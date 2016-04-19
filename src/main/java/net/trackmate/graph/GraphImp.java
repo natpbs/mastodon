@@ -382,6 +382,16 @@ public class GraphImp<
 		return new PoolObjectIntMap< V >( vertexPool, noEntryValue, initialCapacity );
 	}
 
+	public PoolObjectIntArrayMap< V > createVertexIntArrayMap(final int noEntryValue )
+	{
+		return new PoolObjectIntArrayMap< V >( vertexPool, noEntryValue );
+	}
+
+	public PoolObjectIntArrayMap< V > createVertexIntArrayMap( final int noEntryValue, final int initialCapacity )
+	{
+		return new PoolObjectIntArrayMap< V >( vertexPool, noEntryValue, initialCapacity );
+	}
+
 	@Override
 	public PoolObjectIntMap< E > createEdgeIntMap(final int noEntryValue)
 	{
