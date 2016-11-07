@@ -176,7 +176,7 @@ public class TrackSchemePanel extends JPanel implements
 		focus.addFocusListener( this );
 		selection.addSelectionListener( this );
 
-		style = TrackSchemeStyle.defaultStyle().copy( "default" );
+		final TrackSchemeStyle style = TrackSchemeStyle.defaultStyle();
 		graphOverlay = new DefaultTrackSchemeOverlay( graph, highlight, focus, optional, style );
 
 		display.addOverlayRenderer( graphOverlay );
@@ -713,15 +713,6 @@ public class TrackSchemePanel extends JPanel implements
 		return display;
 	}
 
-	// TODO: THIS IS FOR TESTING ONLY
-	private TrackSchemeStyle style;
-
-	// TODO remove??? revise TrackSchemePanel / TrackSchemeFrame construction.
-	public void setTrackSchemeStyle( final TrackSchemeStyle s )
-	{
-		style.set( s );
-	}
-
 	// TODO remove??? revise TrackSchemePanel / TrackSchemeFrame construction.
 	protected OffsetHeaders getOffsetDecorations()
 	{
@@ -876,7 +867,7 @@ public class TrackSchemePanel extends JPanel implements
 		 * Set entities for painting into the specified double-buffered
 		 * {@link AbstractTrackSchemeOverlay}. (This swaps
 		 * {@link #screenEntities} with pending entities from the overlay.)
-		 * 
+		 *
 		 * @param overlay
 		 *            the overlay to paint in.
 		 */

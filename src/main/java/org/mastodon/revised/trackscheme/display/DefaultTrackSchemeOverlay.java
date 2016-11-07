@@ -18,11 +18,11 @@ import org.mastodon.revised.trackscheme.ScreenEdge;
 import org.mastodon.revised.trackscheme.ScreenEntities;
 import org.mastodon.revised.trackscheme.ScreenTransform;
 import org.mastodon.revised.trackscheme.ScreenVertex;
+import org.mastodon.revised.trackscheme.ScreenVertex.Transition;
 import org.mastodon.revised.trackscheme.ScreenVertexRange;
 import org.mastodon.revised.trackscheme.TrackSchemeFocus;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
-import org.mastodon.revised.trackscheme.ScreenVertex.Transition;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 
 import net.imglib2.RealLocalizable;
@@ -68,7 +68,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 	private final Color[] shadowColors;
 
-	private final TrackSchemeStyle style;
+	private TrackSchemeStyle style;
 
 	public DefaultTrackSchemeOverlay(
 			final TrackSchemeGraph< ?, ? > graph,
@@ -86,6 +86,11 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		shadowColors = new Color[ shadowAlphas.length ];
 		for ( int i = 0; i < shadowAlphas.length; ++i )
 			shadowColors[ i ] = new Color( 0, 0, 0, shadowAlphas[ i ] );
+	}
+
+	public void setStyle( final TrackSchemeStyle style )
+	{
+		this.style = style;
 	}
 
 	@Override

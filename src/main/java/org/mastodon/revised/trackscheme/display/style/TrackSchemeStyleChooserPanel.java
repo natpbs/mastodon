@@ -31,6 +31,8 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
 import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
 import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
+import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyEdge;
@@ -67,7 +69,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 	TrackSchemePanel panelPreview;
 
-	public TrackSchemeStyleChooserPanel( final Frame owner, final MutableComboBoxModel< TrackSchemeStyle > mutableComboBoxModel )
+	public TrackSchemeStyleChooserPanel( final Frame owner, final MutableComboBoxModel< TrackSchemeStyle > model )
 	{
 		final Examples ex = DummyGraph.Examples.CELEGANS;
 		final DummyGraph example = ex.getGraph();
@@ -88,13 +90,19 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final JPanel contentPanel = new JPanel();
 		final JPanel panelChooseStyle = new JPanel();
 		final JLabel jlabelTitle = new JLabel();
-		final JComboBox< TrackSchemeStyle > comboBoxStyles = new JComboBox<>( mutableComboBoxModel );
+		final JComboBox< TrackSchemeStyle > comboBoxStyles = new JComboBox<>( model );
 		comboBoxStyles.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
-				panelPreview.setTrackSchemeStyle( comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ) );
+				final AbstractTrackSchemeOverlay overlay = panelPreview.getGraphOverlay();
+				if ( overlay instanceof DefaultTrackSchemeOverlay )
+				{
+					final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
+					final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
+					dtso.setStyle( style );
+				}
 				panelPreview.repaint();
 			}
 		} );

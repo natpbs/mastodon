@@ -13,6 +13,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.MutableComboBoxModel;
 
+import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
+import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleEditorPanel.TrackSchemeStyleEditorDialog;
 
 /**
@@ -156,7 +158,12 @@ public class TrackSchemeStyleChooser
 			@Override
 			public void trackSchemeStyleChanged()
 			{
-				panel.panelPreview.setTrackSchemeStyle( current );
+				final AbstractTrackSchemeOverlay overlay = panel.panelPreview.getGraphOverlay();
+				if ( overlay instanceof DefaultTrackSchemeOverlay )
+				{
+					final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
+					dtso.setStyle( current );
+				}
 				panel.panelPreview.repaint();
 			}
 		};
