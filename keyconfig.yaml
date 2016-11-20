@@ -1,0 +1,5 @@
+---
+- !mapping
+  action: ts test 
+  contexts: [trackscheme]
+  triggers: [shift T]
