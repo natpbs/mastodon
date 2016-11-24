@@ -665,6 +665,7 @@ public class WindowManager
 			final TrackSchemeAction action = provider.create( actionKey );
 			if ( null == action )
 				continue;
+			service.put( action, frame );
 			behaviours.behaviour( action, actionKey );
 		}
 		final TriggerBehaviourBindings triggerbindings = frame.getTriggerbindings();
