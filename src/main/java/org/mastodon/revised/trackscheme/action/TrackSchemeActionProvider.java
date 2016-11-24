@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.scijava.Context;
-import org.scijava.InstantiableException;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.PluginInfo;
@@ -72,15 +71,13 @@ public class TrackSchemeActionProvider
 		}
 	}
 
-	public TrackSchemeAction create( final String name ) throws InstantiableException
+	public TrackSchemeAction create( final String name )
 	{
 		final PluginInfo< TrackSchemeAction > info = infoMap.get( name );
 		if ( null == info )
 			return null;
 
-		final TrackSchemeAction instance = info.createInstance();
-		context.inject( instance );
-		return instance;
+		return pluginService.createInstance( info );
 	}
 
 	public List< String > getKeys()

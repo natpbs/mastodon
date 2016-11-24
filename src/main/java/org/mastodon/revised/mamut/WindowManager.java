@@ -61,6 +61,7 @@ import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
 import org.mastodon.revised.trackscheme.TrackSchemeSelection;
 import org.mastodon.revised.trackscheme.action.TrackSchemeAction;
 import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
+import org.mastodon.revised.trackscheme.action.TrackSchemeService;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
@@ -76,7 +77,6 @@ import org.mastodon.revised.ui.selection.HighlightModel;
 import org.mastodon.revised.ui.selection.NavigationHandler;
 import org.mastodon.revised.ui.selection.Selection;
 import org.mastodon.revised.ui.selection.SelectionListener;
-import org.scijava.InstantiableException;
 import org.scijava.ui.behaviour.KeyStrokeAdder;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.InputTriggerDescription;
@@ -271,6 +271,8 @@ public class WindowManager
 
 	private final TrackSchemeActionProvider provider;
 
+	private final org.scijava.Context context;
+
 	public WindowManager(
 			final String spimDataXmlFilename,
 			final SpimDataMinimal spimData,
@@ -311,7 +313,7 @@ public class WindowManager
 		/*
 		 * TESTING the action provider and context thingies.
 		 */
-		final org.scijava.Context context = new org.scijava.Context();
+		this.context = new org.scijava.Context();
 		this.provider = new TrackSchemeActionProvider();
 		context.inject( provider );
 
@@ -596,6 +598,13 @@ public class WindowManager
 				contextChooser,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
 
+		/*
+		 * Register this TrackScheme in the TrackSchemeService.
+		 */
+		final TrackSchemeService service = context.getService( TrackSchemeService.class );
+		service.register( frame,
+				trackSchemeGraph, trackSchemeSelection, trackSchemeHighlight, trackSchemeFocus, trackSchemeNavigation );
+
 		frame.getTrackschemePanel().setTimepointRange( minTimepoint, maxTimepoint );
 		frame.getTrackschemePanel().graphChanged();
 		contextListener.setContextListener( frame.getTrackschemePanel() );
@@ -648,23 +657,15 @@ public class WindowManager
 		final Behaviours behaviours = new Behaviours( keyconf, "trackscheme" );
 		for ( final String actionKey : provider.getKeys() )
 		{
-			try
-			{
-				/*
-				 * TODO Do not instantiate when there is no mapping for this
-				 * action. The problem is that we cannot know whether 'keyconf'
-				 * has a mapping for the action or not.
-				 */
-				final TrackSchemeAction action = provider.create( actionKey );
-				if ( null == action )
-					continue;
-				behaviours.behaviour( action, actionKey );
-			}
-			catch ( final InstantiableException e )
-			{
-				System.err.println( "Could not instantiate action " + actionKey );
-				e.printStackTrace();
-			}
+			/*
+			 * TODO Do not instantiate when there is no mapping for this action.
+			 * The problem is that we cannot know whether 'keyconf' has a
+			 * mapping for the action or not.
+			 */
+			final TrackSchemeAction action = provider.create( actionKey );
+			if ( null == action )
+				continue;
+			behaviours.behaviour( action, actionKey );
 		}
 		final TriggerBehaviourBindings triggerbindings = frame.getTriggerbindings();
 		behaviours.install( triggerbindings, "trackscheme" );
