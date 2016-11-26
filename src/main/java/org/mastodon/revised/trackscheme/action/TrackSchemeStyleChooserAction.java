@@ -1,8 +1,5 @@
 package org.mastodon.revised.trackscheme.action;
 
-import java.awt.event.ActionEvent;
-
-import javax.swing.AbstractAction;
 import javax.swing.JDialog;
 
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
@@ -11,10 +8,8 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 @Plugin( type = TrackSchemeAction.class, name = "render settings", label = "show display settings" )
-public class TrackSchemeStyleChooserAction extends AbstractAction implements TrackSchemeAction
+public class TrackSchemeStyleChooserAction implements TrackSchemeAction
 {
-
-	private static final long serialVersionUID = 1L;
 
 	@Parameter
 	private TrackSchemeService service;
@@ -31,7 +26,7 @@ public class TrackSchemeStyleChooserAction extends AbstractAction implements Tra
 	}
 
 	@Override
-	public void actionPerformed( final ActionEvent e )
+	public void run()
 	{
 		styleDialog.setVisible( !styleDialog.isVisible() );
 	}

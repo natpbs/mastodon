@@ -1,10 +1,8 @@
 package org.mastodon.revised.trackscheme.action;
 
-import javax.swing.Action;
-
 import org.scijava.plugin.SciJavaPlugin;
 
-public interface TrackSchemeAction extends SciJavaPlugin, Action
+public interface TrackSchemeAction extends SciJavaPlugin, Runnable
 {
 
 	/**

@@ -82,6 +82,7 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.InputTriggerDescription;
 import org.scijava.ui.behaviour.io.InputTriggerDescriptionsBuilder;
 import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
+import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.Behaviours;
 import org.scijava.ui.behaviour.util.InputActionBindings;
 import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
@@ -647,9 +648,7 @@ public class WindowManager
 		 * specified in keyconfig.yaml. With the syntax below, only the mappings
 		 * with contexts having "trackscheme" will be picked up.
 		 */
-		final ActionMap actionMap = new ActionMap();
-		final InputMap inputMap = new InputMap();
-		final KeyStrokeAdder keyStrokeAdder = keyconf.keyStrokeAdder( inputMap, "trackscheme" );
+		final Actions actions = new Actions( keyconf, "trackscheme" );
 		for ( final String key : trackSchemeActionProvider.getKeys() )
 		{
 			/*
@@ -663,12 +662,10 @@ public class WindowManager
 
 			service.put( action, frame );
 			action.initialize();
-			actionMap.put( key, action );
-			keyStrokeAdder.put( key );
+			actions.runnableAction( action, key );
 		}
 		final InputActionBindings keybindings = frame.getKeybindings();
-		keybindings.addActionMap( "trackscheme", actionMap );
-		keybindings.addInputMap( "trackscheme", inputMap );
+		actions.install( keybindings, "trackscheme" );
 
 		/*
 		 * Behaviors discovered by the TrackScheme behaviour provider and with
