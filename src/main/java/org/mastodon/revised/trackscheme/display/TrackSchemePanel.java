@@ -724,7 +724,7 @@ public class TrackSchemePanel extends JPanel implements
 	}
 
 	// TODO remove??? revise TrackSchemePanel / TrackSchemeFrame construction.
-	protected OffsetHeaders getOffsetDecorations()
+	public OffsetHeaders getOffsetDecorations()
 	{
 		return offsetHeaders;
 	}
@@ -877,7 +877,7 @@ public class TrackSchemePanel extends JPanel implements
 		 * Set entities for painting into the specified double-buffered
 		 * {@link AbstractTrackSchemeOverlay}. (This swaps
 		 * {@link #screenEntities} with pending entities from the overlay.)
-		 * 
+		 *
 		 * @param overlay
 		 *            the overlay to paint in.
 		 */
