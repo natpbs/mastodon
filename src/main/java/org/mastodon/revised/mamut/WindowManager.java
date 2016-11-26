@@ -60,7 +60,7 @@ import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
 import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
 import org.mastodon.revised.trackscheme.TrackSchemeSelection;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
-import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
+import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviourProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeService;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
@@ -269,7 +269,7 @@ public class WindowManager
 	 */
 	private final List< TsWindow > tsWindows = new ArrayList<>();
 
-	private final TrackSchemeActionProvider provider;
+	private final TrackSchemeBehaviourProvider provider;
 
 	private final org.scijava.Context context;
 
@@ -314,7 +314,7 @@ public class WindowManager
 		 * TESTING the action provider and context thingies.
 		 */
 		this.context = new org.scijava.Context();
-		this.provider = new TrackSchemeActionProvider();
+		this.provider = new TrackSchemeBehaviourProvider();
 		context.inject( provider );
 
 	}

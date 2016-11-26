@@ -12,8 +12,9 @@ import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
+import org.scijava.plugin.SciJavaPlugin;
 
-public class TrackSchemeActionProvider
+public class AbstractProvider< K extends SciJavaPlugin >
 {
 
 	@Parameter
@@ -31,16 +32,23 @@ public class TrackSchemeActionProvider
 
 	private List< String > disabled;
 
-	private Map< String, PluginInfo< TrackSchemeAction > > infoMap;
+	private Map< String, PluginInfo< K > > infoMap;
+
+	private final Class< K > cl;
+
+	protected AbstractProvider( final Class< K > cl )
+	{
+		this.cl = cl;
+	}
 
 	private void registerModules()
 	{
-		final List< PluginInfo< TrackSchemeAction > > infos = pluginService.getPluginsOfType( TrackSchemeAction.class );
+		final List< PluginInfo< K > > infos = pluginService.getPluginsOfType( cl );
 
-		final Comparator< PluginInfo< TrackSchemeAction > > priorityComparator = new Comparator< PluginInfo< TrackSchemeAction > >()
+		final Comparator< PluginInfo< K > > priorityComparator = new Comparator< PluginInfo< K > >()
 		{
 			@Override
-			public int compare( final PluginInfo< TrackSchemeAction > o1, final PluginInfo< TrackSchemeAction > o2 )
+			public int compare( final PluginInfo< K > o1, final PluginInfo< K > o2 )
 			{
 				return o1.compareTo( o2 );
 			}
@@ -53,7 +61,7 @@ public class TrackSchemeActionProvider
 		disabled = new ArrayList< String >( infos.size() );
 		infoMap = new HashMap<>();
 
-		for ( final PluginInfo< TrackSchemeAction > info : infos )
+		for ( final PluginInfo< K > info : infos )
 		{
 			if ( !info.isEnabled() )
 			{
@@ -71,9 +79,9 @@ public class TrackSchemeActionProvider
 		}
 	}
 
-	public TrackSchemeAction create( final String name )
+	public K create( final String name )
 	{
-		final PluginInfo< TrackSchemeAction > info = infoMap.get( name );
+		final PluginInfo< K > info = infoMap.get( name );
 		if ( null == info )
 			return null;
 
@@ -104,7 +112,7 @@ public class TrackSchemeActionProvider
 	public String echo()
 	{
 		final StringBuilder str = new StringBuilder();
-		str.append( "Discovered modules for " + TrackSchemeAction.class.getSimpleName() + ":\n" );
+		str.append( "Discovered implementations of " + cl.getSimpleName() + ":\n" );
 		str.append( "  Enabled & visible:" );
 		if ( getVisibleKeys().isEmpty() )
 		{
@@ -143,14 +151,4 @@ public class TrackSchemeActionProvider
 		}
 		return str.toString();
 	}
-
-	public static void main( final String[] args )
-	{
-		final Context context = new Context();
-		final TrackSchemeActionProvider provider = new TrackSchemeActionProvider();
-		context.inject( provider );
-		System.out.println( provider.echo() );
-		context.dispose();
-	}
-
 }
