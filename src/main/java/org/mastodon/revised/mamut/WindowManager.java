@@ -59,7 +59,7 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
 import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
 import org.mastodon.revised.trackscheme.TrackSchemeSelection;
-import org.mastodon.revised.trackscheme.action.TrackSchemeAction;
+import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
 import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeService;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
@@ -662,10 +662,12 @@ public class WindowManager
 			 * The problem is that we cannot know whether 'keyconf' has a
 			 * mapping for the action or not.
 			 */
-			final TrackSchemeAction action = provider.create( actionKey );
+			final TrackSchemeBehaviour action = provider.create( actionKey );
 			if ( null == action )
 				continue;
+
 			service.put( action, frame );
+			action.initialize();
 			behaviours.behaviour( action, actionKey );
 		}
 		final TriggerBehaviourBindings triggerbindings = frame.getTriggerbindings();
