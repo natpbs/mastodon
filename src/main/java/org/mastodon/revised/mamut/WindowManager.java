@@ -9,7 +9,6 @@ import java.util.List;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -59,13 +58,14 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
 import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
 import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.action.TrackSchemeAction;
+import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviourProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeService;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
-import org.mastodon.revised.trackscheme.display.ui.TrackSchemeStyleChooser;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
 import org.mastodon.revised.ui.grouping.GroupHandle;
@@ -83,6 +83,7 @@ import org.scijava.ui.behaviour.io.InputTriggerDescription;
 import org.scijava.ui.behaviour.io.InputTriggerDescriptionsBuilder;
 import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
 import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.behaviour.util.InputActionBindings;
 import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
 import bdv.spimdata.SpimDataMinimal;
@@ -269,9 +270,11 @@ public class WindowManager
 	 */
 	private final List< TsWindow > tsWindows = new ArrayList<>();
 
-	private final TrackSchemeBehaviourProvider provider;
-
 	private final org.scijava.Context context;
+
+	private final TrackSchemeBehaviourProvider trackSchemeBehaviourProvider;
+
+	private final TrackSchemeActionProvider trackSchemeActionProvider;
 
 	public WindowManager(
 			final String spimDataXmlFilename,
@@ -314,8 +317,10 @@ public class WindowManager
 		 * TESTING the action provider and context thingies.
 		 */
 		this.context = new org.scijava.Context();
-		this.provider = new TrackSchemeBehaviourProvider();
-		context.inject( provider );
+		this.trackSchemeBehaviourProvider = new TrackSchemeBehaviourProvider();
+		context.inject( trackSchemeBehaviourProvider );
+		this.trackSchemeActionProvider = new TrackSchemeActionProvider();
+		context.inject( trackSchemeActionProvider );
 
 	}
 
@@ -637,38 +642,54 @@ public class WindowManager
 				model.getGraph().getGraphIdBimap(),
 				model );
 
-		// TrackSchemeStyleDialog triggered by "R"
-		final String TRACK_SCHEME_STYLE_SETTINGS = "render settings";
-		final TrackSchemeStyleChooser styleChooser = new TrackSchemeStyleChooser( frame, frame.getTrackschemePanel() );
-		final JDialog styleDialog = styleChooser.getDialog();
-		final ActionMap actionMap = new ActionMap();
-		new ToggleDialogAction( TRACK_SCHEME_STYLE_SETTINGS, styleDialog ).put( actionMap );
-		final InputMap inputMap = new InputMap();
-		final KeyStrokeAdder a = keyconf.keyStrokeAdder( inputMap, "mamut" );
-		a.put( TRACK_SCHEME_STYLE_SETTINGS, "R" );
-		frame.getKeybindings().addActionMap( "mamut", actionMap );
-		frame.getKeybindings().addInputMap( "mamut", inputMap );
-
 		/*
-		 * Behaviors discovered by the TrackScheme action provider and with
-		 * mappings specified in keyconfig.yaml. With the syntax below, only the
-		 * mappings with contexts having "trackscheme" will be picked up.
+		 * Actions discovered by TrackScheme action provider and with mappings
+		 * specified in keyconfig.yaml. With the syntax below, only the mappings
+		 * with contexts having "trackscheme" will be picked up.
 		 */
-		final Behaviours behaviours = new Behaviours( keyconf, "trackscheme" );
-		for ( final String actionKey : provider.getKeys() )
+		final ActionMap actionMap = new ActionMap();
+		final InputMap inputMap = new InputMap();
+		final KeyStrokeAdder keyStrokeAdder = keyconf.keyStrokeAdder( inputMap, "trackscheme" );
+		for ( final String key : trackSchemeActionProvider.getKeys() )
 		{
 			/*
 			 * TODO Do not instantiate when there is no mapping for this action.
 			 * The problem is that we cannot know whether 'keyconf' has a
 			 * mapping for the action or not.
 			 */
-			final TrackSchemeBehaviour action = provider.create( actionKey );
+			final TrackSchemeAction action = trackSchemeActionProvider.create( key );
 			if ( null == action )
 				continue;
 
 			service.put( action, frame );
 			action.initialize();
-			behaviours.behaviour( action, actionKey );
+			actionMap.put( key, action );
+			keyStrokeAdder.put( key );
+		}
+		final InputActionBindings keybindings = frame.getKeybindings();
+		keybindings.addActionMap( "trackscheme", actionMap );
+		keybindings.addInputMap( "trackscheme", inputMap );
+
+		/*
+		 * Behaviors discovered by the TrackScheme behaviour provider and with
+		 * mappings specified in keyconfig.yaml. With the syntax below, only the
+		 * mappings with contexts having "trackscheme" will be picked up.
+		 */
+		final Behaviours behaviours = new Behaviours( keyconf, "trackscheme" );
+		for ( final String key : trackSchemeBehaviourProvider.getKeys() )
+		{
+			/*
+			 * TODO Do not instantiate when there is no mapping for this action.
+			 * The problem is that we cannot know whether 'keyconf' has a
+			 * mapping for the action or not.
+			 */
+			final TrackSchemeBehaviour behaviour = trackSchemeBehaviourProvider.create( key );
+			if ( null == behaviour )
+				continue;
+
+			service.put( behaviour, frame );
+			behaviour.initialize();
+			behaviours.behaviour( behaviour, key );
 		}
 		final TriggerBehaviourBindings triggerbindings = frame.getTriggerbindings();
 		behaviours.install( triggerbindings, "trackscheme" );
