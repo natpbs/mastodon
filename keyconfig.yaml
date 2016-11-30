@@ -1,5 +1,9 @@
 ---
 - !mapping
-  action: ts test 
+  action: render settings 
   contexts: [trackscheme]
-  triggers: [shift T]
+  triggers: [R]
+- !mapping
+  action: zoom rectangle 
+  contexts: [trackscheme]
+  triggers: [Z]
