@@ -1,6 +1,7 @@
 package org.mastodon.revised.model;
 
 import org.mastodon.graph.GraphIdBimap;
+import org.mastodon.graph.branch.BranchGraph;
 import org.mastodon.graph.ref.AbstractListenableEdge;
 
 /**
@@ -34,10 +35,18 @@ public class AbstractModel<
 		return modelGraph.idmap;
 	}
 
+	public BranchGraph< V, E > getBranchGraph()
+	{
+		return branchGraph;
+	}
+
 	protected final MG modelGraph;
+
+	protected BranchGraph< V, E > branchGraph;
 
 	protected AbstractModel( final MG modelGraph )
 	{
 		this.modelGraph = modelGraph;
+		this.branchGraph = new BranchGraph<>( modelGraph );
 	}
 }

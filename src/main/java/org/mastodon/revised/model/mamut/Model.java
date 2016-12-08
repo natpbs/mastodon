@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.features.Feature;
+import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.revised.model.AbstractModel;
 import org.mastodon.spatial.SpatioTemporalIndex;
 import org.mastodon.spatial.SpatioTemporalIndexImp;
