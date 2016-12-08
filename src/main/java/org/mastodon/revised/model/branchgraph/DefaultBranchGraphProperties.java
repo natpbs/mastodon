@@ -40,7 +40,7 @@ public class DefaultBranchGraphProperties<
 	@Override
 	public ModelVertexProperties createVertexProperties()
 	{
-		return new VertexProps< V >( branchGraph, graph, this.idmap );
+		return new VertexProps< V >( branchGraph, graph, this.idmap, selection );
 	}
 
 	@Override
@@ -60,13 +60,17 @@ public class DefaultBranchGraphProperties<
 
 		private final BranchVertex bv;
 
+		private final Selection< V, ? > selection;
+
 		private VertexProps(
 				final BranchGraph< V, ? > branchGraph,
 				final ReadOnlyGraph< V, ? > graph,
-				final GraphIdBimap< BranchVertex, ? > idmap )
+				final GraphIdBimap< BranchVertex, ? > idmap,
+				final Selection< V, ? > selection )
 		{
 			this.branchGraph = branchGraph;
 			this.idmap = idmap;
+			this.selection = selection;
 			this.v = graph.vertexRef();
 			this.bv = branchGraph.vertexRef();
 		}
@@ -82,12 +86,17 @@ public class DefaultBranchGraphProperties<
 
 		@Override
 		public void setLabel( final int id, final String label )
-		{}
+		{
+			idmap.getVertex( id, bv );
+			branchGraph.getLinkedVertex( bv, v ).setLabel( label );
+		}
 
 		@Override
 		public boolean isSelected( final int id )
 		{
-			return false;
+			idmap.getVertex( id, bv );
+			final V linkedVertex = branchGraph.getLinkedVertex( bv, v );
+			return selection.isSelected( linkedVertex );
 		}
 	}
 
