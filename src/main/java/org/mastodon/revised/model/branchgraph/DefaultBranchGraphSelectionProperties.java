@@ -74,6 +74,8 @@ implements ModelSelectionProperties
 			 * means that it is still in the middle of the branch. This in turn
 			 * means that it has only one outgoing edge.
 			 */
+			if ( target.outgoingEdges().isEmpty() )
+				break;
 			edge = target.outgoingEdges().get( 0, eRef );
 			selection.setSelected( edge, selected );
 			target = edge.getTarget( vRef );
