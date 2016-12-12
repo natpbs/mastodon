@@ -6,59 +6,35 @@ package org.mastodon.revised.trackscheme.display.style;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.MutableComboBoxModel;
 
-import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleEditorPanel.TrackSchemeStyleEditorDialog;
-import org.yaml.snakeyaml.Yaml;
 
 /**
- * @author Jean=Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
- *
+ * @author Jean=Yves Tinevez
  */
 public class TrackSchemeStyleChooser
 {
 
-	private static final String STYLE_FILE = System.getProperty( "user.home" ) + "/.mastodon/trackschemestyles.yaml";
+	private final TrackSchemeStyleChooserPanel panel;
 
-	private final DefaultComboBoxModel< TrackSchemeStyle > model;
+	private final TrackSchemeStyleManager styleManager;
 
-	private final TrackSchemeStyleChooserDialog dialog;
+	private final MutableComboBoxModel< TrackSchemeStyle > model;
 
-	private final TrackSchemePanel trackSchemePanel;
-
-	public TrackSchemeStyleChooser( final JFrame owner, final TrackSchemePanel trackSchemePanel )
+	public TrackSchemeStyleChooser( final JFrame owner, final TrackSchemeStyleManager trackschemeStyleManager )
 	{
-		this.trackSchemePanel = trackSchemePanel;
 
-		model = new DefaultComboBoxModel< >();
-		for ( final TrackSchemeStyle defaultStyle : TrackSchemeStyle.defaults )
-			model.addElement( defaultStyle );
-		loadStyles();
+		this.styleManager = trackschemeStyleManager;
+		this.model = styleManager.createComboBoxModel();
 
-		dialog = new TrackSchemeStyleChooserDialog( owner, model );
-		dialog.okButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				okPressed();
-			}
-		} );
-		dialog.buttonDeleteStyle.addActionListener( new ActionListener()
+		this.panel = new TrackSchemeStyleChooserPanel( owner, model );
+		panel.buttonDeleteStyle.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -66,7 +42,7 @@ public class TrackSchemeStyleChooser
 				delete();
 			}
 		} );
-		dialog.buttonEditStyle.addActionListener( new ActionListener()
+		panel.buttonEditStyle.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -74,7 +50,7 @@ public class TrackSchemeStyleChooser
 				edit();
 			}
 		} );
-		dialog.buttonNewStyle.addActionListener( new ActionListener()
+		panel.buttonNewStyle.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -82,7 +58,7 @@ public class TrackSchemeStyleChooser
 				newStyle();
 			}
 		} );
-		dialog.buttonSetStyleName.addActionListener( new ActionListener()
+		panel.buttonSetStyleName.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -90,67 +66,27 @@ public class TrackSchemeStyleChooser
 				setStyleName();
 			}
 		} );
-		dialog.saveButton.addActionListener( new ActionListener()
+		panel.saveButton.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
-				dialog.saveButton.setEnabled( false );
+				panel.saveButton.setEnabled( false );
 				try
 				{
 					saveStyles();
 				}
 				finally
 				{
-					dialog.saveButton.setEnabled( true );
+					panel.saveButton.setEnabled( true );
 				}
 			}
 		} );
-
-		dialog.setSize( 400, 480 );
-		dialog.setLocationRelativeTo( dialog.getOwner() );
-	}
-
-	private void loadStyles()
-	{
-		try
-		{
-			final FileReader input = new FileReader( STYLE_FILE );
-			final Yaml yaml = TrackSchemeStyleIO.createYaml();
-			final Iterable< Object > objs = yaml.loadAll( input );
-			for ( final Object obj : objs )
-				model.addElement( ( TrackSchemeStyle ) obj );
-
-		}
-		catch ( final FileNotFoundException e )
-		{
-			System.out.println( "TrackScheme style file " + STYLE_FILE + " not found. Using builtin styles." );
-		}
 	}
 
 	private void saveStyles()
 	{
-		try
-		{
-			final List< TrackSchemeStyle > stylesToSave = new ArrayList<>();
-			for ( int i = 0; i < model.getSize(); i++ )
-			{
-				final TrackSchemeStyle style = model.getElementAt( i );
-				if ( TrackSchemeStyle.defaults.contains( style ) )
-					continue;
-				stylesToSave.add( style );
-			}
-
-			mkdirs( STYLE_FILE );
-			final FileWriter output = new FileWriter( STYLE_FILE );
-			final Yaml yaml = TrackSchemeStyleIO.createYaml();
-			yaml.dumpAll( stylesToSave.iterator(), output );
-			output.close();
-		}
-		catch ( final IOException e )
-		{
-			e.printStackTrace();
-		}
+		styleManager.saveStyles();
 	}
 
 	private void setStyleName()
@@ -159,13 +95,14 @@ public class TrackSchemeStyleChooser
 		if ( null == current || TrackSchemeStyle.defaults.contains( current ) )
 			return;
 
-		final String newName = ( String ) JOptionPane.showInputDialog( dialog, "Enter the style name:", "Style name", JOptionPane.PLAIN_MESSAGE, null, null, current.name );
+		final String newName = ( String ) JOptionPane.showInputDialog( panel, "Enter the style name:", "Style name", JOptionPane.PLAIN_MESSAGE, null, null, current.name );
 		current.name = newName;
 	}
 
 	private void newStyle()
 	{
 		TrackSchemeStyle current = ( TrackSchemeStyle ) model.getSelectedItem();
+		styleManager.copy( current );
 		if ( null == current )
 			current = TrackSchemeStyle.defaultStyle();
 
@@ -213,12 +150,12 @@ public class TrackSchemeStyleChooser
 			@Override
 			public void trackSchemeStyleChanged()
 			{
-				dialog.panelPreview.setTrackSchemeStyle( current );
-				dialog.panelPreview.repaint();
+				panel.panelPreview.setTrackSchemeStyle( current );
+				panel.panelPreview.repaint();
 			}
 		};
 		current.addUpdateListener( listener );
-		final TrackSchemeStyleEditorDialog nameDialog = new TrackSchemeStyleEditorDialog( dialog, current );
+		final TrackSchemeStyleEditorDialog nameDialog = new TrackSchemeStyleEditorDialog( panel, current );
 		nameDialog.addWindowListener( new WindowAdapter()
 		{
 			@Override
@@ -239,21 +176,8 @@ public class TrackSchemeStyleChooser
 		model.removeElement( model.getSelectedItem() );
 	}
 
-	private void okPressed()
+	public TrackSchemeStyleChooserPanel getPanel()
 	{
-		trackSchemePanel.setTrackSchemeStyle( ( TrackSchemeStyle ) model.getSelectedItem() );
-		trackSchemePanel.repaint();
-		dialog.setVisible( false );
-	}
-
-	public JDialog getDialog()
-	{
-		return dialog;
-	}
-
-	private static boolean mkdirs( final String fileName )
-	{
-		final File dir = new File( fileName ).getParentFile();
-		return dir == null ? false : dir.mkdirs();
+		return panel;
 	}
 }

@@ -308,10 +308,9 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		private final TrackSchemeStyleEditorPanel stylePanel;
 
-		public TrackSchemeStyleEditorDialog( final JDialog dialog, final TrackSchemeStyle style )
+		public TrackSchemeStyleEditorDialog( final JPanel panel, final TrackSchemeStyle style )
 		{
-			super( dialog, "TrackScheme style editor", false );
-
+			setTitle( "TrackScheme style editor" );
 			stylePanel = new TrackSchemeStyleEditorPanel( style );
 
 			final JPanel content = new JPanel();

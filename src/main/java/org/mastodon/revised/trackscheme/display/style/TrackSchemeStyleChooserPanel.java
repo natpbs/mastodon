@@ -1,7 +1,6 @@
 package org.mastodon.revised.trackscheme.display.style;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -12,12 +11,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.BoxLayout;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.MutableComboBoxModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -37,8 +35,8 @@ import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyEdge;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph;
-import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyVertex;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph.Examples;
+import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyVertex;
 import org.mastodon.revised.ui.grouping.GroupManager;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
@@ -48,9 +46,9 @@ import org.mastodon.revised.ui.selection.Selection;
 /**
  * A previewer, editor and managers for TrackScheme styles.
  *
- * @author Jean=Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
+ * @author Jean-Yves Tinevez
  */
-class TrackSchemeStyleChooserDialog extends JDialog
+class TrackSchemeStyleChooserPanel extends JPanel
 {
 
 	private static final long serialVersionUID = 1L;
@@ -69,10 +67,8 @@ class TrackSchemeStyleChooserDialog extends JDialog
 
 	TrackSchemePanel panelPreview;
 
-	public TrackSchemeStyleChooserDialog( final Frame owner, final DefaultComboBoxModel< TrackSchemeStyle > model )
+	public TrackSchemeStyleChooserPanel( final Frame owner, final MutableComboBoxModel< TrackSchemeStyle > mutableComboBoxModel )
 	{
-		super( owner, "TrackScheme style chooser", false );
-
 		final Examples ex = DummyGraph.Examples.CELEGANS;
 		final DummyGraph example = ex.getGraph();
 		final Selection< DummyVertex, DummyEdge > selection = ex.getSelection();
@@ -92,7 +88,7 @@ class TrackSchemeStyleChooserDialog extends JDialog
 		final JPanel contentPanel = new JPanel();
 		final JPanel panelChooseStyle = new JPanel();
 		final JLabel jlabelTitle = new JLabel();
-		final JComboBox< TrackSchemeStyle > comboBoxStyles = new JComboBox<>( model );
+		final JComboBox< TrackSchemeStyle > comboBoxStyles = new JComboBox<>( mutableComboBoxModel );
 		comboBoxStyles.addActionListener( new ActionListener()
 		{
 			@Override
@@ -113,9 +109,7 @@ class TrackSchemeStyleChooserDialog extends JDialog
 		saveButton = new JButton();
 
 		// ======== this ========
-		setTitle( "TrackScheme styles" );
-		final Container contentPane = getContentPane();
-		contentPane.setLayout( new BorderLayout() );
+		setLayout( new BorderLayout() );
 
 		// ======== dialogPane ========
 		{
@@ -189,7 +183,6 @@ class TrackSchemeStyleChooserDialog extends JDialog
 			}
 			dialogPane.add( buttonBar, BorderLayout.SOUTH );
 		}
-		contentPane.add( dialogPane, BorderLayout.CENTER );
-		pack();
+		add( dialogPane, BorderLayout.CENTER );
 	}
 }
