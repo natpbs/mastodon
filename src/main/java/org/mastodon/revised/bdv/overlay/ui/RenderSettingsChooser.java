@@ -8,9 +8,9 @@ import java.awt.event.ActionListener;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.MutableComboBoxModel;
 
 import org.mastodon.revised.bdv.overlay.RenderSettings;
@@ -22,7 +22,7 @@ import org.mastodon.revised.bdv.overlay.RenderSettings;
 public class RenderSettingsChooser
 {
 
-	private final RenderSettingsDialog dialog;
+	private final RenderSettingsPanel panel;
 
 	private final RenderSettings targetSettings;
 
@@ -33,8 +33,8 @@ public class RenderSettingsChooser
 		// Give the choose its own render settings instance.
 		this.targetSettings = RenderSettings.defaultStyle().copy( RenderSettings.defaultStyle().getName() );
 		this.model = renderSettingsManager.createComboBoxModel();
-		dialog = new RenderSettingsDialog( owner, model, targetSettings );
-		dialog.okButton.addActionListener( new ActionListener()
+		panel = new RenderSettingsPanel( owner, model, targetSettings );
+		panel.okButton.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -42,7 +42,7 @@ public class RenderSettingsChooser
 				okPressed();
 			}
 		} );
-		dialog.buttonDeleteStyle.addActionListener( new ActionListener()
+		panel.buttonDeleteStyle.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -50,7 +50,7 @@ public class RenderSettingsChooser
 				delete();
 			}
 		} );
-		dialog.buttonNewStyle.addActionListener( new ActionListener()
+		panel.buttonNewStyle.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -58,7 +58,7 @@ public class RenderSettingsChooser
 				newStyle();
 			}
 		} );
-		dialog.buttonSetStyleName.addActionListener( new ActionListener()
+		panel.buttonSetStyleName.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -66,25 +66,23 @@ public class RenderSettingsChooser
 				setStyleName();
 			}
 		} );
-		dialog.saveButton.addActionListener( new ActionListener()
+		panel.saveButton.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
 			{
-				dialog.saveButton.setEnabled( false );
+				panel.saveButton.setEnabled( false );
 				try
 				{
 					renderSettingsManager.saveStyles();
 				}
 				finally
 				{
-					dialog.saveButton.setEnabled( true );
+					panel.saveButton.setEnabled( true );
 				}
 			}
 		} );
 
-		dialog.setSize( 420, 750 );
-		dialog.setLocationRelativeTo( dialog.getOwner() );
 	}
 
 	private void setStyleName()
@@ -93,7 +91,7 @@ public class RenderSettingsChooser
 		if ( null == current || RenderSettings.defaults.contains( current ) )
 			return;
 
-		final String newName = ( String ) JOptionPane.showInputDialog( dialog, "Enter the render settings name:", "Style name", JOptionPane.PLAIN_MESSAGE, null, null, current.getName() );
+		final String newName = ( String ) JOptionPane.showInputDialog( panel, "Enter the render settings name:", "Style name", JOptionPane.PLAIN_MESSAGE, null, null, current.getName() );
 		current.setName( newName );
 	}
 
@@ -146,21 +144,16 @@ public class RenderSettingsChooser
 
 	private void okPressed()
 	{
-		dialog.setVisible( false );
+		// TODO
 	}
 
-	public JDialog getDialog()
+	public JPanel getPanel()
 	{
-		return dialog;
+		return panel;
 	}
 
 	public RenderSettings getRenderSettings()
 	{
 		return targetSettings;
-	}
-
-	public void setTitle( final String title )
-	{
-		dialog.setTitle( title );
 	}
 }
