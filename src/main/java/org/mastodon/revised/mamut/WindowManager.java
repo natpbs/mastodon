@@ -24,9 +24,6 @@ import org.mastodon.revised.bdv.overlay.EditBehaviours;
 import org.mastodon.revised.bdv.overlay.EditSpecialBehaviours;
 import org.mastodon.revised.bdv.overlay.OverlayContext;
 import org.mastodon.revised.bdv.overlay.OverlayGraphRenderer;
-import org.mastodon.revised.bdv.overlay.RenderSettings;
-import org.mastodon.revised.bdv.overlay.RenderSettings.UpdateListener;
-import org.mastodon.revised.bdv.overlay.ui.RenderSettingsChooser;
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayContextWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayEdgeWrapper;
@@ -271,9 +268,11 @@ public class WindowManager
 			final String spimDataXmlFilename,
 			final SpimDataMinimal spimData,
 			final Model model,
+			final RenderSettingsManager bdvSettingsManager,
 			final InputTriggerConfig keyconf )
 	{
 		this.model = model;
+		this.renderSettingsManager = bdvSettingsManager;
 		this.keyconf = keyconf;
 
 		groupManager = new GroupManager();
@@ -304,10 +303,6 @@ public class WindowManager
 		 * this is changed in the future, then probably only in the model files.
 		 */
 
-		/*
-		 * Deal with a common list of styles for the BDV.
-		 */
-		this.renderSettingsManager = new RenderSettingsManager();
 	}
 
 	private synchronized void addBdvWindow( final BdvWindow w )
@@ -482,30 +477,30 @@ public class WindowManager
 
 		// TODO revise
 		// RenderSettingsDialog triggered by "R"
-		final String RENDER_SETTINGS = "render settings";
-		final RenderSettingsChooser renderSettingsDialog = new RenderSettingsChooser( viewerFrame, renderSettingsManager );
+//		final String RENDER_SETTINGS = "render settings";
+//		final RenderSettingsChooser renderSettingsDialog = new RenderSettingsChooser( viewerFrame, renderSettingsManager );
+//
+//		renderSettingsDialog.setTitle( "Display settings for " + windowTitle );
+//		final ActionMap actionMap = new ActionMap();
+//		new ToggleDialogAction( RENDER_SETTINGS, renderSettingsDialog.getDialog() ).put( actionMap );
+//		final InputMap inputMap = new InputMap();
+//		final KeyStrokeAdder a = keyconf.keyStrokeAdder( inputMap, "mamut" );
+//		a.put( RENDER_SETTINGS, "R" );
+//		viewerFrame.getKeybindings().addActionMap( "mamut", actionMap );
+//		viewerFrame.getKeybindings().addInputMap( "mamut", inputMap );
 
-		renderSettingsDialog.setTitle( "Display settings for " + windowTitle );
-		final ActionMap actionMap = new ActionMap();
-		new ToggleDialogAction( RENDER_SETTINGS, renderSettingsDialog.getDialog() ).put( actionMap );
-		final InputMap inputMap = new InputMap();
-		final KeyStrokeAdder a = keyconf.keyStrokeAdder( inputMap, "mamut" );
-		a.put( RENDER_SETTINGS, "R" );
-		viewerFrame.getKeybindings().addActionMap( "mamut", actionMap );
-		viewerFrame.getKeybindings().addInputMap( "mamut", inputMap );
-
-		final RenderSettings renderSettings = renderSettingsDialog.getRenderSettings();
-		renderSettings.addUpdateListener( new UpdateListener()
-		{
-			@Override
-			public void renderSettingsChanged()
-			{
-				tracksOverlay.setRenderSettings( renderSettings );
-				// TODO: less hacky way of triggering repaint and context update
-				viewer.repaint();
-				overlayContextWrapper.contextChanged( overlayContext );
-			}
-		} );
+//		final RenderSettings renderSettings = renderSettingsDialog.getRenderSettings();
+//		renderSettings.addUpdateListener( new UpdateListener()
+//		{
+//			@Override
+//			public void renderSettingsChanged()
+//			{
+//				tracksOverlay.setRenderSettings( renderSettings );
+//				// TODO: less hacky way of triggering repaint and context update
+//				viewer.repaint();
+//				overlayContextWrapper.contextChanged( overlayContext );
+//			}
+//		} );
 
 		final BdvWindow bdvWindow = new BdvWindow( viewerFrame, tracksOverlay, bdvGroupHandle, contextProvider );
 		addBdvWindow( bdvWindow );
@@ -666,6 +661,11 @@ public class WindowManager
 	public AbstractSpimData< ? > getSpimData()
 	{
 		return sharedBdvData.getSpimData();
+	}
+
+	public RenderSettingsManager getBDVSettingsManager()
+	{
+		return renderSettingsManager;
 	}
 
 

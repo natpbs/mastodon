@@ -13,10 +13,11 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
 import org.mastodon.revised.model.mamut.Model;
+import org.mastodon.revised.ui.DisplaySettingsDialog;
 import org.mastodon.revised.ui.util.FileChooser;
 import org.mastodon.revised.ui.util.XmlFileFilter;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -24,6 +25,7 @@ import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
 
 import bdv.spimdata.SpimDataMinimal;
 import bdv.spimdata.XmlIoSpimDataMinimal;
+import bdv.tools.ToggleDialogAction;
 import mpicbg.spim.data.SpimDataException;
 
 public class MainWindow extends JFrame
@@ -40,15 +42,19 @@ public class MainWindow extends JFrame
 
 	private final TgmmImportDialog tgmmImportDialog;
 
+	private final RenderSettingsManager bdvSettingsManager;
+
 	public MainWindow( final InputTriggerConfig keyconf )
 	{
 		super( "test" );
 		this.keyconf = keyconf;
 
 		tgmmImportDialog = new TgmmImportDialog( this );
+		this.bdvSettingsManager = new RenderSettingsManager();
 
 		final JPanel buttonsPanel = new JPanel();
-		buttonsPanel.setLayout( new GridLayout( 7, 1 ) );
+		buttonsPanel.setLayout( new GridLayout( 9, 1 ) );
+
 		final JButton bdvButton = new JButton( "bdv" );
 		bdvButton.addActionListener( new ActionListener()
 		{
@@ -71,6 +77,17 @@ public class MainWindow extends JFrame
 		} );
 		buttonsPanel.add( bdvButton );
 		buttonsPanel.add( trackschemeButton );
+		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
+
+		/*
+		 * Display settings.
+		 */
+
+		final JButton displaySettingsButton = new JButton( "display settings" );
+		final DisplaySettingsDialog displaySettingsDialog = new DisplaySettingsDialog( bdvSettingsManager );
+		displaySettingsButton.addActionListener(
+				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
+		buttonsPanel.add( displaySettingsButton );
 		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
 
 		final JButton importButton = new JButton( "import tgmm" );
@@ -141,7 +158,11 @@ public class MainWindow extends JFrame
 		if ( windowManager != null )
 			windowManager.closeAllWindows();
 
-		windowManager = new WindowManager( spimDataXmlFilename, spimData, model, keyconf );
+		windowManager = new WindowManager(
+				spimDataXmlFilename, spimData,
+				model,
+				bdvSettingsManager,
+				keyconf );
 	}
 
 	public void saveProject( final File projectFile ) throws IOException
@@ -303,10 +324,10 @@ public class MainWindow extends JFrame
 //		mw.loadProject( new File( "/Users/pietzsch/Desktop/data/TGMM_METTE/project.xml" ) );
 //		mw.createProject();
 //		mw.loadProject();
-		SwingUtilities.invokeAndWait( () -> {
-			mw.windowManager.createBigDataViewer();
-			mw.windowManager.createTrackScheme();
-		} );
+//		SwingUtilities.invokeAndWait( () -> {
+//			mw.windowManager.createBigDataViewer();
+//			mw.windowManager.createTrackScheme();
+//		} );
 //		WindowManager.DumpInputConfig.writeToYaml( System.getProperty( "user.home" ) + "/.mastodon/keyconfig.yaml", mw.windowManager );
 	}
 }
