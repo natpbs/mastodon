@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -60,7 +57,6 @@ import org.mastodon.revised.trackscheme.TrackSchemeSelection;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
-import org.mastodon.revised.trackscheme.display.ui.TrackSchemeStyleChooser;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
 import org.mastodon.revised.ui.grouping.GroupHandle;
@@ -72,14 +68,12 @@ import org.mastodon.revised.ui.selection.HighlightModel;
 import org.mastodon.revised.ui.selection.NavigationHandler;
 import org.mastodon.revised.ui.selection.Selection;
 import org.mastodon.revised.ui.selection.SelectionListener;
-import org.scijava.ui.behaviour.KeyStrokeAdder;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.InputTriggerDescription;
 import org.scijava.ui.behaviour.io.InputTriggerDescriptionsBuilder;
 import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
 
 import bdv.spimdata.SpimDataMinimal;
-import bdv.tools.ToggleDialogAction;
 import bdv.viewer.RequestRepaint;
 import bdv.viewer.TimePointListener;
 import bdv.viewer.ViewerFrame;
@@ -617,18 +611,6 @@ public class WindowManager
 				model.getGraph(),
 				model.getGraph().getGraphIdBimap(),
 				model );
-
-		// TrackSchemeStyleDialog triggered by "R"
-		final String TRACK_SCHEME_STYLE_SETTINGS = "render settings";
-		final TrackSchemeStyleChooser styleChooser = new TrackSchemeStyleChooser( frame, frame.getTrackschemePanel() );
-		final JDialog styleDialog = styleChooser.getDialog();
-		final ActionMap actionMap = new ActionMap();
-		new ToggleDialogAction( TRACK_SCHEME_STYLE_SETTINGS, styleDialog ).put( actionMap );
-		final InputMap inputMap = new InputMap();
-		final KeyStrokeAdder a = keyconf.keyStrokeAdder( inputMap, "mamut" );
-		a.put( TRACK_SCHEME_STYLE_SETTINGS, "R" );
-		frame.getKeybindings().addActionMap( "mamut", actionMap );
-		frame.getKeybindings().addInputMap( "mamut", inputMap );
 
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );
 		addTsWindow( tsWindow );

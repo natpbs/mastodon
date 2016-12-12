@@ -17,6 +17,7 @@ import javax.swing.WindowConstants;
 
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
 import org.mastodon.revised.model.mamut.Model;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
 import org.mastodon.revised.ui.DisplaySettingsDialog;
 import org.mastodon.revised.ui.util.FileChooser;
 import org.mastodon.revised.ui.util.XmlFileFilter;
@@ -44,6 +45,8 @@ public class MainWindow extends JFrame
 
 	private final RenderSettingsManager bdvSettingsManager;
 
+	private final TrackSchemeStyleManager trackSchemeStyleManager;
+
 	public MainWindow( final InputTriggerConfig keyconf )
 	{
 		super( "test" );
@@ -51,6 +54,7 @@ public class MainWindow extends JFrame
 
 		tgmmImportDialog = new TgmmImportDialog( this );
 		this.bdvSettingsManager = new RenderSettingsManager();
+		trackSchemeStyleManager = new TrackSchemeStyleManager();
 
 		final JPanel buttonsPanel = new JPanel();
 		buttonsPanel.setLayout( new GridLayout( 9, 1 ) );
@@ -84,7 +88,8 @@ public class MainWindow extends JFrame
 		 */
 
 		final JButton displaySettingsButton = new JButton( "display settings" );
-		final DisplaySettingsDialog displaySettingsDialog = new DisplaySettingsDialog( bdvSettingsManager );
+		final DisplaySettingsDialog displaySettingsDialog = 
+				new DisplaySettingsDialog( bdvSettingsManager, trackSchemeStyleManager );
 		displaySettingsButton.addActionListener(
 				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
 		buttonsPanel.add( displaySettingsButton );
