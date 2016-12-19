@@ -32,6 +32,8 @@ public class TrackSchemeStyleChooser
 
 		this.styleManager = trackschemeStyleManager;
 		this.model = styleManager.createComboBoxModel();
+		if ( model.getSize() > 0 )
+			model.setSelectedItem( model.getElementAt( 0 ) );
 
 		this.panel = new TrackSchemeStyleChooserPanel( owner, model );
 		panel.buttonDeleteStyle.addActionListener( new ActionListener()
@@ -95,7 +97,11 @@ public class TrackSchemeStyleChooser
 		if ( null == current || TrackSchemeStyle.defaults.contains( current ) )
 			return;
 
-		final String newName = ( String ) JOptionPane.showInputDialog( panel, "Enter the style name:", "Style name", JOptionPane.PLAIN_MESSAGE, null, null, current.name );
+		final String newName = ( String ) JOptionPane.showInputDialog(
+				panel,
+				"Enter the style name:",
+				"Style name",
+				JOptionPane.PLAIN_MESSAGE, null, null, current.name );
 		current.name = newName;
 	}
 

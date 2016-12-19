@@ -34,14 +34,6 @@ public class RenderSettingsChooser
 		this.targetSettings = RenderSettings.defaultStyle().copy( RenderSettings.defaultStyle().getName() );
 		this.model = renderSettingsManager.createComboBoxModel();
 		panel = new RenderSettingsPanel( owner, model, targetSettings );
-		panel.okButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				okPressed();
-			}
-		} );
 		panel.buttonDeleteStyle.addActionListener( new ActionListener()
 		{
 			@Override
@@ -140,11 +132,6 @@ public class RenderSettingsChooser
 			return;
 
 		model.removeElement( model.getSelectedItem() );
-	}
-
-	private void okPressed()
-	{
-		// TODO
 	}
 
 	public JPanel getPanel()

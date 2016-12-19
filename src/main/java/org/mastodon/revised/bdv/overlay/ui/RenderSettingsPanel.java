@@ -48,6 +48,7 @@ class RenderSettingsPanel extends JPanel
 	{
 
 		final JPanel contentPanel = new JPanel();
+		contentPanel.setBorder( null );
 		final JPanel panelChooseStyle = new JPanel();
 		final JLabel jlabelTitle = new JLabel();
 		final RenderSettingsEditorPanel renderSettingsPanel = new RenderSettingsEditorPanel( targetSettings );
@@ -64,7 +65,8 @@ class RenderSettingsPanel extends JPanel
 				enableComponents( renderSettingsPanel, !RenderSettings.defaults.contains( rs ) );
 			}
 		} );
-		comboBoxStyles.setSelectedIndex( 0 );
+		if ( model.getSize() > 0 )
+			comboBoxStyles.setSelectedIndex( 0 );
 
 		// Update menu settings when the common render settings is changed.
 		targetSettings.addUpdateListener( new UpdateListener()
@@ -76,7 +78,6 @@ class RenderSettingsPanel extends JPanel
 				comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ).set( targetSettings );
 			}
 		} );
-
 
 		final JPanel panelStyleButtons = new JPanel();
 		buttonDeleteStyle = new JButton();

@@ -124,12 +124,20 @@ class TrackSchemeStyleChooserPanel extends JPanel
 				{
 					panelChooseStyle.setLayout( new GridLayout( 3, 0, 0, 10 ) );
 
-					// ---- jlabelTitle ----
 					jlabelTitle.setText( "TrackScheme display styles." );
 					jlabelTitle.setHorizontalAlignment( SwingConstants.CENTER );
 					jlabelTitle.setFont( dialogPane.getFont().deriveFont( Font.BOLD ) );
 					panelChooseStyle.add( jlabelTitle );
-					panelChooseStyle.add( comboBoxStyles );
+
+					// Combo box panel
+					final JPanel comboBoxPanel = new JPanel();
+					{
+						final BorderLayout layout = new BorderLayout();
+						comboBoxPanel.setLayout( layout );
+						comboBoxPanel.add( new JLabel( "Style: " ), BorderLayout.WEST );
+						comboBoxPanel.add( comboBoxStyles, BorderLayout.CENTER );
+					}
+					panelChooseStyle.add( comboBoxPanel );
 
 					// ======== panelStyleButtons ========
 					{
@@ -171,9 +179,9 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 				// ---- okButton ----
 				okButton.setText( "OK" );
-				buttonBar.add( okButton, new GridBagConstraints( 2, 0, 1, 1, 0.0, 0.0,
-						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-						new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+//				buttonBar.add( okButton, new GridBagConstraints( 2, 0, 1, 1, 0.0, 0.0,
+//						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//						new Insets( 0, 0, 0, 0 ), 0, 0 ) );
 
 				// ---- saveButton -----
 				saveButton.setText( "Save styles" );

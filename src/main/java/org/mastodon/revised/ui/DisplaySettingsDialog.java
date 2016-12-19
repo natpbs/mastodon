@@ -3,7 +3,6 @@ package org.mastodon.revised.ui;
 import java.awt.BorderLayout;
 
 import javax.swing.JDialog;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsChooser;
@@ -26,7 +25,6 @@ public class DisplaySettingsDialog extends JDialog
 		 */
 
 		setTitle( "Display settings" );
-		setSize( 420, 750 );
 		setLayout( new BorderLayout() );
 
 		// BDV display settings.
@@ -37,8 +35,7 @@ public class DisplaySettingsDialog extends JDialog
 
 		// Tabbed pane.
 		final JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.add( "bdv",
-				new JScrollPane( bdvDisplaySettingsChooser.getPanel() ) );
+		tabbedPane.add( "bdv", bdvDisplaySettingsChooser.getPanel() );
 		tabbedPane.add( "trackscheme", trackSchemeStyleChooser.getPanel() );
 
 		add( tabbedPane, BorderLayout.CENTER );

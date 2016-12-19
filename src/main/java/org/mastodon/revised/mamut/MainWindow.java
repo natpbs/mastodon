@@ -90,6 +90,8 @@ public class MainWindow extends JFrame
 		final JButton displaySettingsButton = new JButton( "display settings" );
 		final DisplaySettingsDialog displaySettingsDialog = 
 				new DisplaySettingsDialog( bdvSettingsManager, trackSchemeStyleManager );
+		displaySettingsDialog.setSize( 475, 750 );
+
 		displaySettingsButton.addActionListener(
 				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
 		buttonsPanel.add( displaySettingsButton );
