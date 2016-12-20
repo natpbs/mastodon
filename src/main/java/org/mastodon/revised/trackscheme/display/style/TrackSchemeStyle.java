@@ -151,20 +151,6 @@ public class TrackSchemeStyle
 	}
 
 	/*
-	 * GETTERS
-	 */
-
-	public Color getEdgeColor( final double val )
-	{
-		return edgeColorMap.get( val, minEdgeColorRange, maxEdgeColorRange );
-	}
-
-	public Color getVertexColor( final double val )
-	{
-		return vertexColorMap.get( val, minVertexColorRange, maxVertexColorRange );
-	}
-
-	/*
 	 * SETTERS
 	 */
 

@@ -27,7 +27,7 @@ import org.yaml.snakeyaml.Yaml;
  * <p>
  * A list of colormaps contains defaults plus the colormaps that are
  * deserialized from a YAML file.
- * 
+ *
  * @author Jean-Yves Tinevez
  */
 public class ColorMap
@@ -88,7 +88,7 @@ public class ColorMap
 
 	/**
 	 * Returns the collection of names of colormaps available.
-	 * 
+	 *
 	 * @return the colormap names.
 	 */
 	public static Collection< String > getColorMapNames()
@@ -99,7 +99,7 @@ public class ColorMap
 	/**
 	 * Returns the colormap instance with the specified name. Defaults to the
 	 * Jet colormap if the specified name is unknown.
-	 * 
+	 *
 	 * @param name
 	 *            the colormap name.
 	 * @return the colormap instance.
@@ -138,7 +138,7 @@ public class ColorMap
 
 	/**
 	 * Returns the color associated with missing values.
-	 * 
+	 *
 	 * @return the missing value color.
 	 */
 	public Color getMissingColor()
@@ -148,7 +148,7 @@ public class ColorMap
 
 	/**
 	 * Returns this colormap name.
-	 * 
+	 *
 	 * @return the colormap name.
 	 */
 	public String getName()
@@ -157,40 +157,34 @@ public class ColorMap
 	}
 
 	/**
-	 * Returns the color associated with the specified value in the specified
-	 * range.
+	 * Returns the color associated with the specified value in the range from 0
+	 * to 1.
 	 * <p>
 	 * If {@code val} is {@link Double#NaN}, returns the non-applicable color.
-	 * If {@code val} is lower than {@code min}, returns the first color of the
-	 * colormap. If {@code val} is higher than {@code max}, returns the last
-	 * color of the colormap. Otherwise, linearly interpolate from the colors in
-	 * the colormap.
-	 * 
+	 * If {@code val} is lower than 0, returns the first color of the colormap.
+	 * If {@code val} is higher than 1, returns the last color of the colormap.
+	 * Otherwise, linearly interpolate from the colors in the colormap.
+	 *
 	 * @param val
 	 *            the value.
-	 * @param min
-	 *            the lower bound of the range.
-	 * @param max
-	 *            the upper value of the range.
 	 * @return a color.
 	 */
-	public Color get( final double val, final double min, final double max )
+	public Color get( final double val )
 	{
 		if ( Double.isNaN( val ) )
 			return notApplicableColor;
-		if ( val <= min || nColors == 1 )
+		if ( val <= 0. || nColors == 1 )
 			return colors[ 0 ];
-		if ( val >= max )
+		if ( val >= 1. )
 			return colors[ nColors - 1 ];
 
-		final double alpha = ( val - min ) / ( max - min );
-		int i = Arrays.binarySearch( alphas, alpha );
+		int i = Arrays.binarySearch( alphas, val );
 		if ( i < 0 )
 			i = -( i + 1 );
 		else
 			return colors[ i ];
 
-		final double theta = ( alpha - alphas[ i - 1 ] ) / ( alphas[ i ] - alphas[ i - 1 ] );
+		final double theta = ( val - alphas[ i - 1 ] ) / ( alphas[ i ] - alphas[ i - 1 ] );
 
 		final int r1 = colors[ i - 1 ].getRed();
 		final int g1 = colors[ i - 1 ].getGreen();
