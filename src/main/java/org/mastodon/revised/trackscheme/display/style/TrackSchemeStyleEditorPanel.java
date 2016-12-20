@@ -1,6 +1,5 @@
 package org.mastodon.revised.trackscheme.display.style;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -15,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,13 +24,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ActionMap;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
-import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
@@ -42,9 +36,7 @@ import javax.swing.JDialog;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
@@ -58,11 +50,23 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 	private final JColorChooser colorChooser;
 
+	private final CategoryJComboBox< ColorVertexBy, FeatureKeyWrapper > colorVertexChoices;
+
+	private final CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > colorEdgeChoices;
+
+	private final List< JComponent > vertexStuffToUnmute;
+
+	private final List< JComponent > edgeStuffToUnmute;
+
+	private final List< JComponent > edgeColorButtonToMute;
+
+	private final List< JComponent > vertexColorButtonToMute;
+
 	public TrackSchemeStyleEditorPanel( final TrackSchemeStyle style )
 	{
 		super( new GridBagLayout() );
-
 		colorChooser = new JColorChooser();
+
 
 		final GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets( 0, 5, 0, 5 );
@@ -85,7 +89,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		c.gridx++;
 		c.gridwidth = 3;
-		final CategoryJComboBox< ColorVertexBy, FeatureKeyWrapper > colorVertexChoices = vertexColorBy( style );
+		this.colorVertexChoices = vertexColorBy( style );
 		add( colorVertexChoices, c );
 
 		// Colormap and ranges.
@@ -134,7 +138,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		add( scalePanel1, c );
 
-		final Collection< JComponent > vertexStuffToUnmute = new ArrayList<>();
+		this.vertexStuffToUnmute = new ArrayList<>();
 		vertexStuffToUnmute.add( lbl3 );
 		vertexStuffToUnmute.add( cmap1 );
 		vertexStuffToUnmute.add( cmp1 );
@@ -256,7 +260,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		final ColorMap currentCMap2 = style.edgeColorMap;
 
 		c.gridy++;
-		add( Box.createVerticalStrut( 15 ), c );
+		add( Box.createVerticalStrut( 5 ), c );
 
 		c.gridy++;
 		c.gridx = 0;
@@ -267,7 +271,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		c.gridx++;
 		c.gridwidth = 3;
-		final CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > colorEdgeChoices = edgeColorBy( style );
+		this.colorEdgeChoices = edgeColorBy( style );
 		add( colorEdgeChoices, c );
 
 		// Colormap and ranges.
@@ -316,7 +320,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		add( scalePanel2, c );
 
-		final Collection< JComponent > edgeStuffToUnmute = new ArrayList<>();
+		this.edgeStuffToUnmute = new ArrayList<>();
 		edgeStuffToUnmute.add( lbl4 );
 		edgeStuffToUnmute.add( cmap2 );
 		edgeStuffToUnmute.add( cmp2 );
@@ -438,18 +442,21 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		final List< ColorSetter > styleColors = styleColors( style );
 		final List< BooleanSetter > styleBooleans = styleBooleans( style );
 
-		final Collection< JButton > edgeColorButtonToMute = new ArrayList<>();
-		final Collection< JButton > vertexColorButtonToMute = new ArrayList<>();
+		this.edgeColorButtonToMute = new ArrayList<>();
+		this.vertexColorButtonToMute = new ArrayList<>();
 
 		c.gridx = 0;
 		c.gridy++;
-		add( Box.createVerticalStrut( 15 ), c );
+		add( Box.createVerticalStrut( 5 ), c );
 		c.gridy++;
 		c.gridwidth = 2;
 		final int columnStart = c.gridy;
 		for ( final ColorSetter colorSetter : styleColors )
 		{
 			final JButton button = new JButton( colorSetter.getLabel(), new ColorIcon( colorSetter.getColor() ) );
+			button.setOpaque( false );
+			button.setContentAreaFilled( false );
+			button.setBorderPainted( false );
 			button.setMargin( new Insets( 0, 0, 0, 0 ) );
 			button.setBorder( new EmptyBorder( 2, 2, 2, 2 ) );
 			button.setHorizontalAlignment( SwingConstants.LEFT );
@@ -487,7 +494,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 			if ( colorSetter.skip > 0 )
 			{
-				add( Box.createVerticalStrut( colorSetter.skip ), c );
+				add( Box.createVerticalStrut( 5 ), c );
 				c.gridy++;
 			}
 
@@ -505,19 +512,25 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		c.gridy = columnStart + 9;
 		c.gridx = 0;
-		add( Box.createVerticalStrut( 15 ), c );
+		add( Box.createVerticalStrut( 5 ), c );
 		c.gridy++;
 
-		for ( final BooleanSetter booleanSetter : styleBooleans )
+		// On 2 columns
+		final int startLine = c.gridy;
+		boolean firstCol = true;
+		for ( int i = 0; i < styleBooleans.size(); i++ )
 		{
+			if ( firstCol && i >= styleBooleans.size() / 2 )
+			{
+				firstCol = false;
+				c.gridy = startLine;
+				c.gridx = c.gridx + 2;
+			}
+			final BooleanSetter booleanSetter = styleBooleans.get( i );
 			final JCheckBox checkbox = new JCheckBox( booleanSetter.getLabel(), booleanSetter.get() );
 			checkbox.addActionListener( new ActionListener()
 			{
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					booleanSetter.set( checkbox.isSelected() );
-				}
+				@Override public void actionPerformed( final ActionEvent e ) { booleanSetter.set( checkbox.isSelected() );}
 			} );
 			add( checkbox, c );
 			c.gridy++;
@@ -534,7 +547,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 			{
 				final FeatureKeyWrapper item = colorEdgeChoices.getSelectedItem();
 				final ColorEdgeBy colorEdgeBy = colorEdgeChoices.getSelectedCategory();
-				for ( final JButton button : edgeColorButtonToMute )
+				for ( final JComponent button : edgeColorButtonToMute )
 					button.setEnabled( colorEdgeBy == ColorEdgeBy.FIXED );
 				for ( final JComponent jc : edgeStuffToUnmute )
 					jc.setEnabled( colorEdgeBy != ColorEdgeBy.FIXED );
@@ -554,7 +567,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 			{
 				final FeatureKeyWrapper item = colorVertexChoices.getSelectedItem();
 				final ColorVertexBy colorVertexBy = colorVertexChoices.getSelectedCategory();
-				for ( final JButton button : vertexColorButtonToMute )
+				for ( final JComponent button : vertexColorButtonToMute )
 					button.setEnabled( colorVertexBy == ColorVertexBy.FIXED );
 				for ( final JComponent jc : vertexStuffToUnmute )
 					jc.setEnabled( colorVertexBy != ColorVertexBy.FIXED );
@@ -566,7 +579,31 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		} );
 		// Fire action listener once.
 		colorVertexChoices.setSelectedIndex( colorVertexChoices.getSelectedIndex() );
+	}
 
+	@Override
+	public void setEnabled( final boolean enabled )
+	{
+		super.setEnabled( enabled );
+		final Component[] comps = getComponents();
+		for ( final Component comp : comps )
+			comp.setEnabled( enabled );
+
+		// Specially don't enable stuff to mute.
+		if ( enabled )
+		{
+			final ColorVertexBy colorVertexBy = colorVertexChoices.getSelectedCategory();
+			for ( final JComponent button : vertexColorButtonToMute )
+				button.setEnabled( colorVertexBy == ColorVertexBy.FIXED );
+			for ( final JComponent jc : vertexStuffToUnmute )
+				jc.setEnabled( colorVertexBy != ColorVertexBy.FIXED );
+
+			final ColorEdgeBy colorEdgeBy = colorEdgeChoices.getSelectedCategory();
+			for ( final JComponent button : edgeColorButtonToMute )
+				button.setEnabled( colorEdgeBy == ColorEdgeBy.FIXED );
+			for ( final JComponent jc : edgeStuffToUnmute )
+				jc.setEnabled( colorEdgeBy != ColorEdgeBy.FIXED );
+		}
 	}
 
 	private static abstract class ColorSetter
@@ -799,10 +836,6 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 	private static List< BooleanSetter > styleBooleans( final TrackSchemeStyle style )
 	{
 		return Arrays.asList( new BooleanSetter[] {
-				new BooleanSetter( "highlightCurrentTimepoint ") {
-					@Override public boolean get() { return style.highlightCurrentTimepoint; }
-					@Override public void set( final boolean b ) { style.highlightCurrentTimepoint( b ); }
-				},
 				new BooleanSetter( "paintRows ") {
 					@Override public boolean get() { return style.paintRows; }
 					@Override public void set( final boolean b ) { style.paintRows( b ); }
@@ -810,6 +843,10 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 				new BooleanSetter( "paintColumns ") {
 					@Override public boolean get() { return style.paintColumns; }
 					@Override public void set( final boolean b ) { style.paintColumns( b ); }
+				},
+				new BooleanSetter( "highlightCurrentTimepoint ") {
+					@Override public boolean get() { return style.highlightCurrentTimepoint; }
+					@Override public void set( final boolean b ) { style.highlightCurrentTimepoint( b ); }
 				},
 				new BooleanSetter( "paintHeaderShadow ") {
 					@Override public boolean get() { return style.paintHeaderShadow; }
@@ -823,7 +860,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 	 */
 	private static class ColorIcon implements Icon
 	{
-		private final int size = 32;
+		private final int size = 16;
 
 		private final Color color;
 
@@ -852,52 +889,6 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		public int getIconHeight()
 		{
 			return size;
-		}
-	}
-
-	public static void main( final String[] args )
-	{
-		final TrackSchemeStyle style = TrackSchemeStyle.defaultStyle();
-		new TrackSchemeStyleEditorDialog( null, style ).setVisible( true );
-	}
-
-	public static class TrackSchemeStyleEditorDialog extends JDialog
-	{
-		private static final long serialVersionUID = 1L;
-
-		private final TrackSchemeStyleEditorPanel stylePanel;
-
-		public TrackSchemeStyleEditorDialog(
-				final JPanel panel,
-				final TrackSchemeStyle style )
-		{
-			setTitle( "TrackScheme style editor" );
-
-			stylePanel = new TrackSchemeStyleEditorPanel( style );
-
-			final JPanel content = new JPanel();
-			content.setLayout( new BoxLayout( content, BoxLayout.PAGE_AXIS ) );
-			content.add( stylePanel );
-			getContentPane().add( content, BorderLayout.NORTH );
-
-			final ActionMap am = getRootPane().getActionMap();
-			final InputMap im = getRootPane().getInputMap( JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT );
-			final Object hideKey = new Object();
-			final Action hideAction = new AbstractAction()
-			{
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public void actionPerformed( final ActionEvent e )
-				{
-					setVisible( false );
-				}
-			};
-			im.put( KeyStroke.getKeyStroke( KeyEvent.VK_ESCAPE, 0 ), hideKey );
-			am.put( hideKey, hideAction );
-
-			pack();
-			setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE );
 		}
 	}
 

@@ -5,17 +5,12 @@ package org.mastodon.revised.trackscheme.display.style;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.MutableComboBoxModel;
-
-import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleEditorPanel.TrackSchemeStyleEditorDialog;
 
 /**
  * @author Jean=Yves Tinevez
@@ -44,14 +39,6 @@ public class TrackSchemeStyleChooser
 			public void actionPerformed( final ActionEvent e )
 			{
 				delete();
-			}
-		} );
-		panel.buttonEditStyle.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				edit();
 			}
 		} );
 		panel.buttonNewStyle.addActionListener( new ActionListener()
@@ -145,40 +132,6 @@ public class TrackSchemeStyleChooser
 		final TrackSchemeStyle newStyle = current.copy( newName );
 		model.addElement( newStyle );
 		model.setSelectedItem( newStyle );
-	}
-
-	private void edit()
-	{
-		final TrackSchemeStyle current = ( TrackSchemeStyle ) model.getSelectedItem();
-		if ( null == current || TrackSchemeStyle.defaults.contains( current ) )
-			return;
-
-		final TrackSchemeStyle.UpdateListener listener = new TrackSchemeStyle.UpdateListener()
-		{
-			@Override
-			public void trackSchemeStyleChanged()
-			{
-				final AbstractTrackSchemeOverlay overlay = panel.panelPreview.getGraphOverlay();
-				if ( overlay instanceof DefaultTrackSchemeOverlay )
-				{
-					final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
-					dtso.setStyle( current );
-				}
-				panel.panelPreview.repaint();
-			}
-		};
-		current.addUpdateListener( listener );
-		final TrackSchemeStyleEditorDialog nameDialog = new TrackSchemeStyleEditorDialog( panel, current );
-		nameDialog.addWindowListener( new WindowAdapter()
-		{
-			@Override
-			public void windowClosing( final java.awt.event.WindowEvent e )
-			{
-				current.removeUpdateListener( listener );
-			};
-		} );
-		nameDialog.setModal( true );
-		nameDialog.setVisible( true );
 	}
 
 	private void delete()

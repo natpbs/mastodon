@@ -1,6 +1,7 @@
 package org.mastodon.revised.trackscheme.display.style;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -35,6 +36,7 @@ import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyEdge;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph.Examples;
@@ -69,6 +71,10 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 	TrackSchemePanel panelPreview;
 
+	private final JComboBox< TrackSchemeStyle > comboBoxStyles;
+
+	private final JPanel contentPanel;
+
 	public TrackSchemeStyleChooserPanel( final Frame owner, final MutableComboBoxModel< TrackSchemeStyle > model )
 	{
 		final Examples ex = DummyGraph.Examples.CELEGANS;
@@ -82,30 +88,17 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final TrackSchemeSelection tsSelection = new TrackSchemeSelection( new DefaultModelSelectionProperties<>( example, idmap, selection ) );
 		final TrackSchemeNavigation navigation = new TrackSchemeNavigation( new DefaultModelNavigationProperties<>( example, idmap, new NavigationHandler<>( new GroupManager().createGroupHandle() ) ), graph );
 		panelPreview = new TrackSchemePanel( graph, highlight, focus, tsSelection, navigation, TrackSchemeOptions.options() );
-		panelPreview.setTimepointRange( 0, 7 );
+		panelPreview.setTimepointRange( 0, 6 );
 		panelPreview.timePointChanged( 2 );
 		panelPreview.graphChanged();
 
+
 		final JPanel dialogPane = new JPanel();
-		final JPanel contentPanel = new JPanel();
+		this.contentPanel = new JPanel();
 		final JPanel panelChooseStyle = new JPanel();
 		final JLabel jlabelTitle = new JLabel();
-		final JComboBox< TrackSchemeStyle > comboBoxStyles = new JComboBox<>( model );
-		comboBoxStyles.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				final AbstractTrackSchemeOverlay overlay = panelPreview.getGraphOverlay();
-				if ( overlay instanceof DefaultTrackSchemeOverlay )
-				{
-					final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
-					final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
-					dtso.setStyle( style );
-				}
-				panelPreview.repaint();
-			}
-		} );
+		this.comboBoxStyles = new JComboBox<>( model );
+
 		final JPanel panelStyleButtons = new JPanel();
 		buttonDeleteStyle = new JButton();
 		final JPanel hSpacer1 = new JPanel( null );
@@ -166,15 +159,16 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 						// ---- buttonEditStyle ----
 						buttonEditStyle.setText( "Edit" );
-						panelStyleButtons.add( buttonEditStyle );
+//						panelStyleButtons.add( buttonEditStyle );
 
 					}
 					panelChooseStyle.add( panelStyleButtons );
 				}
 				contentPanel.add( panelChooseStyle, BorderLayout.NORTH );
 
-				// ======== panelPreview ========
-				contentPanel.add( panelPreview, BorderLayout.CENTER );
+				// ======== style preview ========
+				panelPreview.setPreferredSize( new Dimension( 300, 250 ) );
+				contentPanel.add( panelPreview, BorderLayout.SOUTH );
 			}
 			dialogPane.add( contentPanel, BorderLayout.CENTER );
 
@@ -200,5 +194,52 @@ class TrackSchemeStyleChooserPanel extends JPanel
 			dialogPane.add( buttonBar, BorderLayout.SOUTH );
 		}
 		add( dialogPane, BorderLayout.CENTER );
+
+		// Style editor.
+		final StyleComboBoxListener styleComboBoxListener = new StyleComboBoxListener();
+
+		comboBoxStyles.addActionListener( styleComboBoxListener );
+		comboBoxStyles.setSelectedIndex( 0 );
+
+	}
+
+	private class StyleComboBoxListener implements ActionListener, UpdateListener
+	{
+		private TrackSchemeStyleEditorPanel editorPanel;
+
+		public StyleComboBoxListener()
+		{
+		}
+
+		@Override
+		public void trackSchemeStyleChanged()
+		{
+			panelPreview.repaint();
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			final AbstractTrackSchemeOverlay overlay = panelPreview.getGraphOverlay();
+			if ( overlay instanceof DefaultTrackSchemeOverlay )
+			{
+				final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
+				final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
+				dtso.setStyle( style );
+
+				if ( null != editorPanel )
+					contentPanel.remove( editorPanel );
+
+				editorPanel = new TrackSchemeStyleEditorPanel( comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ) );
+				contentPanel.add( editorPanel, BorderLayout.CENTER );
+
+				style.addUpdateListener( this );
+
+				editorPanel.setEnabled( !TrackSchemeStyle.defaults.contains( style ) );
+
+			}
+			revalidate();
+			panelPreview.repaint();
+		}
 	}
 }
