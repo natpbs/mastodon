@@ -13,6 +13,8 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
@@ -88,9 +90,9 @@ public class MainWindow extends JFrame
 		 */
 
 		final JButton displaySettingsButton = new JButton( "display settings" );
-		final DisplaySettingsDialog displaySettingsDialog = 
+		final DisplaySettingsDialog displaySettingsDialog =
 				new DisplaySettingsDialog( bdvSettingsManager, trackSchemeStyleManager );
-		displaySettingsDialog.setSize( 475, 750 );
+		displaySettingsDialog.setSize( 400, 850 );
 
 		displaySettingsButton.addActionListener(
 				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
@@ -310,8 +312,10 @@ public class MainWindow extends JFrame
 		return conf;
 	}
 
-	public static void main( final String[] args ) throws IOException, SpimDataException, InvocationTargetException, InterruptedException
+	public static void main( final String[] args ) throws IOException, SpimDataException, InvocationTargetException, InterruptedException, ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
 	{
+		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+
 		final String bdvFile = "samples/datasethdf5.xml";
 		final String modelFile = "samples/model_revised.raw";
 		final MamutProject project = new MamutProject( new File( "." ), new File( bdvFile ), new File( modelFile ) );
