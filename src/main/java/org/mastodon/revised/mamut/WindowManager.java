@@ -19,6 +19,9 @@ import javax.swing.event.MenuListener;
 import org.mastodon.graph.GraphChangeListener;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.graph.ListenableReadOnlyGraph;
+import org.mastodon.graph.branch.BranchEdge;
+import org.mastodon.graph.branch.BranchGraph;
+import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.bdv.BigDataViewerMaMuT;
 import org.mastodon.revised.bdv.SharedBigDataViewerData;
 import org.mastodon.revised.bdv.overlay.BdvHighlightHandler;
@@ -41,6 +44,11 @@ import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
+import org.mastodon.revised.model.branchgraph.DefaultBranchGraphFocusProperties;
+import org.mastodon.revised.model.branchgraph.DefaultBranchGraphHighlightProperties;
+import org.mastodon.revised.model.branchgraph.DefaultBranchGraphNavigationProperties;
+import org.mastodon.revised.model.branchgraph.DefaultBranchGraphProperties;
+import org.mastodon.revised.model.branchgraph.DefaultBranchGraphSelectionProperties;
 import org.mastodon.revised.model.mamut.BoundingSphereRadiusStatistics;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
@@ -52,6 +60,7 @@ import org.mastodon.revised.trackscheme.DefaultModelHighlightProperties;
 import org.mastodon.revised.trackscheme.DefaultModelNavigationProperties;
 import org.mastodon.revised.trackscheme.DefaultModelSelectionProperties;
 import org.mastodon.revised.trackscheme.ModelFocusProperties;
+import org.mastodon.revised.trackscheme.ModelGraphProperties;
 import org.mastodon.revised.trackscheme.ModelHighlightProperties;
 import org.mastodon.revised.trackscheme.ModelNavigationProperties;
 import org.mastodon.revised.trackscheme.ModelSelectionProperties;
@@ -821,6 +830,77 @@ public class WindowManager
 
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );
 		addTsWindow( tsWindow );
+		frame.getTrackschemePanel().repaint();
+	}
+
+	public void createBranchGraphTrackScheme()
+	{
+		final BranchGraph< Spot, Link > graph = model.getBranchGraph();
+		final GraphIdBimap< BranchVertex, BranchEdge > idmap = graph.getGraphIdBimap();
+
+		/*
+		 * TrackSchemeGraph listening to branch graph.
+		 */
+		final ModelGraphProperties properties =
+				new DefaultBranchGraphProperties< Spot, Link >( graph, idmap, model.getGraph(), selection );
+		final TrackSchemeGraph< BranchVertex, BranchEdge > trackSchemeGraph =
+				new TrackSchemeGraph< BranchVertex, BranchEdge >( graph, idmap, properties );
+
+		/*
+		 * TrackSchemeHighlight wrapping HighlightModel
+		 */
+		final ModelHighlightProperties highlightProperties =
+				new DefaultBranchGraphHighlightProperties< Spot, Link >( graph, idmap, model.getGraph(), highlightModel );
+		final TrackSchemeHighlight trackSchemeHighlight = new TrackSchemeHighlight( highlightProperties, trackSchemeGraph );
+
+		/*
+		 * TrackScheme selection
+		 */
+		final ModelSelectionProperties selectionProperties =
+				new DefaultBranchGraphSelectionProperties< Spot, Link >( graph, idmap, model.getGraph(), selection );
+		final TrackSchemeSelection trackSchemeSelection = new TrackSchemeSelection( selectionProperties );
+
+		/*
+		 * TrackScheme GroupHandle
+		 */
+		final GroupHandle groupHandle = groupManager.createGroupHandle();
+
+		/*
+		 * TrackScheme navigation
+		 */
+		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandler<>( groupHandle );
+		final ModelNavigationProperties navigationProperties =
+				new DefaultBranchGraphNavigationProperties< Spot, Link >(
+						graph,
+						idmap,
+						model.getGraph(),
+						navigationHandler );
+		final TrackSchemeNavigation trackSchemeNavigation = new TrackSchemeNavigation( navigationProperties, trackSchemeGraph );
+
+		/*
+		 * TrackScheme focus
+		 */
+		final ModelFocusProperties focusProperties =
+				new DefaultBranchGraphFocusProperties< Spot, Link >( graph, idmap, model.getGraph(), focusModel );
+		final TrackSchemeFocus trackSchemeFocus = new TrackSchemeFocus( focusProperties, trackSchemeGraph );
+
+		/*
+		 * show TrackSchemeFrame
+		 */
+		final TrackSchemeFrame frame = new TrackSchemeFrame(
+				trackSchemeGraph,
+				trackSchemeHighlight,
+				trackSchemeFocus,
+				trackSchemeSelection,
+				trackSchemeNavigation,
+				model,
+				groupHandle,
+				null,
+				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
+		frame.setTitle( "Branch graph" );
+		frame.getTrackschemePanel().setTimepointRange( minTimepoint, maxTimepoint );
+		frame.getTrackschemePanel().graphChanged();
+		frame.setVisible( true );
 		frame.getTrackschemePanel().repaint();
 	}
 

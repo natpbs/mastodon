@@ -1,8 +1,8 @@
 package org.mastodon.revised.model.mamut;
 
 import org.mastodon.graph.ref.AbstractEdge;
-import org.mastodon.graph.ref.AbstractEdgePool;
 import org.mastodon.graph.ref.AbstractListenableEdge;
+import org.mastodon.graph.ref.AbstractListenableEdgePool;
 import org.mastodon.pool.ByteMappedElement;
 
 public class Link extends AbstractListenableEdge< Link, Spot, ByteMappedElement >
@@ -26,7 +26,7 @@ public class Link extends AbstractListenableEdge< Link, Spot, ByteMappedElement 
 		return String.format( "Link( %d -> %d )", getSource().getInternalPoolIndex(), getTarget().getInternalPoolIndex() );
 	}
 
-	Link( final AbstractEdgePool< Link, Spot, ByteMappedElement > pool )
+	Link( final AbstractListenableEdgePool< Link, Spot, ByteMappedElement > pool )
 	{
 		super( pool );
 	}

@@ -59,8 +59,7 @@ public class MainWindow extends JFrame
 		trackSchemeStyleManager = new TrackSchemeStyleManager();
 
 		final JPanel buttonsPanel = new JPanel();
-		buttonsPanel.setLayout( new GridLayout( 9, 1 ) );
-
+		buttonsPanel.setLayout( new GridLayout( 10, 1 ) );
 		final JButton bdvButton = new JButton( "bdv" );
 		bdvButton.addActionListener( new ActionListener()
 		{
@@ -81,8 +80,19 @@ public class MainWindow extends JFrame
 					windowManager.createTrackScheme();
 			}
 		} );
+		final JButton branchGraphButton = new JButton( "branch graph" );
+		branchGraphButton.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				if ( windowManager != null )
+					windowManager.createBranchGraphTrackScheme();
+			}
+		} );
 		buttonsPanel.add( bdvButton );
 		buttonsPanel.add( trackschemeButton );
+		buttonsPanel.add( branchGraphButton );
 		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
 
 		/*
@@ -320,6 +330,7 @@ public class MainWindow extends JFrame
 		final String bdvFile = "samples/datasethdf5.xml";
 		final String modelFile = "samples/model_revised.raw";
 		final MamutProject project = new MamutProject( new File( "." ), new File( bdvFile ), new File( modelFile ) );
+//		final MamutProject project = new MamutProject( new File( "." ), new File( bdvFile ), null );
 //		final MamutProject project = new MamutProjectIO().load( "samples/mamutproject.xml" );
 
 

@@ -94,8 +94,11 @@ public class TrackSchemeFrame extends JFrame
 		settingsPanel.add( navigationLocksPanel );
 		settingsPanel.add( Box.createHorizontalGlue() );
 
-		final ContextChooserPanel< ? > contextChooserPanel = new ContextChooserPanel<>( contextChooser );
-		settingsPanel.add( contextChooserPanel );
+		if ( null != contextChooser )
+		{
+			final ContextChooserPanel< ? > contextChooserPanel = new ContextChooserPanel<>( contextChooser );
+			settingsPanel.add( contextChooserPanel );
+		}
 
 		add( settingsPanel, BorderLayout.NORTH );
 		isSettingsPanelVisible = true;
