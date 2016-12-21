@@ -61,6 +61,11 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
 import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
 import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.action.TrackSchemeAction;
+import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
+import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
+import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviourProvider;
+import org.mastodon.revised.trackscheme.action.TrackSchemeService;
 import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
@@ -84,6 +89,10 @@ import org.scijava.ui.behaviour.io.InputTriggerDescription;
 import org.scijava.ui.behaviour.io.InputTriggerDescriptionsBuilder;
 import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
+import org.scijava.ui.behaviour.util.Actions;
+import org.scijava.ui.behaviour.util.Behaviours;
+import org.scijava.ui.behaviour.util.InputActionBindings;
+import org.scijava.ui.behaviour.util.TriggerBehaviourBindings;
 
 import bdv.spimdata.SpimDataMinimal;
 import bdv.viewer.RequestRepaint;
@@ -271,6 +280,11 @@ public class WindowManager
 	private final RenderSettingsManager renderSettingsManager;
 
 	private final TrackSchemeStyleManager trackSchemeStyleManager;
+	private final org.scijava.Context context;
+
+	private final TrackSchemeBehaviourProvider trackSchemeBehaviourProvider;
+
+	private final TrackSchemeActionProvider trackSchemeActionProvider;
 
 	public WindowManager(
 			final String spimDataXmlFilename,
@@ -312,6 +326,15 @@ public class WindowManager
 		 * it would be confusing to have different labels in TrackScheme. If
 		 * this is changed in the future, then probably only in the model files.
 		 */
+
+		/*
+		 * TESTING the action provider and context thingies.
+		 */
+		this.context = new org.scijava.Context();
+		this.trackSchemeBehaviourProvider = new TrackSchemeBehaviourProvider();
+		context.inject( trackSchemeBehaviourProvider );
+		this.trackSchemeActionProvider = new TrackSchemeActionProvider();
+		context.inject( trackSchemeActionProvider );
 
 	}
 
@@ -656,6 +679,14 @@ public class WindowManager
 				groupHandle,
 				contextChooser,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
+
+		/*
+		 * Register this TrackScheme in the TrackSchemeService.
+		 */
+		final TrackSchemeService service = context.getService( TrackSchemeService.class );
+		service.register( frame,
+				trackSchemeGraph, trackSchemeSelection, trackSchemeHighlight, trackSchemeFocus, trackSchemeNavigation );
+
 		frame.getTrackschemePanel().setTimepointRange( minTimepoint, maxTimepoint );
 		frame.getTrackschemePanel().graphChanged();
 		contextListener.setContextListener( frame.getTrackschemePanel() );
@@ -739,6 +770,53 @@ public class WindowManager
 		}
 		frame.setJMenuBar( menu );
 
+		/*
+		 * Actions discovered by TrackScheme action provider and with mappings
+		 * specified in keyconfig.yaml. With the syntax below, only the mappings
+		 * with contexts having "trackscheme" will be picked up.
+		 */
+		final Actions actions = new Actions( keyconf, "trackscheme" );
+		for ( final String key : trackSchemeActionProvider.getKeys() )
+		{
+			/*
+			 * TODO Do not instantiate when there is no mapping for this action.
+			 * The problem is that we cannot know whether 'keyconf' has a
+			 * mapping for the action or not.
+			 */
+			final TrackSchemeAction action = trackSchemeActionProvider.create( key );
+			if ( null == action )
+				continue;
+
+			service.put( action, frame );
+			action.initialize();
+			actions.runnableAction( action, key );
+		}
+		final InputActionBindings keybindings = frame.getKeybindings();
+		actions.install( keybindings, "trackscheme" );
+
+		/*
+		 * Behaviors discovered by the TrackScheme behaviour provider and with
+		 * mappings specified in keyconfig.yaml. With the syntax below, only the
+		 * mappings with contexts having "trackscheme" will be picked up.
+		 */
+		final Behaviours behaviours = new Behaviours( keyconf, "trackscheme" );
+		for ( final String key : trackSchemeBehaviourProvider.getKeys() )
+		{
+			/*
+			 * TODO Do not instantiate when there is no mapping for this action.
+			 * The problem is that we cannot know whether 'keyconf' has a
+			 * mapping for the action or not.
+			 */
+			final TrackSchemeBehaviour behaviour = trackSchemeBehaviourProvider.create( key );
+			if ( null == behaviour )
+				continue;
+
+			service.put( behaviour, frame );
+			behaviour.initialize();
+			behaviours.behaviour( behaviour, key );
+		}
+		final TriggerBehaviourBindings triggerbindings = frame.getTriggerbindings();
+		behaviours.install( triggerbindings, "trackscheme" );
 
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );
 		addTsWindow( tsWindow );
