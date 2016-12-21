@@ -964,13 +964,13 @@ public class RenderSettings
 		df.linkHighlightStroke = DEFAULT_LINK_HIGHLIGHT_STROKE;
 		df.color1 = DEFAULT_COLOR_1;
 		df.color2 = DEFAULT_COLOR_2;
-		df.name = "Default";
+		df.name = "default";
 	}
 
 	private static RenderSettings POINT_CLOUD;
 	static
 	{
-		POINT_CLOUD = df.copy( "Point cloud" );
+		POINT_CLOUD = df.copy( "point cloud" );
 		POINT_CLOUD.drawLinks = false;
 		POINT_CLOUD.drawEllipsoidSliceIntersection = false;
 		POINT_CLOUD.isFocusLimitViewRelative = false;
@@ -979,7 +979,7 @@ public class RenderSettings
 	private static RenderSettings ARROWS;
 	static
 	{
-		ARROWS = df.copy( "Arrows" );
+		ARROWS = df.copy( "arrows" );
 		ARROWS.drawSpots = false;
 		ARROWS.drawLinkArrows = true;
 		ARROWS.color2 = new Color( 55, 150, 126, 255 );
@@ -988,7 +988,7 @@ public class RenderSettings
 	private static RenderSettings NONE;
 	static
 	{
-		NONE = df.copy( "No overlay" );
+		NONE = df.copy( "no overlay" );
 		NONE.drawLinks = false;
 		NONE.drawSpots = false;
 	}
