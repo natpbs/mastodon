@@ -168,7 +168,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 				// ======== style preview ========
 				panelPreview.setPreferredSize( new Dimension( 300, 250 ) );
-				contentPanel.add( panelPreview, BorderLayout.SOUTH );
+				contentPanel.add( panelPreview, BorderLayout.CENTER );
 			}
 			dialogPane.add( contentPanel, BorderLayout.CENTER );
 
@@ -231,7 +231,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 					contentPanel.remove( editorPanel );
 
 				editorPanel = new TrackSchemeStyleEditorPanel( comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ) );
-				contentPanel.add( editorPanel, BorderLayout.CENTER );
+				contentPanel.add( editorPanel, BorderLayout.SOUTH );
 
 				style.addUpdateListener( this );
 

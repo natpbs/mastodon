@@ -768,65 +768,71 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 	private static List< ColorSetter > styleColors( final TrackSchemeStyle style )
 	{
 		return Arrays.asList( new ColorSetter[] {
-				new ColorSetter( "edgeColor" ) {
+				new ColorSetter( "edge color" )
+				{
 					@Override public Color getColor() { return style.edgeColor; }
 					@Override public void setColor( final Color c ) { style.edgeColor( c ); }
 				},
-				new ColorSetter( "vertexFillColor" ) {
+				new ColorSetter( "vertex fill color" )
+				{
 					@Override public Color getColor() { return style.vertexFillColor; }
 					@Override public void setColor( final Color c ) { style.vertexFillColor( c ); }
 				},
-				new ColorSetter( "vertexDrawColor" ) {
+				new ColorSetter( "vertex draw color" )
+				{
 					@Override public Color getColor() { return style.vertexDrawColor; }
 					@Override public void setColor( final Color c ) { style.vertexDrawColor( c ); }
 				},
-				new ColorSetter( "simplifiedVertexFillColor", true ) {
+				new ColorSetter( "simplified vertex fill color", true )
+				{
 					@Override public Color getColor() { return style.simplifiedVertexFillColor; }
 					@Override public void setColor( final Color c ) { style.simplifiedVertexFillColor( c ); }
 				},
-				new ColorSetter( "selectedEdgeColor" ) {
+				new ColorSetter( "selected edge color" )
+				{
 					@Override public Color getColor() { return style.selectedEdgeColor; }
 					@Override public void setColor( final Color c ) { style.selectedEdgeColor( c ); }
 				},
-				new ColorSetter( "selectedVertexDrawColor" ) {
+				new ColorSetter( "selected vertex draw color" )
+				{
 					@Override public Color getColor() { return style.selectedVertexDrawColor; }
 					@Override public void setColor( final Color c ) { style.selectedVertexDrawColor( c ); }
 				},
-				new ColorSetter( "selectedVertexFillColor" ) {
+				new ColorSetter( "selected vertex fill color" ) {
 					@Override public Color getColor() { return style.selectedVertexFillColor; }
 					@Override public void setColor( final Color c ) { style.selectedVertexFillColor( c ); }
 				},
 				// Column break
-				new ColorSetter( "selectedSimplifiedVertexFillColor", false )
+				new ColorSetter( "selected simplified vertex fill color", false )
 				{
 					@Override public Color getColor() { return style.selectedSimplifiedVertexFillColor; }
 					@Override public void setColor( final Color c ) { style.selectedSimplifiedVertexFillColor( c ); }
 				},
-				new ColorSetter( "backgroundColor" ) {
+				new ColorSetter( "background color" ) {
 					@Override public Color getColor() { return style.backgroundColor; }
 					@Override public void setColor( final Color c ) { style.backgroundColor( c ); }
 				},
-				new ColorSetter( "currentTimepointColor" ) {
+				new ColorSetter( "current timepoint color" ) {
 					@Override public Color getColor() { return style.currentTimepointColor; }
 					@Override public void setColor( final Color c ) { style.currentTimepointColor( c ); }
 				},
-				new ColorSetter( "decorationColor" ) {
+				new ColorSetter( "decoration color" ) {
 					@Override public Color getColor() { return style.decorationColor; }
 					@Override public void setColor( final Color c ) { style.decorationColor( c ); }
 				},
-				new ColorSetter( "vertexRangeColor", true ) {
+				new ColorSetter( "vertex range color", true ) {
 					@Override public Color getColor() { return style.vertexRangeColor; }
 					@Override public void setColor( final Color c ) { style.vertexRangeColor( c ); }
 				},
-				new ColorSetter( "headerBackgroundColor" ) {
+				new ColorSetter( "header background color" ) {
 					@Override public Color getColor() { return style.headerBackgroundColor; }
 					@Override public void setColor( final Color c ) { style.headerBackgroundColor( c ); }
 				},
-				new ColorSetter( "headerDecorationColor" ) {
+				new ColorSetter( "header decoration color" ) {
 					@Override public Color getColor() { return style.headerDecorationColor; }
 					@Override public void setColor( final Color c ) { style.headerDecorationColor( c ); }
 				},
-				new ColorSetter( "headerCurrentTimepointColor" ) {
+				new ColorSetter( "header current timepoint color" ) {
 					@Override public Color getColor() { return style.headerCurrentTimepointColor; }
 					@Override public void setColor( final Color c ) { style.headerCurrentTimepointColor( c ); }
 				}
@@ -836,19 +842,19 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 	private static List< BooleanSetter > styleBooleans( final TrackSchemeStyle style )
 	{
 		return Arrays.asList( new BooleanSetter[] {
-				new BooleanSetter( "paintRows ") {
+				new BooleanSetter( "paint rows ") {
 					@Override public boolean get() { return style.paintRows; }
 					@Override public void set( final boolean b ) { style.paintRows( b ); }
 				},
-				new BooleanSetter( "paintColumns ") {
+				new BooleanSetter( "paint columns ") {
 					@Override public boolean get() { return style.paintColumns; }
 					@Override public void set( final boolean b ) { style.paintColumns( b ); }
 				},
-				new BooleanSetter( "highlightCurrentTimepoint ") {
+				new BooleanSetter( "highlight current timepoint ") {
 					@Override public boolean get() { return style.highlightCurrentTimepoint; }
 					@Override public void set( final boolean b ) { style.highlightCurrentTimepoint( b ); }
 				},
-				new BooleanSetter( "paintHeaderShadow ") {
+				new BooleanSetter( "paint header shadow ") {
 					@Override public boolean get() { return style.paintHeaderShadow; }
 					@Override public void set( final boolean b ) { style.paintHeaderShadow( b ); }
 				}
