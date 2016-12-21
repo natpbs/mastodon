@@ -690,6 +690,8 @@ public class WindowManager
 				contextChooser,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
 
+		installTrackSchemeMenu( frame );
+
 		/*
 		 * Register this TrackScheme in the TrackSchemeService.
 		 */
@@ -729,56 +731,6 @@ public class WindowManager
 				model.getGraph().getGraphIdBimap(),
 				model );
 
-		/*
-		 * TrackScheme menu
-		 */
-		final JMenuBar menu = new JMenuBar();
-
-		// Styles auto-populated from TrackScheme style manager.
-		if ( frame.getTrackschemePanel().getGraphOverlay() instanceof DefaultTrackSchemeOverlay )
-		{
-			// Update listener that repaint this TrackScheme when its style changes
-			final UpdateListener panelRepainter = new UpdateListener() 
-				{ @Override public void trackSchemeStyleChanged() { frame.getTrackschemePanel().repaint(); } };
-
-			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) frame.getTrackschemePanel().getGraphOverlay();
-			final JMenu styleMenu = new JMenu( "Styles" );
-
-			styleMenu.addMenuListener( new MenuListener()
-			{
-				@Override
-				public void menuSelected( final MenuEvent e )
-				{
-					styleMenu.removeAll();
-					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
-						styleMenu.add( new JMenuItem(
-								new TrackSchemeStyleAction( style, overlay, panelRepainter ) ) );
-				}
-
-				@Override
-				public void menuDeselected( final MenuEvent e )
-				{}
-
-				@Override
-				public void menuCanceled( final MenuEvent e )
-				{}
-			} );
-			/*
-			 * De-register style listener upon window closing.
-			 */
-			frame.addWindowListener( new WindowAdapter()
-			{
-				@Override
-				public void windowClosing( final WindowEvent e )
-				{
-					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
-						style.removeUpdateListener( panelRepainter );
-				};
-			} );
-
-			menu.add( styleMenu );
-		}
-		frame.setJMenuBar( menu );
 
 		/*
 		 * Actions discovered by TrackScheme action provider and with mappings
@@ -897,6 +849,8 @@ public class WindowManager
 				groupHandle,
 				null,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
+
+		installTrackSchemeMenu( frame );
 		frame.setTitle( "Branch graph" );
 		frame.getTrackschemePanel().setTimepointRange( minTimepoint, maxTimepoint );
 		frame.getTrackschemePanel().graphChanged();
@@ -937,6 +891,61 @@ public class WindowManager
 		return renderSettingsManager;
 	}
 
+	private void installTrackSchemeMenu( final TrackSchemeFrame frame )
+	{
+
+		final JMenuBar menu;
+		if ( frame.getJMenuBar() == null )
+			menu = new JMenuBar();
+		else
+			menu = frame.getJMenuBar();
+
+		// Styles auto-populated from TrackScheme style manager.
+		if ( frame.getTrackschemePanel().getGraphOverlay() instanceof DefaultTrackSchemeOverlay )
+		{
+			// Update listener that repaint this TrackScheme when its style changes
+			final UpdateListener panelRepainter = new UpdateListener()
+				{ @Override public void trackSchemeStyleChanged() { frame.getTrackschemePanel().repaint(); } };
+
+			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) frame.getTrackschemePanel().getGraphOverlay();
+			final JMenu styleMenu = new JMenu( "Styles" );
+
+			styleMenu.addMenuListener( new MenuListener()
+			{
+				@Override
+				public void menuSelected( final MenuEvent e )
+				{
+					styleMenu.removeAll();
+					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
+						styleMenu.add( new JMenuItem(
+								new TrackSchemeStyleAction( style, overlay, panelRepainter ) ) );
+				}
+
+				@Override
+				public void menuDeselected( final MenuEvent e )
+				{}
+
+				@Override
+				public void menuCanceled( final MenuEvent e )
+				{}
+			} );
+			/*
+			 * De-register style listener upon window closing.
+			 */
+			frame.addWindowListener( new WindowAdapter()
+			{
+				@Override
+				public void windowClosing( final WindowEvent e )
+				{
+					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
+						style.removeUpdateListener( panelRepainter );
+				};
+			} );
+
+			menu.add( styleMenu );
+		}
+		frame.setJMenuBar( menu );
+	}
 
 	// TODO: move somewhere else. make bdvWindows, tsWindows accessible.
 	public static class DumpInputConfig
