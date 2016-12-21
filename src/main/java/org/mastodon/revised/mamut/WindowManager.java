@@ -66,6 +66,7 @@ import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviourProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeService;
+import org.mastodon.revised.trackscheme.action.TrackSchemeStyleAction;
 import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
@@ -821,39 +822,6 @@ public class WindowManager
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );
 		addTsWindow( tsWindow );
 		frame.getTrackschemePanel().repaint();
-	}
-
-	/**
-	 * Sets the style of a TrackScheme panel when executed & registers itself as
-	 * a listener for style changes to repaint said panel.
-	 */
-	private class TrackSchemeStyleAction extends AbstractNamedAction
-	{
-
-		private static final long serialVersionUID = 1L;
-
-		private final TrackSchemeStyle style;
-
-		private final UpdateListener panelRepainter;
-
-		private final DefaultTrackSchemeOverlay overlay;
-
-		public TrackSchemeStyleAction( final TrackSchemeStyle style, final DefaultTrackSchemeOverlay overlay, final UpdateListener panelRepainter )
-		{
-			super( style.name );
-			this.style = style;
-			this.overlay = overlay;
-			this.panelRepainter = panelRepainter;
-		}
-
-		@Override
-		public void actionPerformed( final ActionEvent e )
-		{
-			final TrackSchemeStyle oldStyle = overlay.setStyle( style );
-			oldStyle.removeUpdateListener( panelRepainter );
-			style.addUpdateListener( panelRepainter );
-			panelRepainter.trackSchemeStyleChanged();
-		}
 	}
 
 	public void closeAllWindows()
