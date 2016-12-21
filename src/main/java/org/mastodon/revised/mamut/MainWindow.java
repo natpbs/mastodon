@@ -171,6 +171,7 @@ public class MainWindow extends JFrame
 				spimDataXmlFilename, spimData,
 				model,
 				bdvSettingsManager,
+				trackSchemeStyleManager,
 				keyconf );
 	}
 

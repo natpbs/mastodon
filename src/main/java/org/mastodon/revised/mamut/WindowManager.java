@@ -1,5 +1,6 @@
 package org.mastodon.revised.mamut;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -8,7 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 import org.mastodon.graph.GraphChangeListener;
 import org.mastodon.graph.GraphIdBimap;
@@ -21,6 +27,7 @@ import org.mastodon.revised.bdv.overlay.EditBehaviours;
 import org.mastodon.revised.bdv.overlay.EditSpecialBehaviours;
 import org.mastodon.revised.bdv.overlay.OverlayContext;
 import org.mastodon.revised.bdv.overlay.OverlayGraphRenderer;
+import org.mastodon.revised.bdv.overlay.RenderSettings;
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayContextWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayEdgeWrapper;
@@ -54,9 +61,13 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
 import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
 import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
 import org.mastodon.revised.ui.grouping.GroupHandle;
@@ -72,6 +83,7 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.InputTriggerDescription;
 import org.scijava.ui.behaviour.io.InputTriggerDescriptionsBuilder;
 import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
+import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import bdv.spimdata.SpimDataMinimal;
 import bdv.viewer.RequestRepaint;
@@ -258,15 +270,19 @@ public class WindowManager
 
 	private final RenderSettingsManager renderSettingsManager;
 
+	private final TrackSchemeStyleManager trackSchemeStyleManager;
+
 	public WindowManager(
 			final String spimDataXmlFilename,
 			final SpimDataMinimal spimData,
 			final Model model,
 			final RenderSettingsManager bdvSettingsManager,
+			final TrackSchemeStyleManager trackSchemeStyleManager,
 			final InputTriggerConfig keyconf )
 	{
 		this.model = model;
 		this.renderSettingsManager = bdvSettingsManager;
+		this.trackSchemeStyleManager = trackSchemeStyleManager;
 		this.keyconf = keyconf;
 
 		groupManager = new GroupManager();
@@ -466,38 +482,98 @@ public class WindowManager
 		 * not.
 		 */
 		viewer.addTimePointListener( tpl );
-//		viewer.repaint(); // TODO remove?
 
+		/*
+		 * BDV menu.
+		 */
 
-		// TODO revise
-		// RenderSettingsDialog triggered by "R"
-//		final String RENDER_SETTINGS = "render settings";
-//		final RenderSettingsChooser renderSettingsDialog = new RenderSettingsChooser( viewerFrame, renderSettingsManager );
-//
-//		renderSettingsDialog.setTitle( "Display settings for " + windowTitle );
-//		final ActionMap actionMap = new ActionMap();
-//		new ToggleDialogAction( RENDER_SETTINGS, renderSettingsDialog.getDialog() ).put( actionMap );
-//		final InputMap inputMap = new InputMap();
-//		final KeyStrokeAdder a = keyconf.keyStrokeAdder( inputMap, "mamut" );
-//		a.put( RENDER_SETTINGS, "R" );
-//		viewerFrame.getKeybindings().addActionMap( "mamut", actionMap );
-//		viewerFrame.getKeybindings().addInputMap( "mamut", inputMap );
+		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer );
+		final JMenu styleMenu = new JMenu( "Styles" );
+		styleMenu.addMenuListener( new MenuListener()
+		{
+			@Override
+			public void menuSelected( final MenuEvent e )
+			{
+				styleMenu.removeAll();
+				for ( final RenderSettings rs : renderSettingsManager.getRenderSettings() )
+					styleMenu.add( new JMenuItem(
+							new BdvRenderSettingsAction( rs, panelRepainter ) ) );
 
-//		final RenderSettings renderSettings = renderSettingsDialog.getRenderSettings();
-//		renderSettings.addUpdateListener( new UpdateListener()
-//		{
-//			@Override
-//			public void renderSettingsChanged()
-//			{
-//				tracksOverlay.setRenderSettings( renderSettings );
-//				// TODO: less hacky way of triggering repaint and context update
-//				viewer.repaint();
-//				overlayContextWrapper.contextChanged( overlayContext );
-//			}
-//		} );
+			}
+
+			@Override public void menuDeselected( final MenuEvent e ) {}
+			@Override public void menuCanceled( final MenuEvent e ) {}
+		} );
+		viewerFrame.getJMenuBar().add( styleMenu );
+
+		/*
+		 * De-register render settings listener upon window closing.
+		 */
+		viewerFrame.addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				for ( final RenderSettings rs : renderSettingsManager.getRenderSettings() )
+					rs.removeUpdateListener( panelRepainter );
+			};
+		} );
+
 
 		final BdvWindow bdvWindow = new BdvWindow( viewerFrame, tracksOverlay, bdvGroupHandle, contextProvider );
 		addBdvWindow( bdvWindow );
+	}
+
+	private class BdvRenderSettingsUpdater implements org.mastodon.revised.bdv.overlay.RenderSettings.UpdateListener
+	{
+
+		private final ViewerPanel viewer;
+
+		private final OverlayGraphRenderer< ?, ? > overlay;
+
+		private RenderSettings renderSettings;
+
+		public BdvRenderSettingsUpdater( final OverlayGraphRenderer< ?, ? > overlay, final ViewerPanel viewer )
+		{
+			this.overlay = overlay;
+			this.viewer = viewer;
+		}
+
+		@Override
+		public void renderSettingsChanged()
+		{
+			overlay.setRenderSettings( renderSettings );
+			viewer.repaint();
+		}
+	}
+
+	/**
+	 * Sets the style of a TrackScheme panel when executed & registers itself as
+	 * a listener for style changes to repaint said panel.
+	 */
+	private class BdvRenderSettingsAction extends AbstractNamedAction
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		private final RenderSettings rs;
+
+		private final BdvRenderSettingsUpdater panelRepainter;
+
+		public BdvRenderSettingsAction( final RenderSettings rs, final BdvRenderSettingsUpdater panelRepainter )
+		{
+			super( rs.getName() );
+			this.rs = rs;
+			this.panelRepainter = panelRepainter;
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			panelRepainter.renderSettings = rs;
+			rs.addUpdateListener( panelRepainter );
+			panelRepainter.renderSettingsChanged();
+		}
 	}
 
 	// TODO testing only
@@ -612,9 +688,94 @@ public class WindowManager
 				model.getGraph().getGraphIdBimap(),
 				model );
 
+		/*
+		 * TrackScheme menu
+		 */
+		final JMenuBar menu = new JMenuBar();
+
+		// Styles auto-populated from TrackScheme style manager.
+		if ( frame.getTrackschemePanel().getGraphOverlay() instanceof DefaultTrackSchemeOverlay )
+		{
+			// Update listener that repaint this TrackScheme when its style changes
+			final UpdateListener panelRepainter = new UpdateListener() 
+				{ @Override public void trackSchemeStyleChanged() { frame.getTrackschemePanel().repaint(); } };
+
+			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) frame.getTrackschemePanel().getGraphOverlay();
+			final JMenu styleMenu = new JMenu( "Styles" );
+
+			styleMenu.addMenuListener( new MenuListener()
+			{
+				@Override
+				public void menuSelected( final MenuEvent e )
+				{
+					styleMenu.removeAll();
+					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
+						styleMenu.add( new JMenuItem(
+								new TrackSchemeStyleAction( style, overlay, panelRepainter ) ) );
+				}
+
+				@Override
+				public void menuDeselected( final MenuEvent e )
+				{}
+
+				@Override
+				public void menuCanceled( final MenuEvent e )
+				{}
+			} );
+			/*
+			 * De-register style listener upon window closing.
+			 */
+			frame.addWindowListener( new WindowAdapter()
+			{
+				@Override
+				public void windowClosing( final WindowEvent e )
+				{
+					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
+						style.removeUpdateListener( panelRepainter );
+				};
+			} );
+
+			menu.add( styleMenu );
+		}
+		frame.setJMenuBar( menu );
+
+
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );
 		addTsWindow( tsWindow );
 		frame.getTrackschemePanel().repaint();
+	}
+
+	/**
+	 * Sets the style of a TrackScheme panel when executed & registers itself as
+	 * a listener for style changes to repaint said panel.
+	 */
+	private class TrackSchemeStyleAction extends AbstractNamedAction
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		private final TrackSchemeStyle style;
+
+		private final UpdateListener panelRepainter;
+
+		private final DefaultTrackSchemeOverlay overlay;
+
+		public TrackSchemeStyleAction( final TrackSchemeStyle style, final DefaultTrackSchemeOverlay overlay, final UpdateListener panelRepainter )
+		{
+			super( style.name );
+			this.style = style;
+			this.overlay = overlay;
+			this.panelRepainter = panelRepainter;
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			final TrackSchemeStyle oldStyle = overlay.setStyle( style );
+			oldStyle.removeUpdateListener( panelRepainter );
+			style.addUpdateListener( panelRepainter );
+			panelRepainter.trackSchemeStyleChanged();
+		}
 	}
 
 	public void closeAllWindows()

@@ -88,9 +88,18 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			shadowColors[ i ] = new Color( 0, 0, 0, shadowAlphas[ i ] );
 	}
 
-	public void setStyle( final TrackSchemeStyle style )
+	/**
+	 * Sets the TrackScheme style used to render this overlay.
+	 * 
+	 * @param style
+	 *            the style to set.
+	 * @return the style previously used before this call.
+	 */
+	public TrackSchemeStyle setStyle( final TrackSchemeStyle style )
 	{
+		final TrackSchemeStyle oldStyle = this.style;
 		this.style = style;
+		return oldStyle;
 	}
 
 	@Override
