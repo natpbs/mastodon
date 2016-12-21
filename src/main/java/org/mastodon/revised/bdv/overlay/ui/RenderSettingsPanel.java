@@ -44,6 +44,8 @@ class RenderSettingsPanel extends JPanel
 
 	JButton saveButton;
 
+	JComboBox< RenderSettings > comboBoxStyles;
+
 	public RenderSettingsPanel( final Frame owner, final MutableComboBoxModel< RenderSettings > model, final RenderSettings targetSettings )
 	{
 
@@ -53,7 +55,7 @@ class RenderSettingsPanel extends JPanel
 		final JLabel jlabelTitle = new JLabel();
 		final RenderSettingsEditorPanel renderSettingsPanel = new RenderSettingsEditorPanel( targetSettings );
 
-		final JComboBox< RenderSettings > comboBoxStyles = new JComboBox<>( model );
+		this.comboBoxStyles = new JComboBox<>( model );
 		// Update common render settings when a settings is chosen in the menu.
 		comboBoxStyles.addActionListener( new ActionListener()
 		{

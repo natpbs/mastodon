@@ -5,9 +5,8 @@ package org.mastodon.revised.trackscheme.display.style;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.MutableComboBoxModel;
@@ -28,7 +27,7 @@ public class TrackSchemeStyleChooser
 	{
 
 		this.styleManager = trackschemeStyleManager;
-		this.model = styleManager.createComboBoxModel();
+		this.model = new DefaultComboBoxModel<>( trackschemeStyleManager.getStyles() );
 		if ( model.getSize() > 0 )
 			model.setSelectedItem( model.getElementAt( 0 ) );
 
@@ -73,6 +72,19 @@ public class TrackSchemeStyleChooser
 				}
 			}
 		} );
+		panel.comboBoxStyles.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				final boolean enabled = !TrackSchemeStyle.defaults.contains( model.getSelectedItem() );
+				panel.buttonDeleteStyle.setEnabled( enabled );
+				panel.buttonSetStyleName.setEnabled( enabled );
+				panel.buttonEditStyle.setEnabled( enabled );
+
+			}
+		} );
+		panel.comboBoxStyles.setSelectedIndex( 0 );
 	}
 
 	private void saveStyles()
@@ -97,40 +109,10 @@ public class TrackSchemeStyleChooser
 	private void newStyle()
 	{
 		TrackSchemeStyle current = ( TrackSchemeStyle ) model.getSelectedItem();
-		styleManager.copy( current );
 		if ( null == current )
 			current = TrackSchemeStyle.defaultStyle();
 
-		final String name = current.name;
-		final Pattern pattern = Pattern.compile( "(.+) \\((\\d+)\\)$" );
-		final Matcher matcher = pattern.matcher( name );
-		int n;
-		String prefix;
-		if ( matcher.matches() )
-		{
-			final String nstr = matcher.group( 2 );
-			n = Integer.parseInt( nstr );
-			prefix = matcher.group( 1 );
-		}
-		else
-		{
-			n = 1;
-			prefix = name;
-		}
-		String newName;
-		INCREMENT: while ( true )
-		{
-			newName = prefix + " (" + ( ++n ) + ")";
-			for ( int j = 0; j < model.getSize(); j++ )
-			{
-				if ( model.getElementAt( j ).name.equals( newName ) )
-					continue INCREMENT;
-			}
-			break;
-		}
-
-		final TrackSchemeStyle newStyle = current.copy( newName );
-		model.addElement( newStyle );
+		final TrackSchemeStyle newStyle = styleManager.copy( current );
 		model.setSelectedItem( newStyle );
 	}
 

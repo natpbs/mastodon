@@ -8,9 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
-
-import javax.swing.AbstractListModel;
-import javax.swing.MutableComboBoxModel;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mastodon.revised.bdv.overlay.RenderSettings;
 import org.yaml.snakeyaml.Yaml;
@@ -38,9 +37,44 @@ public class RenderSettingsManager
 		loadStyles();
 	}
 
-	public MutableComboBoxModel< RenderSettings > createComboBoxModel()
+	public Vector< RenderSettings > getRenderSettings()
 	{
-		return new MyListModel();
+		return rs;
+	}
+
+	public RenderSettings copy( final RenderSettings current )
+	{
+		final String name = current.getName();
+		final Pattern pattern = Pattern.compile( "(.+) \\((\\d+)\\)$" );
+		final Matcher matcher = pattern.matcher( name );
+		int n;
+		String prefix;
+		if ( matcher.matches() )
+		{
+			final String nstr = matcher.group( 2 );
+			n = Integer.parseInt( nstr );
+			prefix = matcher.group( 1 );
+		}
+		else
+		{
+			n = 1;
+			prefix = name;
+		}
+		String newName;
+		INCREMENT: while ( true )
+		{
+			newName = prefix + " (" + ( ++n ) + ")";
+			for ( int j = 0; j < rs.size(); j++ )
+			{
+				if ( rs.get( j ).getName().equals( newName ) )
+					continue INCREMENT;
+			}
+			break;
+		}
+
+		final RenderSettings newStyle = current.copy( newName );
+		rs.add( newStyle );
+		return newStyle;
 	}
 
 	private void loadStyles()
@@ -84,98 +118,6 @@ public class RenderSettingsManager
 			e.printStackTrace();
 		}
 	}
-
-	/*
-	 * INNER CLASS
-	 */
-
-	private final class MyListModel extends AbstractListModel< RenderSettings > implements MutableComboBoxModel< RenderSettings >
-	{
-		private static final long serialVersionUID = 1L;
-
-		private Object selectedObject;
-
-		/**
-		 * Set the value of the selected item. The selected item may be null.
-		 *
-		 * @param anObject
-		 *            The combo box value or null for no selection.
-		 */
-		@Override
-		public void setSelectedItem( final Object anObject )
-		{
-			if ( ( selectedObject != null && !selectedObject.equals( anObject ) ) || selectedObject == null && anObject != null )
-			{
-				selectedObject = anObject;
-				fireContentsChanged( this, -1, -1 );
-			}
-		}
-
-		@Override
-		public Object getSelectedItem()
-		{
-			return selectedObject;
-		}
-
-		@Override
-		public int getSize()
-		{
-			return rs.size();
-		}
-
-		@Override
-		public RenderSettings getElementAt( final int index )
-		{
-			if ( index >= 0 && index < rs.size() )
-				return rs.elementAt( index );
-			else
-				return null;
-		}
-
-		@Override
-		public void addElement( final RenderSettings anObject )
-		{
-			if ( rs.contains( anObject ) )
-				return;
-			rs.addElement( anObject );
-			fireIntervalAdded( this, rs.size() - 1, rs.size() - 1 );
-			if ( rs.size() == 1 && selectedObject == null && anObject != null )
-				setSelectedItem( anObject );
-		}
-
-		@Override
-		public void insertElementAt( final RenderSettings anObject, final int index )
-		{
-			if ( rs.contains( anObject ) )
-				return;
-			rs.insertElementAt( anObject, index );
-			fireIntervalAdded( this, index, index );
-		}
-
-		@Override
-		public void removeElementAt( final int index )
-		{
-			if ( getElementAt( index ) == selectedObject )
-			{
-				if ( index == 0 )
-					setSelectedItem( getSize() == 1 ? null : getElementAt( index + 1 ) );
-				else
-					setSelectedItem( getElementAt( index - 1 ) );
-			}
-
-			rs.removeElementAt( index );
-			fireIntervalRemoved( this, index, index );
-		}
-
-		@Override
-		public void removeElement( final Object anObject )
-		{
-			final int index = rs.indexOf( anObject );
-			if ( index != -1 )
-				removeElementAt( index );
-		}
-	}
-
 	
 	/*
 	 * STATIC UTILITIES

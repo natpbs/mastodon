@@ -71,7 +71,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 	TrackSchemePanel panelPreview;
 
-	private final JComboBox< TrackSchemeStyle > comboBoxStyles;
+	JComboBox< TrackSchemeStyle > comboBoxStyles;
 
 	private final JPanel contentPanel;
 

@@ -11,9 +11,6 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.AbstractListModel;
-import javax.swing.MutableComboBoxModel;
-
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -38,11 +35,6 @@ public class TrackSchemeStyleManager
 			tss.add( ts );
 
 		loadStyles();
-	}
-
-	public MutableComboBoxModel< TrackSchemeStyle > createComboBoxModel()
-	{
-		return new MyListModel();
 	}
 
 	public void add( final TrackSchemeStyle ts )
@@ -86,6 +78,16 @@ public class TrackSchemeStyleManager
 		final TrackSchemeStyle newStyle = current.copy( newName );
 		tss.add( newStyle );
 		return newStyle;
+	}
+
+	/**
+	 * Exposes the collection of styles managed.
+	 * 
+	 * @return the collection of styles.
+	 */
+	public Vector< TrackSchemeStyle > getStyles()
+	{
+		return tss;
 	}
 
 	private void loadStyles()
@@ -134,97 +136,6 @@ public class TrackSchemeStyleManager
 	}
 
 	/*
-	 * INNER CLASS
-	 */
-
-	private final class MyListModel extends AbstractListModel< TrackSchemeStyle > implements MutableComboBoxModel< TrackSchemeStyle >
-	{
-		private static final long serialVersionUID = 1L;
-
-		private Object selectedObject;
-
-		/**
-		 * Set the value of the selected item. The selected item may be null.
-		 *
-		 * @param anObject
-		 *            The combo box value or null for no selection.
-		 */
-		@Override
-		public void setSelectedItem( final Object anObject )
-		{
-			if ( ( selectedObject != null && !selectedObject.equals( anObject ) ) || selectedObject == null && anObject != null )
-			{
-				selectedObject = anObject;
-				fireContentsChanged( this, -1, -1 );
-			}
-		}
-
-		@Override
-		public Object getSelectedItem()
-		{
-			return selectedObject;
-		}
-
-		@Override
-		public int getSize()
-		{
-			return tss.size();
-		}
-
-		@Override
-		public TrackSchemeStyle getElementAt( final int index )
-		{
-			if ( index >= 0 && index < tss.size() )
-				return tss.elementAt( index );
-			else
-				return null;
-		}
-
-		@Override
-		public void addElement( final TrackSchemeStyle anObject )
-		{
-			if ( tss.contains( anObject ) )
-				return;
-			tss.addElement( anObject );
-			fireIntervalAdded( this, tss.size() - 1, tss.size() - 1 );
-			if ( tss.size() == 1 && selectedObject == null && anObject != null )
-				setSelectedItem( anObject );
-		}
-
-		@Override
-		public void insertElementAt( final TrackSchemeStyle anObject, final int index )
-		{
-			if ( tss.contains( anObject ) )
-				return;
-			tss.insertElementAt( anObject, index );
-			fireIntervalAdded( this, index, index );
-		}
-
-		@Override
-		public void removeElementAt( final int index )
-		{
-			if ( getElementAt( index ) == selectedObject )
-			{
-				if ( index == 0 )
-					setSelectedItem( getSize() == 1 ? null : getElementAt( index + 1 ) );
-				else
-					setSelectedItem( getElementAt( index - 1 ) );
-			}
-
-			tss.removeElementAt( index );
-			fireIntervalRemoved( this, index, index );
-		}
-
-		@Override
-		public void removeElement( final Object anObject )
-		{
-			final int index = tss.indexOf( anObject );
-			if ( index != -1 )
-				removeElementAt( index );
-		}
-	}
-
-	/*
 	 * STATIC UTILITIES
 	 */
 
@@ -233,4 +144,5 @@ public class TrackSchemeStyleManager
 		final File dir = new File( fileName ).getParentFile();
 		return dir == null ? false : dir.mkdirs();
 	}
+
 }

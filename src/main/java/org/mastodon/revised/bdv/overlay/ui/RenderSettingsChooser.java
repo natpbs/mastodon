@@ -5,9 +5,8 @@ package org.mastodon.revised.bdv.overlay.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -28,11 +27,14 @@ public class RenderSettingsChooser
 
 	private final MutableComboBoxModel< RenderSettings > model;
 
+	private final RenderSettingsManager renderSettingsManager;
+
 	public RenderSettingsChooser( final JFrame owner, final RenderSettingsManager renderSettingsManager )
 	{
+		this.renderSettingsManager = renderSettingsManager;
 		// Give the choose its own render settings instance.
 		this.targetSettings = RenderSettings.defaultStyle().copy( RenderSettings.defaultStyle().getName() );
-		this.model = renderSettingsManager.createComboBoxModel();
+		this.model = new DefaultComboBoxModel<>( renderSettingsManager.getRenderSettings() );
 		panel = new RenderSettingsPanel( owner, model, targetSettings );
 		panel.buttonDeleteStyle.addActionListener( new ActionListener()
 		{
@@ -74,6 +76,18 @@ public class RenderSettingsChooser
 				}
 			}
 		} );
+		panel.comboBoxStyles.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				final RenderSettings current = ( RenderSettings ) model.getSelectedItem();
+				final boolean enabled = !RenderSettings.defaults.contains( current );
+				panel.buttonDeleteStyle.setEnabled( enabled );
+				panel.buttonSetStyleName.setEnabled( enabled );
+			}
+		} );
+		panel.comboBoxStyles.setSelectedIndex( 0 );
 
 	}
 
@@ -93,36 +107,7 @@ public class RenderSettingsChooser
 		if ( null == current )
 			current = RenderSettings.defaultStyle();
 
-		final String name = current.getName();
-		final Pattern pattern = Pattern.compile( "(.+) \\((\\d+)\\)$" );
-		final Matcher matcher = pattern.matcher( name );
-		int n;
-		String prefix;
-		if ( matcher.matches() )
-		{
-			final String nstr = matcher.group( 2 );
-			n = Integer.parseInt( nstr );
-			prefix = matcher.group( 1 );
-		}
-		else
-		{
-			n = 1;
-			prefix = name;
-		}
-		String newName;
-		INCREMENT: while ( true )
-		{
-			newName = prefix + " (" + ( ++n ) + ")";
-			for ( int j = 0; j < model.getSize(); j++ )
-			{
-				if ( model.getElementAt( j ).getName().equals( newName ) )
-					continue INCREMENT;
-			}
-			break;
-		}
-
-		final RenderSettings newStyle = current.copy( newName );
-		model.addElement( newStyle );
+		final RenderSettings newStyle = renderSettingsManager.copy( current );
 		model.setSelectedItem( newStyle );
 	}
 
