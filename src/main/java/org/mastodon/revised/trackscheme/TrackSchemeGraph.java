@@ -21,6 +21,8 @@ import org.mastodon.pool.ByteMappedElementArray;
 import org.mastodon.pool.MemPool;
 import org.mastodon.pool.PoolObject;
 import org.mastodon.pool.SingleArrayMemPool;
+import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
+import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.spatial.HasTimepoint;
 
 /**
@@ -75,7 +77,7 @@ import org.mastodon.spatial.HasTimepoint;
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
 public class TrackSchemeGraph<
-		V extends Vertex< E > & HasTimepoint,
+		V extends Vertex< E >,
 		E extends Edge< V > >
 	extends GraphImp<
 				TrackSchemeGraph.TrackSchemeVertexPool,
@@ -116,7 +118,7 @@ public class TrackSchemeGraph<
 	public TrackSchemeGraph(
 			final ListenableReadOnlyGraph< V, E > modelGraph,
 			final GraphIdBimap< V, E > idmap,
-			final ModelGraphProperties modelGraphProperties )
+			final ModelGraphProperties< V, E > modelGraphProperties )
 	{
 		this( modelGraph, idmap, modelGraphProperties, 10000 );
 	}
@@ -137,22 +139,24 @@ public class TrackSchemeGraph<
 	public TrackSchemeGraph(
 			final ListenableReadOnlyGraph< V, E > modelGraph,
 			final GraphIdBimap< V, E > idmap,
-			final ModelGraphProperties modelGraphProperties,
+			final ModelGraphProperties< V, E > modelGraphProperties,
 			final int initialCapacity )
 	{
 		super( new TrackSchemeEdgePool(
-				modelGraphProperties, initialCapacity,
-				new TrackSchemeVertexPool( modelGraphProperties, initialCapacity ) ) );
+				initialCapacity,
+				new TrackSchemeVertexPool(
+						new ModelGraphWrapper<>( idmap, modelGraphProperties ),
+						initialCapacity ) ) );
 		this.modelGraph = modelGraph;
 		this.idmap = idmap;
-		idToTrackSchemeVertex =	new IntRefArrayMap< TrackSchemeVertex >( vertexPool );
-		idToTrackSchemeEdge = new IntRefArrayMap< TrackSchemeEdge >( edgePool );
-		roots = new RefSetImp< TrackSchemeVertex >( vertexPool );
+		idToTrackSchemeVertex =	new IntRefArrayMap<>( vertexPool );
+		idToTrackSchemeEdge = new IntRefArrayMap<>( edgePool );
+		roots = new RefSetImp<>( vertexPool );
 		mv = modelGraph.vertexRef();
 		tsv = vertexRef();
 		tsv2 = vertexRef();
 		tse = edgeRef();
-		listeners = new ArrayList< GraphChangeListener >();
+		listeners = new ArrayList<>();
 		modelGraph.addGraphListener( this );
 		modelGraph.addGraphChangeListener( this );
 		graphRebuilt();
@@ -300,8 +304,7 @@ public class TrackSchemeGraph<
 		for ( final V v : modelGraph.vertices() )
 		{
 			final int id = idmap.getVertexId( v );
-			final int timepoint = v.getTimepoint();
-			addVertex( tsv ).init( id, timepoint );
+			addVertex( tsv ).init( id );
 			idToTrackSchemeVertex.put( id, tsv );
 			if ( v.incomingEdges().isEmpty() )
 				roots.add( tsv );
@@ -320,7 +323,7 @@ public class TrackSchemeGraph<
 	public void vertexAdded( final V vertex )
 	{
 		final int id = idmap.getVertexId( vertex );
-		addVertex( tsv ).init( id, vertex.getTimepoint() );
+		addVertex( tsv ).init( id );
 		idToTrackSchemeVertex.put( id, tsv );
 		roots.add( tsv );
 	}
@@ -364,8 +367,7 @@ public class TrackSchemeGraph<
 //	@Override // TODO: should be implemented for some listener interface, or REMOVE? (vertices never change timepoint?)
 	public void vertexTimepointChanged( final V vertex )
 	{
-		idToTrackSchemeVertex.get( idmap.getVertexId( vertex ), tsv );
-		tsv.setTimepoint( vertex.getTimepoint() );
+		idToTrackSchemeVertex.get( idmap.getVertexId( vertex ), tsv ).updateTimepointFromModel();
 	}
 
 	/*
@@ -374,26 +376,29 @@ public class TrackSchemeGraph<
 
 	static class TrackSchemeVertexPool extends AbstractVertexPool< TrackSchemeVertex, TrackSchemeEdge, ByteMappedElement >
 	{
-		private TrackSchemeVertexPool( final ModelGraphProperties props, final int initialCapacity )
+		private final ModelGraphWrapper< ?, ? > modelGraphWrapper;
+
+		private TrackSchemeVertexPool( final ModelGraphWrapper< ?, ? > modelGraphWrapper, final int initialCapacity )
 		{
-			this( initialCapacity, new VertexFactory( props ) );
+			this( initialCapacity, new VertexFactory( modelGraphWrapper ) );
 		}
 
 		private TrackSchemeVertexPool( final int initialCapacity, final VertexFactory f )
 		{
 			super( initialCapacity, f );
 			f.vertexPool = this;
+			this.modelGraphWrapper = f.modelGraphWrapper;
 		}
 
 		private static class VertexFactory implements PoolObject.Factory< TrackSchemeVertex, ByteMappedElement >
 		{
 			private TrackSchemeVertexPool vertexPool;
 
-			private final ModelGraphProperties props;
+			private final ModelGraphWrapper< ?, ? > modelGraphWrapper;
 
-			private VertexFactory( final ModelGraphProperties modelGraphProperties )
+			private VertexFactory( final ModelGraphWrapper< ?, ? > modelGraphWrapper )
 			{
-				this.props = modelGraphProperties;
+				this.modelGraphWrapper = modelGraphWrapper;
 			}
 
 			@Override
@@ -405,7 +410,9 @@ public class TrackSchemeGraph<
 			@Override
 			public TrackSchemeVertex createEmptyRef()
 			{
-				return new TrackSchemeVertex( vertexPool, props.createVertexProperties() );
+				final TrackSchemeVertex vertex = new TrackSchemeVertex( vertexPool );
+				vertex.modelVertex = modelGraphWrapper.createVertexWrapper( vertex );
+				return vertex;
 			}
 
 			@Override
@@ -424,13 +431,13 @@ public class TrackSchemeGraph<
 
 	static class TrackSchemeEdgePool extends AbstractEdgePool< TrackSchemeEdge, TrackSchemeVertex, ByteMappedElement >
 	{
-		private TrackSchemeEdgePool( final ModelGraphProperties props, final int initialCapacity, final TrackSchemeVertexPool vertexPool )
+		private TrackSchemeEdgePool( final int initialCapacity, final TrackSchemeVertexPool vertexPool )
 		{
-			this( props, initialCapacity, new EdgeFactory( props ), vertexPool );
+			this( initialCapacity, new EdgeFactory( vertexPool.modelGraphWrapper ), vertexPool );
 			vertexPool.linkEdgePool( this );
 		}
 
-		private TrackSchemeEdgePool( final ModelGraphProperties props, final int initialCapacity, final EdgeFactory f, final TrackSchemeVertexPool vertexPool )
+		private TrackSchemeEdgePool( final int initialCapacity, final EdgeFactory f, final TrackSchemeVertexPool vertexPool )
 		{
 			super( initialCapacity, f, vertexPool );
 			f.edgePool = this;
@@ -440,11 +447,11 @@ public class TrackSchemeGraph<
 		{
 			private TrackSchemeEdgePool edgePool;
 
-			private final ModelGraphProperties props;
+			private final ModelGraphWrapper< ?, ? > modelGraphWrapper;
 
-			private EdgeFactory( final ModelGraphProperties modelGraphProperties )
+			private EdgeFactory( final ModelGraphWrapper< ?, ? > modelGraphWrapper )
 			{
-				this.props = modelGraphProperties;
+				this.modelGraphWrapper = modelGraphWrapper;
 			}
 
 			@Override
@@ -456,7 +463,9 @@ public class TrackSchemeGraph<
 			@Override
 			public TrackSchemeEdge createEmptyRef()
 			{
-				return new TrackSchemeEdge( edgePool, props.createEdgeProperties() );
+				final TrackSchemeEdge edge = new TrackSchemeEdge( edgePool );
+				edge.modelEdge = modelGraphWrapper.createEdgeWrapper( edge );
+				return edge;
 			}
 
 			@Override

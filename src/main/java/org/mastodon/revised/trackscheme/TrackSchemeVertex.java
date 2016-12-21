@@ -10,7 +10,6 @@ import org.mastodon.graph.ref.AbstractVertex;
 import org.mastodon.graph.ref.AbstractVertexPool;
 import org.mastodon.pool.ByteMappedElement;
 import org.mastodon.pool.PoolObject;
-import org.mastodon.revised.trackscheme.ModelGraphProperties.ModelVertexProperties;
 
 /**
  * The vertex class for TrackScheme.
@@ -28,7 +27,7 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 	protected static final int GHOST_OFFSET = SCREENVERTEX_INDEX_OFFSET + INDEX_SIZE;
 	protected static final int SIZE_IN_BYTES = GHOST_OFFSET + BOOLEAN_SIZE;
 
-	private final ModelVertexProperties props;
+	ModelGraphWrapper< ?, ? >.ModelVertexWrapper modelVertex;
 
 	@Override
 	protected void setToUninitializedState()
@@ -37,14 +36,14 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 		setScreenVertexIndex( -1 );
 	}
 
-	public TrackSchemeVertex init( final int modelVertexId, final int timepoint )
+	public TrackSchemeVertex init( final int modelVertexId )
 	{
 		setModelVertexId( modelVertexId );
 		setLayoutX( 0 );
-		setTimepoint( timepoint );
 		setLayoutTimestamp( -1 );
 		setLayoutInEdgeIndex( 0 );
 		setGhost( false );
+		updateTimepointFromModel();
 		return this;
 	}
 
@@ -75,12 +74,9 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 				getTimepoint() );
 	}
 
-	TrackSchemeVertex(
-			final AbstractVertexPool< TrackSchemeVertex, ?, ByteMappedElement > pool,
-			final ModelVertexProperties props )
+	TrackSchemeVertex( final AbstractVertexPool< TrackSchemeVertex, ?, ByteMappedElement > pool )
 	{
 		super( pool );
-		this.props = props;
 	}
 
 	/**
@@ -91,7 +87,7 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 	 */
 	public String getLabel()
 	{
-		return props.getLabel( getModelVertexId() );
+		return modelVertex.getLabel();
 	}
 
 	/**
@@ -102,20 +98,7 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 	 */
 	public void setLabel( final String label )
 	{
-		props.setLabel( getModelVertexId(), label );
-	}
-
-	/**
-	 * Returns whether this vertex is selected.
-	 *
-	 * Backed by the state of the SelectionModel for the associated ModelGraph
-	 * vertex.
-	 *
-	 * @return {@code true} if the associated model vertex is selected.
-	 */
-	public boolean isSelected()
-	{
-		return props.isSelected( getModelVertexId() );
+		modelVertex.setLabel( label );
 	}
 
 	public int getTimepoint()
@@ -126,6 +109,11 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 	protected void setTimepoint( final int timepoint )
 	{
 		access.putInt( timepoint, TIMEPOINT_OFFSET );
+	}
+
+	protected void updateTimepointFromModel()
+	{
+		setTimepoint( modelVertex.getTimepoint() );
 	}
 
 	/**

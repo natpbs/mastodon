@@ -14,15 +14,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.mastodon.revised.context.ContextChooser;
-import org.mastodon.revised.trackscheme.TrackSchemeFocus;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
-import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
-import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.TrackSchemeNavigator.NavigatorEtiquette;
 import org.mastodon.revised.ui.context.ContextChooserPanel;
 import org.mastodon.revised.ui.grouping.GroupHandle;
 import org.mastodon.revised.ui.grouping.GroupLocksPanel;
+import org.mastodon.revised.ui.selection.FocusModel;
+import org.mastodon.revised.ui.selection.HighlightModel;
+import org.mastodon.revised.ui.selection.NavigationHandler;
+import org.mastodon.revised.ui.selection.Selection;
 import org.mastodon.undo.UndoPointMarker;
 import org.scijava.ui.behaviour.MouseAndKeyHandler;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -48,14 +50,14 @@ public class TrackSchemeFrame extends JFrame
 
 	private final EditFocusVertexBehaviour editFocusVertex;
 
-	private final UndoPointMarker undoPointMarker;
+	private final UndoPointMarker undoPointMarker; // TODO: unused, remove?
 
 	public TrackSchemeFrame(
 			final TrackSchemeGraph< ?, ? > graph,
-			final TrackSchemeHighlight highlight,
-			final TrackSchemeFocus focus,
-			final TrackSchemeSelection selection,
-			final TrackSchemeNavigation navigation,
+			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
+			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
+			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
+			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
 			final UndoPointMarker undoPointMarker,
 			final GroupHandle groupHandle,
 			final ContextChooser< ? > contextChooser )
@@ -65,10 +67,10 @@ public class TrackSchemeFrame extends JFrame
 
 	public TrackSchemeFrame(
 			final TrackSchemeGraph< ?, ? > graph,
-			final TrackSchemeHighlight highlight,
-			final TrackSchemeFocus focus,
-			final TrackSchemeSelection selection,
-			final TrackSchemeNavigation navigation,
+			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
+			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
+			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
+			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
 			final UndoPointMarker undoPointMarker,
 			final GroupHandle groupHandle,
 			final ContextChooser< ? > contextChooser,

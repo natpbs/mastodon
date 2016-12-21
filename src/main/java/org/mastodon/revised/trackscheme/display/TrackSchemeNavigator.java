@@ -7,12 +7,12 @@ import org.mastodon.collection.RefSet;
 import org.mastodon.revised.trackscheme.LineageTreeLayout;
 import org.mastodon.revised.trackscheme.ScreenTransform;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
-import org.mastodon.revised.trackscheme.TrackSchemeFocus;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
-import org.mastodon.revised.trackscheme.TrackSchemeSelection;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.OffsetHeaders.OffsetHeadersListener;
+import org.mastodon.revised.ui.selection.FocusModel;
+import org.mastodon.revised.ui.selection.NavigationHandler;
+import org.mastodon.revised.ui.selection.Selection;
 import org.scijava.ui.behaviour.BehaviourMap;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.DragBehaviour;
@@ -114,13 +114,13 @@ public class TrackSchemeNavigator implements TransformListener< ScreenTransform 
 
 	private final LineageTreeLayout layout;
 
-	private final TrackSchemeNavigation navigation;
+	private final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation;
 
-	private final TrackSchemeSelection selection;
+	private final Selection< TrackSchemeVertex, TrackSchemeEdge > selection;
 
 	private final ScreenTransform screenTransform;
 
-	private final TrackSchemeFocus focus;
+	private final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus;
 
 
 	/**
@@ -148,9 +148,9 @@ public class TrackSchemeNavigator implements TransformListener< ScreenTransform 
 			final TrackSchemeGraph< ?, ? > graph,
 			final LineageTreeLayout layout,
 			final AbstractTrackSchemeOverlay graphOverlay,
-			final TrackSchemeFocus focus,
-			final TrackSchemeNavigation navigation,
-			final TrackSchemeSelection selection )
+			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
+			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
+			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection )
 	{
 		this.display = display;
 		this.graph = graph;
@@ -285,7 +285,7 @@ public class TrackSchemeNavigator implements TransformListener< ScreenTransform 
 		final TrackSchemeVertex ref = graph.vertexRef();
 		final TrackSchemeVertex v = focus.getFocusedVertex( ref );
 		if ( v != null )
-			selection.toggleSelected( v );
+			selection.toggle( v );
 		graph.releaseRef( ref );
 	}
 
@@ -412,7 +412,7 @@ public class TrackSchemeNavigator implements TransformListener< ScreenTransform 
 		// See if we can select a vertex.
 		if ( graphOverlay.getVertexAt( x, y, vertex ) != null )
 		{
-			final boolean selected = vertex.isSelected();
+			final boolean selected = selection.isSelected( vertex );
 			if ( !addToSelection )
 				selection.clearSelection();
 			selection.setSelected( vertex, !selected );
@@ -420,7 +420,7 @@ public class TrackSchemeNavigator implements TransformListener< ScreenTransform 
 		// See if we can select an edge.
 		else if ( graphOverlay.getEdgeAt( x, y, EDGE_SELECT_DISTANCE_TOLERANCE, edge ) != null )
 		{
-			final boolean selected = edge.isSelected();
+			final boolean selected = selection.isSelected( edge );
 			if ( !addToSelection )
 				selection.clearSelection();
 			selection.setSelected( edge, !selected );

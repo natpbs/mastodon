@@ -20,10 +20,12 @@ import org.mastodon.revised.trackscheme.ScreenTransform;
 import org.mastodon.revised.trackscheme.ScreenVertex;
 import org.mastodon.revised.trackscheme.ScreenVertex.Transition;
 import org.mastodon.revised.trackscheme.ScreenVertexRange;
-import org.mastodon.revised.trackscheme.TrackSchemeFocus;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
+import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
+import org.mastodon.revised.ui.selection.FocusModel;
+import org.mastodon.revised.ui.selection.HighlightModel;
 
 import net.imglib2.RealLocalizable;
 
@@ -72,8 +74,8 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 	public DefaultTrackSchemeOverlay(
 			final TrackSchemeGraph< ?, ? > graph,
-			final TrackSchemeHighlight highlight,
-			final TrackSchemeFocus focus,
+			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
+			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final TrackSchemeOptions options,
 			final TrackSchemeStyle style )
 	{
@@ -129,6 +131,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		if ( style.paintRows )
 		{
 			g2.setColor( style.decorationColor );
+			g2.setStroke( style.decorationStroke );
 
 			final int stepT = 1 + MIN_TIMELINE_SPACING / ( int ) ( 1 + yScale );
 
@@ -151,6 +154,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		if ( style.paintColumns )
 		{
 			g2.setColor( style.decorationColor );
+			g2.setStroke( style.decorationStroke );
 
 			for ( final ScreenColumn column : screenEntities.getColumns() )
 			{
@@ -208,6 +212,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			int tend = Math.min( getMaxTimepoint(), 1 + ( int ) maxY );
 			tend = ( 1 + tend / stepT ) * stepT;
 
+			g2.setStroke( style.decorationStroke );
 			for ( int t = tstart; t <= tend; t = t + stepT )
 			{
 				final int yline = ( int ) ( ( t - minY - 0.5 ) * yScale ) + headerHeight;
@@ -238,6 +243,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			final FontMetrics fm = g2.getFontMetrics( style.headerFont );
 			g2.setFont( style.headerFont );
 
+			g2.setStroke( style.decorationStroke );
 			for ( final ScreenColumn column : screenEntities.getColumns() )
 			{
 				g2.drawLine( column.xLeft, 0, column.xLeft, headerHeight );

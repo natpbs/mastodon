@@ -1,5 +1,7 @@
 package org.mastodon.revised.bdv.overlay;
 
+import org.mastodon.revised.ui.selection.NavigationHandler;
+import org.mastodon.revised.ui.selection.Selection;
 import org.scijava.ui.behaviour.BehaviourMap;
 import org.scijava.ui.behaviour.ClickBehaviour;
 import org.scijava.ui.behaviour.InputTriggerAdder;
@@ -20,17 +22,17 @@ public class BdvSelectionBehaviours< V extends OverlayVertex< V, E >, E extends 
 
 	private final OverlayGraphRenderer< V, E > renderer;
 
-	private final OverlaySelection< V, E > selection;
+	private final Selection< V, E > selection;
 
-	private final OverlayNavigation< V, E > navigation;
+	private final NavigationHandler< V, E > navigation;
 
 	private final BehaviourMap behaviourMap;
 
 	public BdvSelectionBehaviours(
 			final OverlayGraph< V, E > overlayGraph,
 			final OverlayGraphRenderer< V, E > renderer,
-			final OverlaySelection< V, E > selection,
-			final OverlayNavigation< V, E > navigation )
+			final Selection< V, E > selection,
+			final NavigationHandler< V, E > navigation )
 	{
 		this.overlayGraph = overlayGraph;
 		this.renderer = renderer;
@@ -71,7 +73,7 @@ public class BdvSelectionBehaviours< V extends OverlayVertex< V, E >, E extends 
 		// See if we can select a vertex.
 		if ( renderer.getVertexAt( x, y, POINT_SELECT_DISTANCE_TOLERANCE, vertex ) != null )
 		{
-			final boolean selected = vertex.isSelected();
+			final boolean selected = selection.isSelected( vertex );
 			if ( !addToSelection )
 				selection.clearSelection();
 			selection.setSelected( vertex, !selected );
@@ -79,7 +81,7 @@ public class BdvSelectionBehaviours< V extends OverlayVertex< V, E >, E extends 
 		// See if we can select an edge.
 		else if ( renderer.getEdgeAt( x, y, EDGE_SELECT_DISTANCE_TOLERANCE, edge ) != null )
 		{
-			final boolean selected = edge.isSelected();
+			final boolean selected = selection.isSelected( vertex );
 			if ( !addToSelection )
 				selection.clearSelection();
 			selection.setSelected( edge, !selected );

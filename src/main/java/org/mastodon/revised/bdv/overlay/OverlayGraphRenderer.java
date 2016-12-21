@@ -15,6 +15,9 @@ import org.mastodon.collection.RefCollections;
 import org.mastodon.collection.RefList;
 import org.mastodon.kdtree.ClipConvexPolytope;
 import org.mastodon.revised.Util;
+import org.mastodon.revised.ui.selection.FocusModel;
+import org.mastodon.revised.ui.selection.HighlightModel;
+import org.mastodon.revised.ui.selection.Selection;
 import org.mastodon.spatial.SpatialIndex;
 import org.mastodon.spatial.SpatioTemporalIndex;
 
@@ -73,18 +76,22 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 
 	private final SpatioTemporalIndex< V > index;
 
-	private final OverlayHighlight< V, E > highlight;
+	private final HighlightModel< V, E > highlight;
 
-	private final OverlayFocus< V, E > focus;
+	private final FocusModel< V, E > focus;
+
+	private final Selection< V, E > selection;
 
 	public OverlayGraphRenderer(
 			final OverlayGraph< V, E > graph,
-			final OverlayHighlight< V, E > highlight,
-			final OverlayFocus< V, E > focus )
+			final HighlightModel< V, E > highlight,
+			final FocusModel< V, E > focus,
+			final Selection< V, E > selection )
 	{
 		this.graph = graph;
 		this.highlight = highlight;
 		this.focus = focus;
+		this.selection = selection;
 		index = graph.getIndex();
 		renderTransform = new AffineTransform3D();
 		setRenderSettings( RenderSettings.defaultStyle() );
@@ -557,7 +564,6 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 				? focusLimit
 				: focusLimit * Affine3DHelpers.extractScale( transform, 0 );
 
-
 		graphics.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasing );
 
 		final V target = graph.vertexRef();
@@ -614,10 +620,12 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 							{
 								if ( ( sd0 > -1 && sd0 < 1 ) || ( sd1 > -1 && sd1 < 1 ) )
 								{
-									final Color c1 = getColor( sd1, td1, sliceDistanceFade, timepointDistanceFade, edge.isSelected(), color1, color2 );
+									final Color c1 = getColor( sd1, td1, sliceDistanceFade, timepointDistanceFade,
+											selection.isSelected( edge ), color1, color2 );
 									if ( useGradient )
 									{
-										final Color c0 = getColor( sd0, td0, sliceDistanceFade, timepointDistanceFade, edge.isSelected(), color1, color2 );
+										final Color c0 = getColor( sd0, td0, sliceDistanceFade, timepointDistanceFade,
+												selection.isSelected( edge ), color1, color2 );
 										graphics.setPaint( new GradientPaint( x0, y0, c0, x1, y1, c1 ) );
 									}
 									else
@@ -686,7 +694,8 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 
 							graphics.translate( tr[ 0 ], tr[ 1 ] );
 							graphics.rotate( theta );
-							graphics.setColor( getColor( 0, 0, ellipsoidFadeDepth, timepointDistanceFade, vertex.isSelected(), color1, color2 ) );
+							graphics.setColor( getColor( 0, 0, ellipsoidFadeDepth, timepointDistanceFade,
+									selection.isSelected( vertex ), color1, color2 ) );
 							if ( isHighlighted )
 								graphics.setStroke( highlightedVertexStroke );
 							else if ( isFocused )
@@ -724,7 +733,8 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 
 							graphics.translate( tr[ 0 ], tr[ 1 ] );
 							graphics.rotate( theta );
-							graphics.setColor( getColor( sd, 0, ellipsoidFadeDepth, timepointDistanceFade, vertex.isSelected(), color1, color2 ) );
+							graphics.setColor( getColor( sd, 0, ellipsoidFadeDepth, timepointDistanceFade,
+									selection.isSelected( vertex ), color1, color2 ) );
 							if ( isHighlighted )
 								graphics.setStroke( highlightedVertexStroke );
 							else if ( isFocused )
@@ -757,7 +767,8 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 								|| ( drawEllipsoidSliceIntersection && !screenVertexMath.intersectsViewPlane() ) );
 						if ( drawPoint )
 						{
-							graphics.setColor( getColor( sd, 0, pointFadeDepth, timepointDistanceFade, vertex.isSelected(), color1, color2 ) );
+							graphics.setColor( getColor( sd, 0, pointFadeDepth, timepointDistanceFade,
+									selection.isSelected( vertex ), color1, color2 ) );
 							double radius = pointRadius;
 							if ( isHighlighted || isFocused )
 								radius *= 2;

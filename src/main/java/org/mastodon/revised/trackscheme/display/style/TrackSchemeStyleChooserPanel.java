@@ -20,18 +20,17 @@ import javax.swing.MutableComboBoxModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.mastodon.adapter.FocusAdapter;
+import org.mastodon.adapter.HighlightAdapter;
+import org.mastodon.adapter.NavigationHandlerAdapter;
+import org.mastodon.adapter.RefBimap;
+import org.mastodon.adapter.SelectionAdapter;
 import org.mastodon.graph.GraphIdBimap;
-import org.mastodon.revised.trackscheme.DefaultModelFocusProperties;
-import org.mastodon.revised.trackscheme.DefaultModelGraphProperties;
-import org.mastodon.revised.trackscheme.DefaultModelHighlightProperties;
-import org.mastodon.revised.trackscheme.DefaultModelNavigationProperties;
-import org.mastodon.revised.trackscheme.DefaultModelSelectionProperties;
-import org.mastodon.revised.trackscheme.ModelGraphProperties;
-import org.mastodon.revised.trackscheme.TrackSchemeFocus;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge;
+import org.mastodon.revised.trackscheme.TrackSchemeEdgeBimap;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
-import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
-import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.TrackSchemeVertex;
+import org.mastodon.revised.trackscheme.TrackSchemeVertexBimap;
 import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
@@ -41,10 +40,15 @@ import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyEdge;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph.Examples;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyVertex;
+import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
+import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.revised.ui.grouping.GroupManager;
 import org.mastodon.revised.ui.selection.FocusModel;
+import org.mastodon.revised.ui.selection.FocusModelImp;
 import org.mastodon.revised.ui.selection.HighlightModel;
+import org.mastodon.revised.ui.selection.HighlightModelImp;
 import org.mastodon.revised.ui.selection.NavigationHandler;
+import org.mastodon.revised.ui.selection.NavigationHandlerImp;
 import org.mastodon.revised.ui.selection.Selection;
 
 /**
@@ -79,19 +83,19 @@ class TrackSchemeStyleChooserPanel extends JPanel
 	{
 		final Examples ex = DummyGraph.Examples.CELEGANS;
 		final DummyGraph example = ex.getGraph();
-		final Selection< DummyVertex, DummyEdge > selection = ex.getSelection();
 		final GraphIdBimap< DummyVertex, DummyEdge > idmap = example.getIdBimap();
-		final ModelGraphProperties dummyProps = new DefaultModelGraphProperties< >( example, idmap, selection );
+		final ModelGraphProperties< DummyVertex, DummyEdge > dummyProps = new DefaultModelGraphProperties<>();
 		final TrackSchemeGraph< DummyVertex, DummyEdge > graph = new TrackSchemeGraph<>( example, idmap, dummyProps );
-		final TrackSchemeHighlight highlight = new TrackSchemeHighlight( new DefaultModelHighlightProperties<>( example, idmap, new HighlightModel<>( idmap ) ), graph );
-		final TrackSchemeFocus focus = new TrackSchemeFocus( new DefaultModelFocusProperties<>( example, idmap, new FocusModel<>( idmap ) ), graph );
-		final TrackSchemeSelection tsSelection = new TrackSchemeSelection( new DefaultModelSelectionProperties<>( example, idmap, selection ) );
-		final TrackSchemeNavigation navigation = new TrackSchemeNavigation( new DefaultModelNavigationProperties<>( example, idmap, new NavigationHandler<>( new GroupManager().createGroupHandle() ) ), graph );
-		panelPreview = new TrackSchemePanel( graph, highlight, focus, tsSelection, navigation, TrackSchemeOptions.options() );
-		panelPreview.setTimepointRange( 0, 6 );
+		final RefBimap< DummyVertex, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, graph );
+		final RefBimap< DummyEdge, TrackSchemeEdge > edgeMap = new TrackSchemeEdgeBimap<>( idmap, graph );
+		final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight = new HighlightAdapter<>( new HighlightModelImp<>( idmap ), vertexMap, edgeMap );
+		final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus = new FocusAdapter<>( new FocusModelImp<>( idmap ), vertexMap, edgeMap );
+		final Selection< TrackSchemeVertex, TrackSchemeEdge > selection = new SelectionAdapter<>( ex.getSelection(), vertexMap, edgeMap );
+		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation = new NavigationHandlerAdapter<>( new NavigationHandlerImp<>( new GroupManager().createGroupHandle() ), vertexMap, edgeMap );
+		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, TrackSchemeOptions.options() );
+		panelPreview.setTimepointRange( 0, 7 );
 		panelPreview.timePointChanged( 2 );
 		panelPreview.graphChanged();
-
 
 		final JPanel dialogPane = new JPanel();
 		this.contentPanel = new JPanel();

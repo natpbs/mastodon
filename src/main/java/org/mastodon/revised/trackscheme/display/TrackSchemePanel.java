@@ -21,19 +21,19 @@ import org.mastodon.revised.trackscheme.ScreenEntities;
 import org.mastodon.revised.trackscheme.ScreenEntitiesInterpolator;
 import org.mastodon.revised.trackscheme.ScreenTransform;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
-import org.mastodon.revised.trackscheme.TrackSchemeFocus;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
-import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
-import org.mastodon.revised.trackscheme.TrackSchemeSelection;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions.Values;
 import org.mastodon.revised.trackscheme.display.animate.AbstractAnimator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.ui.selection.FocusListener;
+import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightListener;
+import org.mastodon.revised.ui.selection.HighlightModel;
 import org.mastodon.revised.ui.selection.NavigationEtiquette;
+import org.mastodon.revised.ui.selection.NavigationHandler;
 import org.mastodon.revised.ui.selection.NavigationListener;
+import org.mastodon.revised.ui.selection.Selection;
 import org.mastodon.revised.ui.selection.SelectionListener;
 
 import bdv.viewer.TimePointListener;
@@ -140,7 +140,7 @@ public class TrackSchemePanel extends JPanel implements
 
 //	private final TrackSchemeSelection selection;
 
-	private final TrackSchemeFocus focus;
+	private final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus;
 
 	private final TrackSchemeNavigator navigator;
 
@@ -152,10 +152,10 @@ public class TrackSchemePanel extends JPanel implements
 
 	public TrackSchemePanel(
 			final TrackSchemeGraph< ?, ? > graph,
-			final TrackSchemeHighlight highlight,
-			final TrackSchemeFocus focus,
-			final TrackSchemeSelection selection,
-			final TrackSchemeNavigation navigation,
+			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
+			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
+			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
+			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
 			final TrackSchemeOptions optional )
 	{
 		super( new BorderLayout(), false );
@@ -197,7 +197,7 @@ public class TrackSchemePanel extends JPanel implements
 		} );
 
 		screenTransform = new ScreenTransform();
-		layout = new LineageTreeLayout( graph );
+		layout = new LineageTreeLayout( graph, selection );
 		contextLayout = new ContextLayout( graph, layout );
 		final TransformEventHandler< ScreenTransform > tevl = display.getTransformEventHandler();
 		if ( tevl instanceof LayoutListener )

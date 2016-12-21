@@ -16,6 +16,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import org.mastodon.adapter.FocusAdapter;
+import org.mastodon.adapter.HighlightAdapter;
+import org.mastodon.adapter.NavigationHandlerAdapter;
+import org.mastodon.adapter.RefBimap;
+import org.mastodon.adapter.SelectionAdapter;
 import org.mastodon.graph.GraphChangeListener;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.graph.ListenableReadOnlyGraph;
@@ -30,46 +35,35 @@ import org.mastodon.revised.bdv.overlay.EditBehaviours;
 import org.mastodon.revised.bdv.overlay.EditSpecialBehaviours;
 import org.mastodon.revised.bdv.overlay.OverlayContext;
 import org.mastodon.revised.bdv.overlay.OverlayGraphRenderer;
+import org.mastodon.revised.bdv.overlay.OverlayNavigation;
 import org.mastodon.revised.bdv.overlay.RenderSettings;
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayContextWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayEdgeWrapper;
-import org.mastodon.revised.bdv.overlay.wrap.OverlayFocusWrapper;
+import org.mastodon.revised.bdv.overlay.wrap.OverlayEdgeWrapperBimap;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayGraphWrapper;
-import org.mastodon.revised.bdv.overlay.wrap.OverlayHighlightWrapper;
-import org.mastodon.revised.bdv.overlay.wrap.OverlayNavigationWrapper;
-import org.mastodon.revised.bdv.overlay.wrap.OverlaySelectionWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayVertexWrapper;
+import org.mastodon.revised.bdv.overlay.wrap.OverlayVertexWrapperBimap;
 import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
+import org.mastodon.revised.model.branchgraph.BranchGraphHighlightAdapter;
+import org.mastodon.revised.model.branchgraph.BranchGraphSelectionAdapter;
 import org.mastodon.revised.model.branchgraph.DefaultBranchGraphFocusProperties;
-import org.mastodon.revised.model.branchgraph.DefaultBranchGraphHighlightProperties;
 import org.mastodon.revised.model.branchgraph.DefaultBranchGraphNavigationProperties;
 import org.mastodon.revised.model.branchgraph.DefaultBranchGraphProperties;
-import org.mastodon.revised.model.branchgraph.DefaultBranchGraphSelectionProperties;
 import org.mastodon.revised.model.mamut.BoundingSphereRadiusStatistics;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelOverlayProperties;
 import org.mastodon.revised.model.mamut.Spot;
-import org.mastodon.revised.trackscheme.DefaultModelFocusProperties;
-import org.mastodon.revised.trackscheme.DefaultModelGraphProperties;
-import org.mastodon.revised.trackscheme.DefaultModelHighlightProperties;
-import org.mastodon.revised.trackscheme.DefaultModelNavigationProperties;
-import org.mastodon.revised.trackscheme.DefaultModelSelectionProperties;
-import org.mastodon.revised.trackscheme.ModelFocusProperties;
-import org.mastodon.revised.trackscheme.ModelGraphProperties;
-import org.mastodon.revised.trackscheme.ModelHighlightProperties;
-import org.mastodon.revised.trackscheme.ModelNavigationProperties;
-import org.mastodon.revised.trackscheme.ModelSelectionProperties;
 import org.mastodon.revised.trackscheme.TrackSchemeContextListener;
-import org.mastodon.revised.trackscheme.TrackSchemeFocus;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge;
+import org.mastodon.revised.trackscheme.TrackSchemeEdgeBimap;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
-import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
-import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.TrackSchemeVertex;
+import org.mastodon.revised.trackscheme.TrackSchemeVertexBimap;
 import org.mastodon.revised.trackscheme.action.TrackSchemeAction;
 import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
@@ -83,16 +77,22 @@ import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
+import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
+import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
 import org.mastodon.revised.ui.grouping.GroupHandle;
 import org.mastodon.revised.ui.grouping.GroupManager;
 import org.mastodon.revised.ui.selection.FocusListener;
 import org.mastodon.revised.ui.selection.FocusModel;
+import org.mastodon.revised.ui.selection.FocusModelImp;
 import org.mastodon.revised.ui.selection.HighlightListener;
 import org.mastodon.revised.ui.selection.HighlightModel;
+import org.mastodon.revised.ui.selection.HighlightModelImp;
 import org.mastodon.revised.ui.selection.NavigationHandler;
+import org.mastodon.revised.ui.selection.NavigationHandlerImp;
 import org.mastodon.revised.ui.selection.Selection;
+import org.mastodon.revised.ui.selection.SelectionImp;
 import org.mastodon.revised.ui.selection.SelectionListener;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.InputTriggerDescription;
@@ -290,6 +290,7 @@ public class WindowManager
 	private final RenderSettingsManager renderSettingsManager;
 
 	private final TrackSchemeStyleManager trackSchemeStyleManager;
+
 	private final org.scijava.Context context;
 
 	private final TrackSchemeBehaviourProvider trackSchemeBehaviourProvider;
@@ -323,10 +324,10 @@ public class WindowManager
 
 		final ListenableReadOnlyGraph< Spot, Link > graph = model.getGraph();
 		final GraphIdBimap< Spot, Link > idmap = model.getGraphIdBimap();
-		selection = new Selection<>( graph, idmap );
-		highlightModel = new HighlightModel<  >( idmap );
+		selection = new SelectionImp<>( graph, idmap );
+		highlightModel = new HighlightModelImp<>( idmap );
 		radiusStats = new BoundingSphereRadiusStatistics( model );
-		focusModel = new FocusModel<>( idmap );
+		focusModel = new FocusModelImp<>( idmap );
 
 		minTimepoint = 0;
 		maxTimepoint = sharedBdvData.getNumTimepoints() - 1;
@@ -403,19 +404,15 @@ public class WindowManager
 				model.getGraph(),
 				model.getGraphIdBimap(),
 				model.getSpatioTemporalIndex(),
-				new ModelOverlayProperties( model.getGraph(), radiusStats, selection ) );
+				new ModelOverlayProperties( model.getGraph(), radiusStats ) );
+		final RefBimap< Spot, OverlayVertexWrapper< Spot, Link > > vertexMap = new OverlayVertexWrapperBimap<>( overlayGraph );
+		final RefBimap< Link, OverlayEdgeWrapper< Spot, Link > > edgeMap = new OverlayEdgeWrapperBimap<>( overlayGraph );
 
-		final OverlayHighlightWrapper< Spot, Link > overlayHighlight = new OverlayHighlightWrapper<>(
-				model.getGraphIdBimap(),
-				highlightModel );
-
-		final OverlayFocusWrapper< Spot, Link > overlayFocus = new OverlayFocusWrapper<>(
-				model.getGraphIdBimap(),
-				focusModel );
-
-		final OverlaySelectionWrapper< Spot, Link > overlaySelection = new OverlaySelectionWrapper<>(
-				selection );
-
+		final HighlightModel< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlayHighlight = new HighlightAdapter<>( highlightModel, vertexMap, edgeMap );
+		final FocusModel< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlayFocus = new FocusAdapter<>( focusModel, vertexMap, edgeMap );
+		final Selection< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlaySelection = new SelectionAdapter<>( selection, vertexMap, edgeMap );
+		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandlerImp<>( bdvGroupHandle );
+		final NavigationHandler< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlayNavigationHandler = new NavigationHandlerAdapter<>( navigationHandler, vertexMap, edgeMap );
 		final String windowTitle = "BigDataViewer " + (bdvName++); // TODO: use JY naming scheme
 		final BigDataViewerMaMuT bdv = BigDataViewerMaMuT.open( sharedBdvData, windowTitle, bdvGroupHandle );
 		final ViewerFrame viewerFrame = bdv.getViewerFrame();
@@ -432,7 +429,8 @@ public class WindowManager
 		final OverlayGraphRenderer< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > tracksOverlay = new OverlayGraphRenderer<>(
 				overlayGraph,
 				overlayHighlight,
-				overlayFocus );
+				overlayFocus,
+				overlaySelection );
 		viewer.getDisplay().addOverlayRenderer( tracksOverlay );
 		viewer.addRenderTransformListener( tracksOverlay );
 		viewer.addTimePointListener( tracksOverlay );
@@ -471,14 +469,14 @@ public class WindowManager
 		} );
 		// TODO: remember those listeners and remove them when the BDV window is closed!!!
 
+		final OverlayNavigation< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlayNavigation = new OverlayNavigation<>( viewer, overlayGraph );
+		overlayNavigationHandler.addNavigationListener( overlayNavigation );
+
 		final BdvHighlightHandler< ?, ? > highlightHandler = new BdvHighlightHandler<>( overlayGraph, tracksOverlay, overlayHighlight );
 		viewer.getDisplay().addHandler( highlightHandler );
 		viewer.addRenderTransformListener( highlightHandler );
 
-		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandler<>( bdvGroupHandle );
-		final OverlayNavigationWrapper< Spot, Link > navigation =
-				new OverlayNavigationWrapper< >( viewer, overlayGraph, navigationHandler );
-		final BdvSelectionBehaviours< ?, ? > selectionBehaviours = new BdvSelectionBehaviours<>( overlayGraph, tracksOverlay, overlaySelection, navigation );
+		final BdvSelectionBehaviours< ?, ? > selectionBehaviours = new BdvSelectionBehaviours<>( overlayGraph, tracksOverlay, overlaySelection, overlayNavigationHandler );
 		selectionBehaviours.installBehaviourBindings( viewerFrame.getTriggerbindings(), keyconf );
 
 		final OverlayContext< OverlayVertexWrapper< Spot, Link > > overlayContext = new OverlayContext<>( overlayGraph, tracksOverlay );
@@ -633,22 +631,24 @@ public class WindowManager
 		final GraphIdBimap< Spot, Link > idmap = model.getGraphIdBimap();
 
 		/*
-		 * TrackSchemeGraph listening to model
+		 * TrackSchemeGraph listening to model.
 		 */
-		final DefaultModelGraphProperties< Spot, Link > properties = new DefaultModelGraphProperties<>( graph, idmap, selection );
+		final ModelGraphProperties< Spot, Link > properties = new DefaultModelGraphProperties<>();
 		final TrackSchemeGraph< Spot, Link > trackSchemeGraph = new TrackSchemeGraph<>( graph, idmap, properties );
+		final RefBimap< Spot, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, trackSchemeGraph );
+		final RefBimap< Link, TrackSchemeEdge > edgeMap = new TrackSchemeEdgeBimap<>( idmap, trackSchemeGraph );
 
 		/*
-		 * TrackSchemeHighlight wrapping HighlightModel
+		 * Highlight model for TrackScheme.
 		 */
-		final ModelHighlightProperties highlightProperties = new DefaultModelHighlightProperties< >( graph, idmap, highlightModel );
-		final TrackSchemeHighlight trackSchemeHighlight = new TrackSchemeHighlight( highlightProperties, trackSchemeGraph );
+		final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeHighlight =
+				new HighlightAdapter<>( highlightModel, vertexMap, edgeMap );
 
 		/*
-		 * TrackScheme selection
+		 * Selection model for TrackScheme.
 		 */
-		final ModelSelectionProperties selectionProperties = new DefaultModelSelectionProperties< >( graph, idmap, selection );
-		final TrackSchemeSelection trackSchemeSelection = new TrackSchemeSelection( selectionProperties );
+		final Selection< TrackSchemeVertex, TrackSchemeEdge > trackSchemeSelection =
+				new SelectionAdapter<>( selection, vertexMap, edgeMap );
 
 		/*
 		 * TrackScheme GroupHandle
@@ -656,20 +656,20 @@ public class WindowManager
 		final GroupHandle groupHandle = groupManager.createGroupHandle();
 
 		/*
-		 * TrackScheme navigation
+		 * Navigation for TrackScheme.
 		 */
-		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandler<>( groupHandle );
-		final ModelNavigationProperties navigationProperties = new DefaultModelNavigationProperties< >( graph, idmap, navigationHandler );
-		final TrackSchemeNavigation trackSchemeNavigation = new TrackSchemeNavigation( navigationProperties, trackSchemeGraph );
+		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandlerImp<>( groupHandle );
+		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > trackSchemeNavigation =
+				new NavigationHandlerAdapter<>( navigationHandler, vertexMap, edgeMap );
 
 		/*
-		 * TrackScheme focus
+		 * Focus model for TrackScheme.
 		 */
-		final ModelFocusProperties focusProperties = new DefaultModelFocusProperties<>( graph, idmap, focusModel );
-		final TrackSchemeFocus trackSchemeFocus = new TrackSchemeFocus( focusProperties, trackSchemeGraph );
+		final FocusModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFocus =
+				new FocusAdapter<>( focusModel, vertexMap, edgeMap );
 
 		/*
-		 * TrackScheme ContextChooser
+		 * TrackScheme ContextChooser.
 		 */
 		final TrackSchemeContextListener< Spot > contextListener = new TrackSchemeContextListener< >(
 				idmap,
@@ -677,7 +677,7 @@ public class WindowManager
 		final ContextChooser< Spot > contextChooser = new ContextChooser<>( contextListener );
 
 		/*
-		 * show TrackSchemeFrame
+		 * Show TrackSchemeFrame.
 		 */
 		final TrackSchemeFrame frame = new TrackSchemeFrame(
 				trackSchemeGraph,
@@ -793,24 +793,29 @@ public class WindowManager
 		/*
 		 * TrackSchemeGraph listening to branch graph.
 		 */
-		final ModelGraphProperties properties =
-				new DefaultBranchGraphProperties< Spot, Link >( graph, idmap, model.getGraph(), selection );
+		final ModelGraphProperties< BranchVertex, BranchEdge > properties =
+				new DefaultBranchGraphProperties< Spot, Link >( graph, model.getGraph() );
 		final TrackSchemeGraph< BranchVertex, BranchEdge > trackSchemeGraph =
 				new TrackSchemeGraph< BranchVertex, BranchEdge >( graph, idmap, properties );
+		final RefBimap< BranchVertex, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, trackSchemeGraph );
+		final RefBimap< BranchEdge, TrackSchemeEdge > edgeMap = new TrackSchemeEdgeBimap<>( idmap, trackSchemeGraph );
 
 		/*
-		 * TrackSchemeHighlight wrapping HighlightModel
+		 * Highlight model for branch graph.
 		 */
-		final ModelHighlightProperties highlightProperties =
-				new DefaultBranchGraphHighlightProperties< Spot, Link >( graph, idmap, model.getGraph(), highlightModel );
-		final TrackSchemeHighlight trackSchemeHighlight = new TrackSchemeHighlight( highlightProperties, trackSchemeGraph );
+		final HighlightModel< BranchVertex, BranchEdge > branchGraphHighlight =
+				new BranchGraphHighlightAdapter<>( graph, model.getGraph(), highlightModel );
+		final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeHighlight =
+				new HighlightAdapter<>( branchGraphHighlight, vertexMap, edgeMap );
 
 		/*
-		 * TrackScheme selection
+		 * Selection model for branch graph.
 		 */
-		final ModelSelectionProperties selectionProperties =
-				new DefaultBranchGraphSelectionProperties< Spot, Link >( graph, idmap, model.getGraph(), selection );
-		final TrackSchemeSelection trackSchemeSelection = new TrackSchemeSelection( selectionProperties );
+		final Selection< BranchVertex, BranchEdge > branchGraphSelection =
+				new BranchGraphSelectionAdapter<>( graph, model.getGraph(), selection );
+		final Selection< TrackSchemeVertex, TrackSchemeEdge > trackSchemeSelection =
+				new SelectionAdapter<>( branchGraphSelection, vertexMap, edgeMap );
+
 
 		/*
 		 * TrackScheme GroupHandle
