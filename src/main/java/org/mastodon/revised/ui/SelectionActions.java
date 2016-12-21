@@ -22,7 +22,7 @@ import org.scijava.ui.behaviour.util.InputActionBindings;
 /**
  * User-interface actions that are related to a model selection.
  *
- * @author Jean=Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
+ * @author Jean-Yves Tinevez
  *
  */
 public class SelectionActions< V extends Vertex< E >, E extends Edge< V > >
