@@ -3,12 +3,14 @@ package org.mastodon.revised.trackscheme.action;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mastodon.revised.trackscheme.TrackSchemeFocus;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.revised.trackscheme.TrackSchemeHighlight;
-import org.mastodon.revised.trackscheme.TrackSchemeNavigation;
-import org.mastodon.revised.trackscheme.TrackSchemeSelection;
+import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
+import org.mastodon.revised.ui.selection.FocusModel;
+import org.mastodon.revised.ui.selection.HighlightModel;
+import org.mastodon.revised.ui.selection.NavigationHandler;
+import org.mastodon.revised.ui.selection.Selection;
 import org.scijava.plugin.Plugin;
 import org.scijava.service.AbstractService;
 import org.scijava.service.Service;
@@ -19,19 +21,18 @@ public class DefaultTrackSchemeService extends AbstractService implements TrackS
 
 	private final Map< TrackSchemeFrame, TrackSchemeGraph< ?, ? > > graphs;
 
-	private final Map< TrackSchemeFrame, TrackSchemeSelection > selections;
+	private final Map< TrackSchemeFrame, Selection< TrackSchemeVertex, TrackSchemeEdge > > selections;
 
-	private final Map< TrackSchemeFrame, TrackSchemeHighlight > highlights;
+	private final Map< TrackSchemeFrame, HighlightModel< TrackSchemeVertex, TrackSchemeEdge > > highlights;
 
-	private final Map< TrackSchemeFrame, TrackSchemeFocus > focuses;
+	private final Map< TrackSchemeFrame, FocusModel< TrackSchemeVertex, TrackSchemeEdge > > focuses;
 
-	private final Map< TrackSchemeFrame, TrackSchemeNavigation > navigations;
+	private final Map< TrackSchemeFrame, NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > > navigations;
 
 	private final Map< Object, TrackSchemeFrame > actions;
 
 	public DefaultTrackSchemeService()
 	{
-		System.out.println( "Creating the service " + toString() ); // DEBUG
 		this.graphs = new HashMap<>();
 		this.selections = new HashMap<>();
 		this.highlights = new HashMap<>();
@@ -44,10 +45,10 @@ public class DefaultTrackSchemeService extends AbstractService implements TrackS
 	public void register(
 			final TrackSchemeFrame frame,
 			final TrackSchemeGraph< ?, ? > graph,
-			final TrackSchemeSelection selection,
-			final TrackSchemeHighlight highlight,
-			final TrackSchemeFocus focus,
-			final TrackSchemeNavigation navigation)
+			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
+			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
+			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
+			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation )
 	{
 		graphs.put( frame, graph );
 		selections.put( frame, selection );
@@ -78,25 +79,25 @@ public class DefaultTrackSchemeService extends AbstractService implements TrackS
 	}
 
 	@Override
-	public TrackSchemeSelection getSelection( final Object action )
+	public Selection< TrackSchemeVertex, TrackSchemeEdge > getSelection( final Object action )
 	{
 		return selections.get( getFrame( action ) );
 	}
 
 	@Override
-	public TrackSchemeHighlight getHighlight( final Object action )
+	public HighlightModel< TrackSchemeVertex, TrackSchemeEdge > getHighlight( final Object action )
 	{
 		return highlights.get( getFrame( action ) );
 	}
 
 	@Override
-	public TrackSchemeFocus getFocus( final Object action )
+	public FocusModel< TrackSchemeVertex, TrackSchemeEdge > getFocus( final Object action )
 	{
 		return focuses.get( getFrame( action ) );
 	}
 
 	@Override
-	public TrackSchemeNavigation getNavigation( final Object action )
+	public NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > getNavigation( final Object action )
 	{
 		return navigations.get( getFrame( action ) );
 	}

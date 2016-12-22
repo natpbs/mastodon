@@ -48,10 +48,10 @@ import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
+import org.mastodon.revised.model.branchgraph.BranchGraphFocusAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphHighlightAdapter;
+import org.mastodon.revised.model.branchgraph.BranchGraphNavigationHandlerAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphSelectionAdapter;
-import org.mastodon.revised.model.branchgraph.DefaultBranchGraphFocusProperties;
-import org.mastodon.revised.model.branchgraph.DefaultBranchGraphNavigationProperties;
 import org.mastodon.revised.model.branchgraph.DefaultBranchGraphProperties;
 import org.mastodon.revised.model.mamut.BoundingSphereRadiusStatistics;
 import org.mastodon.revised.model.mamut.Link;
@@ -818,28 +818,27 @@ public class WindowManager
 
 
 		/*
-		 * TrackScheme GroupHandle
+		 * TrackScheme GroupHandle.
 		 */
 		final GroupHandle groupHandle = groupManager.createGroupHandle();
 
 		/*
-		 * TrackScheme navigation
+		 * Navigation model for branch graph.
 		 */
-		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandler<>( groupHandle );
-		final ModelNavigationProperties navigationProperties =
-				new DefaultBranchGraphNavigationProperties< Spot, Link >(
-						graph,
-						idmap,
-						model.getGraph(),
-						navigationHandler );
-		final TrackSchemeNavigation trackSchemeNavigation = new TrackSchemeNavigation( navigationProperties, trackSchemeGraph );
+		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandlerImp<>( groupHandle );
+		final NavigationHandler< BranchVertex, BranchEdge > branchGraphNavigation =
+				new BranchGraphNavigationHandlerAdapter< Spot, Link >( graph, model.getGraph(), navigationHandler );
+		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > trackSchemeNavigation =
+				new NavigationHandlerAdapter<>( branchGraphNavigation, vertexMap, edgeMap );
 
 		/*
-		 * TrackScheme focus
+		 * Focus model for branch graph.
 		 */
-		final ModelFocusProperties focusProperties =
-				new DefaultBranchGraphFocusProperties< Spot, Link >( graph, idmap, model.getGraph(), focusModel );
-		final TrackSchemeFocus trackSchemeFocus = new TrackSchemeFocus( focusProperties, trackSchemeGraph );
+
+		final FocusModel< BranchVertex, BranchEdge > branchGraphFocus =
+				new BranchGraphFocusAdapter< Spot, Link >( graph, model.getGraph(), focusModel );
+		final FocusModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFocus =
+				new FocusAdapter<>( branchGraphFocus, vertexMap, edgeMap );
 
 		/*
 		 * show TrackSchemeFrame

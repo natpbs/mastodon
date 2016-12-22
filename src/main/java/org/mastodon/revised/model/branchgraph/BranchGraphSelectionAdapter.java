@@ -96,7 +96,7 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 			}
 			else
 			{
-				while ( branchGraph.getBranchEdge( target, beRef ).equals( edge ) )
+				while ( edge.equals( branchGraph.getBranchEdge( target, beRef ) ) )
 				{
 					/*
 					 * The target vertex is still linked to the branch edge, so
