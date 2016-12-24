@@ -46,6 +46,8 @@ public class Model extends AbstractModel< ModelGraph, Spot, Link > implements Un
 
 	private final GraphUndoRecorder< Spot, Link, ? > undoRecorder;
 
+	private final FeatureModel featureModel;
+
 	public Model()
 	{
 		super( new ModelGraph() );
@@ -55,6 +57,8 @@ public class Model extends AbstractModel< ModelGraph, Spot, Link > implements Un
 		vertexFeaturesToSerialize.add( ModelFeatures.LABEL );
 
 		edgeFeaturesToSerialize = new ArrayList<>();
+
+		featureModel = new FeatureModel();
 
 		undoRecorder = GraphUndoRecorder.create(
 				modelGraph,
@@ -118,5 +122,10 @@ public class Model extends AbstractModel< ModelGraph, Spot, Link > implements Un
 	public void setUndoPoint()
 	{
 		undoRecorder.setUndoPoint();
+	}
+
+	public FeatureModel featureModel()
+	{
+		return featureModel;
 	}
 }

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import org.mastodon.features.DoubleFeature;
+import org.mastodon.features.Feature;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelGraph;
@@ -11,7 +12,7 @@ import org.mastodon.revised.model.mamut.Spot;
 import org.scijava.plugin.Plugin;
 
 @Plugin( type = LinkFeatureComputer.class, name = "link_displacement" )
-public class LinkDisplacementComputer implements LinkFeatureComputer
+public class LinkDisplacementComputer extends LinkFeatureComputer
 {
 
 	public static final String NAME = "link_displacement";
@@ -48,4 +49,9 @@ public class LinkDisplacementComputer implements LinkFeatureComputer
 		graph.releaseRef( ref2 );
 	}
 
+	@Override
+	public Feature< ?, ?, ? > getFeature()
+	{
+		return FEATURE;
+	}
 }

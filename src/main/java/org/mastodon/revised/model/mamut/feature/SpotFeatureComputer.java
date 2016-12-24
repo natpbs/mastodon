@@ -1,6 +1,14 @@
 package org.mastodon.revised.model.mamut.feature;
 
-public interface SpotFeatureComputer extends FeatureComputer
+import org.mastodon.revised.model.mamut.FeatureModel.FeatureTarget;
+
+public abstract class SpotFeatureComputer implements FeatureComputer
 {
+
+	@Override
+	public FeatureTarget getTarget()
+	{
+		return FeatureTarget.VERTEX;
+	}
 
 }

@@ -81,8 +81,13 @@ public class DefaultMamutFeatureService extends AbstractService implements Mamut
 			return false;
 		}
 
+		model.featureModel().clearFeatures();
 		for ( final ObjectVertex< FeatureComputer > v : sorter.get() )
-			v.getContent().compute( model );
+		{
+			final FeatureComputer computer = v.getContent();
+			model.featureModel().declareFeature( computer.getFeature(), computer.getTarget() );
+			computer.compute( model );
+		}
 
 		return true;
 	}
