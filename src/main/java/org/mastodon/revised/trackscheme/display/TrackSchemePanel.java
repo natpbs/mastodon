@@ -14,6 +14,7 @@ import javax.swing.UIManager;
 import org.mastodon.graph.GraphChangeListener;
 import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextListener;
+import org.mastodon.revised.model.mamut.feature.ScalarFeatureProperties.FeatureProjector;
 import org.mastodon.revised.trackscheme.ContextLayout;
 import org.mastodon.revised.trackscheme.LineageTreeLayout;
 import org.mastodon.revised.trackscheme.LineageTreeLayout.LayoutListener;
@@ -25,6 +26,7 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions.Values;
 import org.mastodon.revised.trackscheme.display.animate.AbstractAnimator;
+import org.mastodon.revised.trackscheme.display.style.LayoutColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.ui.selection.FocusListener;
 import org.mastodon.revised.ui.selection.FocusModel;
@@ -150,17 +152,21 @@ public class TrackSchemePanel extends JPanel implements
 
 	private NavigationBehaviour navigationBehaviour;
 
+	private LayoutColorGenerator colorGenerator;
+
 	public TrackSchemePanel(
 			final TrackSchemeGraph< ?, ? > graph,
 			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
 			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
+			final FeatureProjector featureProjector,
 			final TrackSchemeOptions optional )
 	{
 		super( new BorderLayout(), false );
 		this.graph = graph;
 		this.focus = focus;
+		this.colorGenerator = new LayoutColorGenerator( graph, featureProjector );
 
 		final Values options = optional.values;
 
@@ -816,7 +822,7 @@ public class TrackSchemePanel extends JPanel implements
 			if (duration > 0 )
 			{
 				copyIpStart();
-				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight() );
+				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight(), colorGenerator );
 				swapIpEnd();
 				interpolator = new ScreenEntitiesInterpolator( screenEntitiesIpStart, screenEntitiesIpEnd );
 			}
@@ -824,7 +830,7 @@ public class TrackSchemePanel extends JPanel implements
 			{
 				interpolator = null;
 				swapPools();
-				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight() );
+				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight(), colorGenerator );
 				lastComputedScreenEntities = screenEntities;
 			}
 		}
@@ -833,7 +839,7 @@ public class TrackSchemePanel extends JPanel implements
 		{
 			if ( interpolator != null )
 			{
-				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight() );
+				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight(), colorGenerator );
 				swapIpEnd();
 				interpolator = new ScreenEntitiesInterpolator(
 						screenEntitiesIpStart,

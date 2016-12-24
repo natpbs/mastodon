@@ -16,6 +16,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
+import org.mastodon.adapter.FeatureProjectorAdapter;
 import org.mastodon.adapter.FocusAdapter;
 import org.mastodon.adapter.HighlightAdapter;
 import org.mastodon.adapter.NavigationHandlerAdapter;
@@ -58,6 +59,8 @@ import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelOverlayProperties;
 import org.mastodon.revised.model.mamut.Spot;
+import org.mastodon.revised.model.mamut.feature.MamutFeatureProjector;
+import org.mastodon.revised.model.mamut.feature.ScalarFeatureProperties.FeatureProjector;
 import org.mastodon.revised.trackscheme.TrackSchemeContextListener;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeEdgeBimap;
@@ -669,6 +672,13 @@ public class WindowManager
 				new FocusAdapter<>( focusModel, vertexMap, edgeMap );
 
 		/*
+		 * Features for TrackScheme.
+		 */
+		final FeatureProjector< Spot, Link > featureProjector = new MamutFeatureProjector( model );
+		final FeatureProjector< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
+				new FeatureProjectorAdapter< Spot, Link, TrackSchemeVertex, TrackSchemeEdge >( featureProjector, vertexMap, edgeMap, graph );
+
+		/*
 		 * TrackScheme ContextChooser.
 		 */
 		final TrackSchemeContextListener< Spot > contextListener = new TrackSchemeContextListener< >(
@@ -685,6 +695,7 @@ public class WindowManager
 				trackSchemeFocus,
 				trackSchemeSelection,
 				trackSchemeNavigation,
+				trackSchemeFeatures,
 				model,
 				groupHandle,
 				contextChooser,
@@ -849,6 +860,7 @@ public class WindowManager
 				trackSchemeFocus,
 				trackSchemeSelection,
 				trackSchemeNavigation,
+				null,
 				model,
 				groupHandle,
 				null,

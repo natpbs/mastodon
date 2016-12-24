@@ -92,7 +92,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus = new FocusAdapter<>( new FocusModelImp<>( idmap ), vertexMap, edgeMap );
 		final Selection< TrackSchemeVertex, TrackSchemeEdge > selection = new SelectionAdapter<>( ex.getSelection(), vertexMap, edgeMap );
 		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation = new NavigationHandlerAdapter<>( new NavigationHandlerImp<>( new GroupManager().createGroupHandle() ), vertexMap, edgeMap );
-		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, TrackSchemeOptions.options() );
+		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, null, TrackSchemeOptions.options() );
 		panelPreview.setTimepointRange( 0, 7 );
 		panelPreview.timePointChanged( 2 );
 		panelPreview.graphChanged();
