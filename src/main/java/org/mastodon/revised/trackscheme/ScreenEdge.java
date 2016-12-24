@@ -4,7 +4,10 @@ import static org.mastodon.pool.ByteUtils.BOOLEAN_SIZE;
 import static org.mastodon.pool.ByteUtils.BYTE_SIZE;
 import static org.mastodon.pool.ByteUtils.DOUBLE_SIZE;
 import static org.mastodon.pool.ByteUtils.INDEX_SIZE;
+import static org.mastodon.pool.ByteUtils.INT_SIZE;
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.NONE;
+
+import java.awt.Color;
 
 import org.mastodon.pool.ByteMappedElement;
 import org.mastodon.pool.ByteMappedElementArray;
@@ -27,7 +30,8 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ByteMappedElement >
 	protected static final int SELECTED_OFFSET = TARGET_SCREEN_VERTEX_INDEX_OFFSET + INDEX_SIZE;
 	protected static final int TRANSITION_OFFSET = SELECTED_OFFSET + BOOLEAN_SIZE;
 	protected static final int IP_RATIO_OFFSET = TRANSITION_OFFSET + BYTE_SIZE;
-	protected static final int SIZE_IN_BYTES = IP_RATIO_OFFSET + DOUBLE_SIZE;
+	protected static final int COLOR_OFFSET = IP_RATIO_OFFSET + DOUBLE_SIZE;
+	protected static final int SIZE_IN_BYTES = COLOR_OFFSET + INT_SIZE;
 
 	protected ScreenEdge( final Pool< ScreenEdge, ByteMappedElement > pool )
 	{
@@ -38,14 +42,26 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ByteMappedElement >
 			final int id,
 			final int sourceScreenVertexIndex,
 			final int targetScreenVertexIndex,
-			final boolean selected )
+			final boolean selected,
+			final Color color )
 	{
 		setTrackSchemeEdgeId( id );
 		setSourceScreenVertexIndex( sourceScreenVertexIndex );
 		setTargetScreenVertexIndex( targetScreenVertexIndex );
 		setSelected( selected );
 		setTransition( NONE );
+		setColor( color );
 		return this;
+	}
+
+	public Color getColor()
+	{
+		return new Color( access.getInt( COLOR_OFFSET ) );
+	}
+
+	protected void setColor( final Color color )
+	{
+		access.putInt( color.getRGB(), COLOR_OFFSET );
 	}
 
 	public Transition getTransition()

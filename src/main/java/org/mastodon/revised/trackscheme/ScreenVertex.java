@@ -4,7 +4,10 @@ import static org.mastodon.pool.ByteUtils.BOOLEAN_SIZE;
 import static org.mastodon.pool.ByteUtils.BYTE_SIZE;
 import static org.mastodon.pool.ByteUtils.DOUBLE_SIZE;
 import static org.mastodon.pool.ByteUtils.INDEX_SIZE;
+import static org.mastodon.pool.ByteUtils.INT_SIZE;
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.NONE;
+
+import java.awt.Color;
 
 import org.mastodon.RefPool;
 import org.mastodon.pool.ByteMappedElement;
@@ -30,7 +33,8 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ByteMappedElement >
 	protected static final int TRANSITION_OFFSET = GHOST_OFFSET + BOOLEAN_SIZE;
 	protected static final int IP_SCREENVERTEX_INDEX_OFFSET = TRANSITION_OFFSET + BYTE_SIZE;
 	protected static final int IP_RATIO_OFFSET = IP_SCREENVERTEX_INDEX_OFFSET + INDEX_SIZE;
-	protected static final int SIZE_IN_BYTES = IP_RATIO_OFFSET + DOUBLE_SIZE;
+	protected static final int COLOR_OFFSET = IP_RATIO_OFFSET + DOUBLE_SIZE;
+	protected static final int SIZE_IN_BYTES = COLOR_OFFSET + INT_SIZE;
 
 	private final TrackSchemeVertex vref;
 
@@ -69,7 +73,8 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ByteMappedElement >
 			final double x,
 			final double y,
 			final boolean selected,
-			final boolean ghost )
+			final boolean ghost,
+			final Color color )
 	{
 		setTrackSchemeVertexId( id );
 		setX( x );
@@ -77,7 +82,18 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ByteMappedElement >
 		setSelected( selected );
 		setGhost( ghost );
 		setTransition( NONE );
+		setColor( color );
 		return this;
+	}
+
+	public Color getColor()
+	{
+		return new Color( access.getInt( COLOR_OFFSET ), true );
+	}
+
+	protected void setColor( final Color color )
+	{
+		access.putInt( color.getRGB(), COLOR_OFFSET );
 	}
 
 	/**
@@ -271,6 +287,7 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ByteMappedElement >
 		setTransition( v.getTransition() );
 		setInterpolatedScreenVertexIndex( v.getInterpolatedScreenVertexIndex() );
 		setInterpolationCompletionRatio( v.getInterpolationCompletionRatio() );
+		setColor( getColor() );
 		return this;
 	}
 
@@ -351,7 +368,7 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ByteMappedElement >
 	@Override
 	public String toString()
 	{
-		return String.format( "ScreenVertex(%d, sv=%d, \"%s\", (%.2f, %.2f), %s, isv=%d%s)",
+		return String.format( "ScreenVertex(%d, sv=%d, \"%s\", (%.2f, %.2f), %s, isv=%d%s, color=%s)",
 				getInternalPoolIndex(),
 				getTrackSchemeVertexId(),
 				getLabel(),
@@ -359,6 +376,7 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ByteMappedElement >
 				getY(),
 				getTransition().toString(),
 				getInterpolatedScreenVertexIndex(),
-				isSelected() ? ", selected" : "" );
+				isSelected() ? ", selected" : "",
+				getColor().toString() );
 	}
 }
