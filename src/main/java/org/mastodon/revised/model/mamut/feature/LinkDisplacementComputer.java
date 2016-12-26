@@ -1,10 +1,12 @@
 package org.mastodon.revised.model.mamut.feature;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import org.mastodon.features.DoubleFeature;
-import org.mastodon.features.Feature;
+import org.mastodon.revised.model.feature.DefaultFeatureProjectors;
+import org.mastodon.revised.model.feature.FeatureProjection;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelGraph;
@@ -12,12 +14,14 @@ import org.mastodon.revised.model.mamut.Spot;
 import org.scijava.plugin.Plugin;
 
 @Plugin( type = LinkFeatureComputer.class, name = "link_displacement" )
-public class LinkDisplacementComputer extends LinkFeatureComputer
+public class LinkDisplacementComputer extends LinkFeatureComputer< DoubleFeature< Link >, Model >
 {
 
 	public static final String NAME = "link_displacement";
 
 	public static final DoubleFeature< Link > FEATURE = new DoubleFeature<>( NAME, Double.NaN );
+
+	public static final FeatureProjection< Link > FEATURE_PROJECTION = DefaultFeatureProjectors.project( FEATURE );
 
 	@Override
 	public Set< String > getDependencies()
@@ -50,8 +54,14 @@ public class LinkDisplacementComputer extends LinkFeatureComputer
 	}
 
 	@Override
-	public Feature< ?, ?, ? > getFeature()
+	public DoubleFeature< Link > getFeature()
 	{
 		return FEATURE;
+	}
+
+	@Override
+	public Map< String, FeatureProjection< Link > > getProjections()
+	{
+		return Collections.singletonMap( FEATURE.getKey(), FEATURE_PROJECTION );
 	}
 }

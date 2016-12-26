@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.mastodon.revised.context.ContextChooser;
-import org.mastodon.revised.model.mamut.feature.ScalarFeatureProperties.FeatureProjector;
+import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
@@ -59,12 +59,12 @@ public class TrackSchemeFrame extends JFrame
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
 			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
-			final FeatureProjector featureProjector,
+			final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features,
 			final UndoPointMarker undoPointMarker,
 			final GroupHandle groupHandle,
 			final ContextChooser< ? > contextChooser )
 	{
-		this( graph, highlight, focus, selection, navigation, featureProjector, undoPointMarker, groupHandle, contextChooser, TrackSchemeOptions.options() );
+		this( graph, highlight, focus, selection, navigation, features, undoPointMarker, groupHandle, contextChooser, TrackSchemeOptions.options() );
 	}
 
 	public TrackSchemeFrame(
@@ -73,7 +73,7 @@ public class TrackSchemeFrame extends JFrame
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
 			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
-			final FeatureProjector featureProjector,
+			final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features,
 			final UndoPointMarker undoPointMarker,
 			final GroupHandle groupHandle,
 			final ContextChooser< ? > contextChooser,
@@ -89,7 +89,7 @@ public class TrackSchemeFrame extends JFrame
 				focus,
 				selection,
 				navigation,
-				featureProjector,
+				features,
 				optional );
 		add( trackschemePanel, BorderLayout.CENTER );
 

@@ -1,8 +1,12 @@
 package org.mastodon.revised.model.mamut.feature;
 
-import org.mastodon.revised.model.mamut.FeatureModel.FeatureTarget;
+import org.mastodon.features.Feature;
+import org.mastodon.revised.model.AbstractModel;
+import org.mastodon.revised.model.feature.FeatureComputer;
+import org.mastodon.revised.model.feature.FeatureModel.FeatureTarget;
+import org.mastodon.revised.model.mamut.Spot;
 
-public abstract class SpotFeatureComputer implements FeatureComputer
+public abstract class SpotFeatureComputer< K extends Feature< ?, Spot, ? >, AM extends AbstractModel< ?, ?, ? > > implements FeatureComputer< K, Spot, AM >
 {
 
 	@Override

@@ -2,8 +2,8 @@ package org.mastodon.revised.trackscheme.display.style;
 
 import java.awt.Color;
 
-import org.mastodon.revised.model.mamut.feature.ScalarFeatureProperties;
-import org.mastodon.revised.model.mamut.feature.ScalarFeatureProperties.FeatureProjector;
+import org.mastodon.revised.model.feature.FeatureModel;
+import org.mastodon.revised.model.feature.FeatureProjection;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
@@ -27,19 +27,19 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 
 	private EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator;
 
-	private final FeatureProjector< TrackSchemeVertex, TrackSchemeEdge > featureProjector;
+	@SuppressWarnings( "rawtypes" )
+	private FeatureProjection vertexFeatureProperties;
 
 	@SuppressWarnings( "rawtypes" )
-	private ScalarFeatureProperties vertexFeatureProperties;
+	private FeatureProjection edgeFeatureProperties;
 
-	@SuppressWarnings( "rawtypes" )
-	private ScalarFeatureProperties edgeFeatureProperties;
+	private final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features;
 
 	public LayoutColorGenerator( final TrackSchemeGraph< ?, ? > graph,
-			final FeatureProjector< TrackSchemeVertex, TrackSchemeEdge > featureProjector )
+			final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features )
 	{
 		this.graph = graph;
-		this.featureProjector = featureProjector;
+		this.features = features;
 		trackSchemeStyleChanged();
 	}
 
@@ -57,7 +57,7 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 	public void trackSchemeStyleChanged()
 	{
 		final VertexColorGenerator< TrackSchemeVertex > vcg;
-		final ScalarFeatureProperties< ? > vfp;
+		final FeatureProjection< ? > vfp;
 		switch ( style.colorVertexBy )
 		{
 		case FIXED:
@@ -67,22 +67,22 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			break;
 		case INCOMING_EDGE:
 			vcg = new IncomingEdgeVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
-			vfp = featureProjector.createEdgeFeatureProperties( style.vertexColorFeatureKey );
+			vfp = features.getVertexProjection( style.vertexColorFeatureKey );
 			break;
 		case OUTGOING_EDGE:
 			vcg = new OutgoingEdgeVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
-			vfp = featureProjector.createEdgeFeatureProperties( style.vertexColorFeatureKey );
+			vfp = features.getVertexProjection( style.vertexColorFeatureKey );
 			break;
 		case VERTEX:
 			vcg = new ThisVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
-			vfp = featureProjector.createVertexFeatureProperties( style.vertexColorFeatureKey );
+			vfp = features.getVertexProjection( style.vertexColorFeatureKey );
 			break;
 		}
 		vertexColorGenerator = vcg;
 		vertexFeatureProperties = vfp;
 
 		final EdgeColorGenerator< TrackSchemeEdge > ecg;
-		final ScalarFeatureProperties< ? > efp;
+		final FeatureProjection< ? > efp;
 		switch ( style.colorEdgeBy )
 		{
 		case FIXED:
@@ -92,15 +92,15 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			break;
 		case EDGE:
 			ecg = new ThisEdgeColorGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
-			efp = featureProjector.createEdgeFeatureProperties( style.edgeColorFeatureKey );
+			efp = features.getVertexProjection( style.edgeColorFeatureKey );
 			break;
 		case SOURCE_VERTEX:
 			ecg = new SourceVertexEdgeGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
-			efp = featureProjector.createVertexFeatureProperties( style.edgeColorFeatureKey );
+			efp = features.getVertexProjection( style.edgeColorFeatureKey );
 			break;
 		case TARGET_VERTEX:
 			ecg = new TargetVertexEdgeGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
-			efp = featureProjector.createVertexFeatureProperties( style.edgeColorFeatureKey );
+			efp = features.getVertexProjection( style.edgeColorFeatureKey );
 			break;
 		}
 		edgeColorGenerator = ecg;

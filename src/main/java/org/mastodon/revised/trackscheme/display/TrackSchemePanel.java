@@ -14,7 +14,7 @@ import javax.swing.UIManager;
 import org.mastodon.graph.GraphChangeListener;
 import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextListener;
-import org.mastodon.revised.model.mamut.feature.ScalarFeatureProperties.FeatureProjector;
+import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.trackscheme.ContextLayout;
 import org.mastodon.revised.trackscheme.LineageTreeLayout;
 import org.mastodon.revised.trackscheme.LineageTreeLayout.LayoutListener;
@@ -160,13 +160,13 @@ public class TrackSchemePanel extends JPanel implements
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
 			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
-			final FeatureProjector featureProjector,
+			final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features,
 			final TrackSchemeOptions optional )
 	{
 		super( new BorderLayout(), false );
 		this.graph = graph;
 		this.focus = focus;
-		this.colorGenerator = new LayoutColorGenerator( graph, featureProjector );
+		this.colorGenerator = new LayoutColorGenerator( graph, features );
 
 		final Values options = optional.values;
 
