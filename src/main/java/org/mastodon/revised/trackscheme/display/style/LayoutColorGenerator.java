@@ -8,6 +8,8 @@ import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
+import org.mastodon.revised.ui.EdgeColorGenerator;
+import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.util.ColorMap;
 
 /**
@@ -67,11 +69,11 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			break;
 		case INCOMING_EDGE:
 			vcg = new IncomingEdgeVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
-			vfp = features.getVertexProjection( style.vertexColorFeatureKey );
+			vfp = features.getEdgeProjection( style.vertexColorFeatureKey );
 			break;
 		case OUTGOING_EDGE:
 			vcg = new OutgoingEdgeVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
-			vfp = features.getVertexProjection( style.vertexColorFeatureKey );
+			vfp = features.getEdgeProjection( style.vertexColorFeatureKey );
 			break;
 		case VERTEX:
 			vcg = new ThisVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
@@ -92,7 +94,7 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			break;
 		case EDGE:
 			ecg = new ThisEdgeColorGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
-			efp = features.getVertexProjection( style.edgeColorFeatureKey );
+			efp = features.getEdgeProjection( style.edgeColorFeatureKey );
 			break;
 		case SOURCE_VERTEX:
 			ecg = new SourceVertexEdgeGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );

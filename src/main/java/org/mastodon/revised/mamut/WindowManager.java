@@ -6,7 +6,9 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -60,6 +62,7 @@ import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelOverlayProperties;
 import org.mastodon.revised.model.mamut.Spot;
+import org.mastodon.revised.model.mamut.feature.DefaultMamutFeatureComputerService;
 import org.mastodon.revised.trackscheme.TrackSchemeContextListener;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeEdgeBimap;
@@ -76,6 +79,7 @@ import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
+import org.mastodon.revised.trackscheme.display.style.LayoutColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
@@ -348,6 +352,16 @@ public class WindowManager
 		context.inject( trackSchemeBehaviourProvider );
 		this.trackSchemeActionProvider = new TrackSchemeActionProvider();
 		context.inject( trackSchemeActionProvider );
+		{
+			// TODO
+			final DefaultMamutFeatureComputerService featureComputerService = new DefaultMamutFeatureComputerService();
+			context.inject( featureComputerService );
+			featureComputerService.initialize();
+			final Set< String > features = new HashSet<>();
+			features.addAll( featureComputerService.getAvailableEdgeFeatureComputers() );
+			features.addAll( featureComputerService.getAvailableVertexFeatureComputers() );
+			featureComputerService.compute( model, features );
+		}
 
 	}
 
@@ -415,14 +429,17 @@ public class WindowManager
 		final Selection< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlaySelection = new SelectionAdapter<>( selection, vertexMap, edgeMap );
 		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandlerImp<>( bdvGroupHandle );
 		final NavigationHandler< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlayNavigationHandler = new NavigationHandlerAdapter<>( navigationHandler, vertexMap, edgeMap );
-		final String windowTitle = "BigDataViewer " + (bdvName++); // TODO: use JY naming scheme
+		final String windowTitle = "BigDataViewer " + ( bdvName++ ); // TODO:
+																		// use
+																		// JY
+																		// naming
+																		// scheme
 		final BigDataViewerMaMuT bdv = BigDataViewerMaMuT.open( sharedBdvData, windowTitle, bdvGroupHandle );
 		final ViewerFrame viewerFrame = bdv.getViewerFrame();
 		final ViewerPanel viewer = bdv.getViewer();
 
-
-		// TODO: It's ok to create the wrappers here, but wiring up Listeners should be done elsewhere
-
+		// TODO: It's ok to create the wrappers here, but wiring up Listeners
+		// should be done elsewhere
 
 //		if ( !bdv.tryLoadSettings( bdvFile ) ) // TODO
 //			InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewer(), bdv.getSetupAssignments() );
@@ -469,7 +486,8 @@ public class WindowManager
 				viewer.getDisplay().repaint();
 			}
 		} );
-		// TODO: remember those listeners and remove them when the BDV window is closed!!!
+		// TODO: remember those listeners and remove them when the BDV window is
+		// closed!!!
 
 		final OverlayNavigation< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlayNavigation = new OverlayNavigation<>( viewer, overlayGraph );
 		overlayNavigationHandler.addNavigationListener( overlayNavigation );
@@ -494,7 +512,7 @@ public class WindowManager
 		HighlightBehaviours.installActionBindings(
 				viewerFrame.getTriggerbindings(),
 				keyconf,
-				new String[] {"bdv"},
+				new String[] { "bdv" },
 				model.getGraph(),
 				model.getGraph(),
 				highlightModel,
@@ -534,8 +552,13 @@ public class WindowManager
 
 			}
 
-			@Override public void menuDeselected( final MenuEvent e ) {}
-			@Override public void menuCanceled( final MenuEvent e ) {}
+			@Override
+			public void menuDeselected( final MenuEvent e )
+			{}
+
+			@Override
+			public void menuCanceled( final MenuEvent e )
+			{}
 		} );
 		viewerFrame.getJMenuBar().add( styleMenu );
 
@@ -551,7 +574,6 @@ public class WindowManager
 					rs.removeUpdateListener( panelRepainter );
 			};
 		} );
-
 
 		final BdvWindow bdvWindow = new BdvWindow( viewerFrame, tracksOverlay, bdvGroupHandle, contextProvider );
 		addBdvWindow( bdvWindow );
@@ -676,11 +698,12 @@ public class WindowManager
 		final FeatureModel< Spot, Link > featureModel = model.featureModel();
 		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
 				new FeatureModelAdapter< Spot, Link, TrackSchemeVertex, TrackSchemeEdge >( featureModel, vertexMap, edgeMap );
+		final LayoutColorGenerator colorGenerator = new LayoutColorGenerator( trackSchemeGraph, trackSchemeFeatures );
 
 		/*
 		 * TrackScheme ContextChooser.
 		 */
-		final TrackSchemeContextListener< Spot > contextListener = new TrackSchemeContextListener< >(
+		final TrackSchemeContextListener< Spot > contextListener = new TrackSchemeContextListener<>(
 				idmap,
 				trackSchemeGraph );
 		final ContextChooser< Spot > contextChooser = new ContextChooser<>( contextListener );
@@ -694,13 +717,14 @@ public class WindowManager
 				trackSchemeFocus,
 				trackSchemeSelection,
 				trackSchemeNavigation,
-				trackSchemeFeatures,
+				colorGenerator,
+				colorGenerator,
 				model,
 				groupHandle,
 				contextChooser,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
 
-		installTrackSchemeMenu( frame );
+		installTrackSchemeMenu( frame, colorGenerator );
 
 		/*
 		 * Register this TrackScheme in the TrackSchemeService.
@@ -740,7 +764,6 @@ public class WindowManager
 				model.getGraph(),
 				model.getGraph().getGraphIdBimap(),
 				model );
-
 
 		/*
 		 * Actions discovered by TrackScheme action provider and with mappings
@@ -826,7 +849,6 @@ public class WindowManager
 		final Selection< TrackSchemeVertex, TrackSchemeEdge > trackSchemeSelection =
 				new SelectionAdapter<>( branchGraphSelection, vertexMap, edgeMap );
 
-
 		/*
 		 * TrackScheme GroupHandle.
 		 */
@@ -860,12 +882,13 @@ public class WindowManager
 				trackSchemeSelection,
 				trackSchemeNavigation,
 				null,
+				null,
 				model,
 				groupHandle,
 				null,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
 
-		installTrackSchemeMenu( frame );
+		installTrackSchemeMenu( frame, null );
 		frame.setTitle( "Branch graph" );
 		frame.getTrackschemePanel().setTimepointRange( minTimepoint, maxTimepoint );
 		frame.getTrackschemePanel().graphChanged();
@@ -906,7 +929,7 @@ public class WindowManager
 		return renderSettingsManager;
 	}
 
-	private void installTrackSchemeMenu( final TrackSchemeFrame frame )
+	private void installTrackSchemeMenu( final TrackSchemeFrame frame, final LayoutColorGenerator colorGenerator )
 	{
 
 		final JMenuBar menu;
@@ -918,9 +941,17 @@ public class WindowManager
 		// Styles auto-populated from TrackScheme style manager.
 		if ( frame.getTrackschemePanel().getGraphOverlay() instanceof DefaultTrackSchemeOverlay )
 		{
-			// Update listener that repaint this TrackScheme when its style changes
+			// Update listener that repaint this TrackScheme when its style
+			// changes
 			final UpdateListener panelRepainter = new UpdateListener()
-				{ @Override public void trackSchemeStyleChanged() { frame.getTrackschemePanel().repaint(); } };
+			{
+				@Override
+				public void trackSchemeStyleChanged()
+				{
+					// Trigger relayout to get the new colors.
+					frame.getTrackschemePanel().graphChanged();
+				}
+			};
 
 			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) frame.getTrackschemePanel().getGraphOverlay();
 			final JMenu styleMenu = new JMenu( "Styles" );
@@ -933,7 +964,7 @@ public class WindowManager
 					styleMenu.removeAll();
 					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
 						styleMenu.add( new JMenuItem(
-								new TrackSchemeStyleAction( style, overlay, panelRepainter ) ) );
+								new TrackSchemeStyleAction( style, overlay, panelRepainter, colorGenerator ) ) );
 				}
 
 				@Override
@@ -989,7 +1020,7 @@ public class WindowManager
 		public static void writeToYaml( final String fileName, final WindowManager wm ) throws IOException
 		{
 			mkdirs( fileName );
-			YamlConfigIO.write(  buildDescriptions( wm ), fileName );
+			YamlConfigIO.write( buildDescriptions( wm ), fileName );
 		}
 	}
 }

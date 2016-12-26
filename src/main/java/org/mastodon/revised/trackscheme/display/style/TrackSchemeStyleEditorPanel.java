@@ -39,6 +39,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import org.mastodon.revised.model.feature.FeatureKeys;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.ui.util.CategoryJComboBox;
@@ -62,7 +64,10 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 	private final List< JComponent > vertexColorButtonToMute;
 
-	public TrackSchemeStyleEditorPanel( final TrackSchemeStyle style )
+	public TrackSchemeStyleEditorPanel(
+			final TrackSchemeStyle style,
+			final FeatureKeys featureKeys,
+			final FeatureRangeCalculator featureRangeCalculator )
 	{
 		super( new GridBagLayout() );
 		colorChooser = new JColorChooser();
@@ -89,7 +94,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		c.gridx++;
 		c.gridwidth = 3;
-		this.colorVertexChoices = vertexColorBy( style );
+		this.colorVertexChoices = vertexColorBy( style, featureKeys );
 		add( colorVertexChoices, c );
 
 		// Colormap and ranges.
@@ -215,31 +220,11 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 					{
 						try
 						{
-							switch ( style.colorVertexBy )
-							{
-							case INCOMING_EDGE:
-							case OUTGOING_EDGE:
-							{
-								final double[] range = new double[] { 0., 1. }; // TODO
-								style.minVertexColorRange = range[ 0 ];
-								style.maxVertexColorRange = range[ 1 ];
-								min1.setValue( Double.valueOf( range[ 0 ] ) );
-								max1.setValue( Double.valueOf( range[ 1 ] ) );
-								break;
-							}
-							case VERTEX:
-							{
-								final double[] range = new double[] { 0., 1. }; // TODO
-								style.minVertexColorRange = range[ 0 ];
-								style.maxVertexColorRange = range[ 1 ];
-								min1.setValue( Double.valueOf( range[ 0 ] ) );
-								max1.setValue( Double.valueOf( range[ 1 ] ) );
-								break;
-							}
-							default:
-								break;
-
-							}
+							final double[] range = featureRangeCalculator.getRange( style.vertexColorFeatureKey );
+							style.minVertexColorRange = range[ 0 ];
+							style.maxVertexColorRange( range[ 1 ] );
+							min1.setValue( Double.valueOf( range[ 0 ] ) );
+							max1.setValue( Double.valueOf( range[ 1 ] ) );
 						}
 						finally
 						{
@@ -271,7 +256,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		c.gridx++;
 		c.gridwidth = 3;
-		this.colorEdgeChoices = edgeColorBy( style );
+		this.colorEdgeChoices = edgeColorBy( style, featureKeys );
 		add( colorEdgeChoices, c );
 
 		// Colormap and ranges.
@@ -397,31 +382,11 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 					{
 						try
 						{
-							switch ( style.colorEdgeBy )
-							{
-							case EDGE:
-							{
-								final double[] range = new double[] { 0., 1. }; // TODO
-								style.minEdgeColorRange = range[ 0 ];
-								style.maxEdgeColorRange = range[ 1 ];
-								min2.setValue( Double.valueOf( range[ 0 ] ) );
-								max2.setValue( Double.valueOf( range[ 1 ] ) );
-								break;
-							}
-							case SOURCE_VERTEX:
-							case TARGET_VERTEX:
-							{
-								final double[] range = new double[] { 0., 1. }; // TODO
-								style.minEdgeColorRange = range[ 0 ];
-								style.maxEdgeColorRange = range[ 1 ];
-								min2.setValue( Double.valueOf( range[ 0 ] ) );
-								max2.setValue( Double.valueOf( range[ 1 ] ) );
-								break;
-							}
-							default:
-								break;
-
-							}
+							final double[] range = featureRangeCalculator.getRange( style.edgeColorFeatureKey );
+							style.minEdgeColorRange = range[ 0 ];
+							style.maxEdgeColorRange( range[ 1 ] );
+							min2.setValue( Double.valueOf( range[ 0 ] ) );
+							max2.setValue( Double.valueOf( range[ 1 ] ) );
 						}
 						finally
 						{
@@ -676,23 +641,35 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		}
 	}
 
-	private static CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > edgeColorBy( final TrackSchemeStyle style )
+	private static CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > edgeColorBy(
+			final TrackSchemeStyle style,
+			final FeatureKeys featureKeys )
 	{
 		/*
 		 * Harvest possible choices.
 		 */
-
-		final FeatureKeyWrapper fixedColor = new FeatureKeyWrapper( "Fixed color", "Fixed color" );
-		final FeatureKeyWrapper edgeDisplacementFeature = new FeatureKeyWrapper( "DISPLACEMENT", "Displacement" );
-		final FeatureKeyWrapper vertexZPosSourceFeature = new FeatureKeyWrapper( "Z_POS", "Z position" );
-		final FeatureKeyWrapper vertexZPosTargetFeature = new FeatureKeyWrapper( "Z_POS", "Z position" );
-
 		final Map< ColorEdgeBy, Collection< FeatureKeyWrapper > > items = new LinkedHashMap<>();
+
+		// Fixed color.
+		final FeatureKeyWrapper fixedColor = new FeatureKeyWrapper( "Fixed color", "Fixed color" );
 		items.put( ColorEdgeBy.FIXED, Collections.singleton( fixedColor ) );
-		// TODO read features from registry, once it is typed.
-		items.put( ColorEdgeBy.EDGE, Collections.singleton( edgeDisplacementFeature ) );
-		items.put( ColorEdgeBy.SOURCE_VERTEX, Collections.singleton( vertexZPosSourceFeature ) );
-		items.put( ColorEdgeBy.TARGET_VERTEX, Collections.singleton( vertexZPosTargetFeature ) );
+
+		// This edge.
+		final Collection< FeatureKeyWrapper > edgeProjections = new ArrayList<>();
+		for ( final String projectionKey : featureKeys.getEdgeProjectionKeys() )
+			edgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+		items.put( ColorEdgeBy.EDGE, edgeProjections );
+
+		// Source and target vertex.
+		final Collection< FeatureKeyWrapper > sourceVertexProjections = new ArrayList<>();
+		final Collection< FeatureKeyWrapper > targetVertexProjections = new ArrayList<>();
+		for ( final String projectionKey : featureKeys.getVertexProjectionKeys() )
+		{
+			sourceVertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+			targetVertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+		}
+		items.put( ColorEdgeBy.SOURCE_VERTEX, sourceVertexProjections );
+		items.put( ColorEdgeBy.TARGET_VERTEX, targetVertexProjections );
 
 		final Map< FeatureKeyWrapper, String > itemNames = null;
 		final Map< ColorEdgeBy, String > categoryNames = new HashMap<>();
@@ -720,23 +697,36 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		return comboBox;
 	}
 
-	private static CategoryJComboBox< ColorVertexBy, FeatureKeyWrapper > vertexColorBy( final TrackSchemeStyle style )
+	private static CategoryJComboBox< ColorVertexBy, FeatureKeyWrapper > vertexColorBy(
+			final TrackSchemeStyle style,
+			final FeatureKeys featureKeys )
 	{
 		/*
 		 * Harvest possible choices.
 		 */
 
-		final FeatureKeyWrapper fixedColor = new FeatureKeyWrapper( "Fixed color", "Fixed color" );
-		final FeatureKeyWrapper vertexZPosFeature = new FeatureKeyWrapper( "Z_POS", "Z position" );
-		final FeatureKeyWrapper edgeDisplacementIncomingFeature = new FeatureKeyWrapper( "DISPLACEMENT", "Displacement" );
-		final FeatureKeyWrapper edgeDisplacementOutgoingFeature = new FeatureKeyWrapper( "DISPLACEMENT", "Displacement" );
-
 		final Map< ColorVertexBy, Collection< FeatureKeyWrapper > > items = new LinkedHashMap<>();
+
+		// Fixed.
+		final FeatureKeyWrapper fixedColor = new FeatureKeyWrapper( "Fixed color", "Fixed color" );
 		items.put( ColorVertexBy.FIXED, Collections.singleton( fixedColor ) );
-		// TODO read features from registry, once it is typed.
-		items.put( ColorVertexBy.VERTEX, Collections.singleton( vertexZPosFeature ) );
-		items.put( ColorVertexBy.INCOMING_EDGE, Collections.singleton( edgeDisplacementIncomingFeature ) );
-		items.put( ColorVertexBy.OUTGOING_EDGE, Collections.singleton( edgeDisplacementOutgoingFeature ) );
+
+		// This vertex.
+		final Collection< FeatureKeyWrapper > vertexProjections = new ArrayList<>();
+		for ( final String projectionKey : featureKeys.getVertexProjectionKeys() )
+			vertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+		items.put( ColorVertexBy.VERTEX, vertexProjections );
+
+		// Incoming and outgoing edges.
+		final Collection< FeatureKeyWrapper > incomingEdgeProjections = new ArrayList<>();
+		final Collection< FeatureKeyWrapper > outgoingEdgeProjections = new ArrayList<>();
+		for ( final String projectionKey : featureKeys.getEdgeProjectionKeys() )
+		{
+			incomingEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+			outgoingEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+		}
+		items.put( ColorVertexBy.INCOMING_EDGE, incomingEdgeProjections );
+		items.put( ColorVertexBy.OUTGOING_EDGE, outgoingEdgeProjections );
 
 		final Map< FeatureKeyWrapper, String > itemNames = null;
 

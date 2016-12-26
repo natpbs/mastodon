@@ -26,6 +26,8 @@ import org.mastodon.adapter.NavigationHandlerAdapter;
 import org.mastodon.adapter.RefBimap;
 import org.mastodon.adapter.SelectionAdapter;
 import org.mastodon.graph.GraphIdBimap;
+import org.mastodon.revised.model.feature.FeatureKeys;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeEdgeBimap;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
@@ -79,8 +81,21 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 	private final JPanel contentPanel;
 
-	public TrackSchemeStyleChooserPanel( final Frame owner, final MutableComboBoxModel< TrackSchemeStyle > model )
+	private final FeatureKeys featureKeys;
+
+	private final FeatureRangeCalculator featureRangeCalculator;
+
+	private final DummyLayoutColorGenerator colorGenerator;
+
+	public TrackSchemeStyleChooserPanel(
+			final Frame owner,
+			final MutableComboBoxModel< TrackSchemeStyle > model,
+			final FeatureKeys featureKeys,
+			final FeatureRangeCalculator featureRangeCalculator )
 	{
+		this.featureKeys = featureKeys;
+		this.featureRangeCalculator = featureRangeCalculator;
+
 		final Examples ex = DummyGraph.Examples.CELEGANS;
 		final DummyGraph example = ex.getGraph();
 		final GraphIdBimap< DummyVertex, DummyEdge > idmap = example.getIdBimap();
@@ -92,7 +107,8 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus = new FocusAdapter<>( new FocusModelImp<>( idmap ), vertexMap, edgeMap );
 		final Selection< TrackSchemeVertex, TrackSchemeEdge > selection = new SelectionAdapter<>( ex.getSelection(), vertexMap, edgeMap );
 		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation = new NavigationHandlerAdapter<>( new NavigationHandlerImp<>( new GroupManager().createGroupHandle() ), vertexMap, edgeMap );
-		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, null, TrackSchemeOptions.options() );
+		colorGenerator = new DummyLayoutColorGenerator( graph, model );
+		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, colorGenerator, colorGenerator, TrackSchemeOptions.options() );
 		panelPreview.setTimepointRange( 0, 7 );
 		panelPreview.timePointChanged( 2 );
 		panelPreview.graphChanged();
@@ -218,7 +234,8 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		@Override
 		public void trackSchemeStyleChanged()
 		{
-			panelPreview.repaint();
+			colorGenerator.trackSchemeStyleChanged();
+			panelPreview.graphChanged();
 		}
 
 		@Override
@@ -229,12 +246,15 @@ class TrackSchemeStyleChooserPanel extends JPanel
 			{
 				final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
 				final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
-				dtso.setStyle( style );
+
+				final TrackSchemeStyle oldStyle = dtso.setStyle( style );
+				oldStyle.removeUpdateListener( this );
 
 				if ( null != editorPanel )
 					contentPanel.remove( editorPanel );
 
-				editorPanel = new TrackSchemeStyleEditorPanel( comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ) );
+				editorPanel = new TrackSchemeStyleEditorPanel(
+						comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ), featureKeys, featureRangeCalculator );
 				contentPanel.add( editorPanel, BorderLayout.SOUTH );
 
 				style.addUpdateListener( this );

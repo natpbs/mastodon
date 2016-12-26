@@ -170,6 +170,7 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ByteMappedElement >
 		setSelected( e.isSelected() );
 		setTransition( e.getTransition() );
 		setInterpolationCompletionRatio( e.getInterpolationCompletionRatio() );
+		setColor( e.getColor() );
 		return this;
 	}
 

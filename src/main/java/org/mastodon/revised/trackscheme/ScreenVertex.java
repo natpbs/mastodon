@@ -287,7 +287,7 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ByteMappedElement >
 		setTransition( v.getTransition() );
 		setInterpolatedScreenVertexIndex( v.getInterpolatedScreenVertexIndex() );
 		setInterpolationCompletionRatio( v.getInterpolationCompletionRatio() );
-		setColor( getColor() );
+		setColor( v.getColor() );
 		return this;
 	}
 

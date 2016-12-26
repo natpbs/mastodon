@@ -24,6 +24,8 @@ import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 
@@ -92,7 +94,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 	/**
 	 * Sets the TrackScheme style used to render this overlay.
-	 * 
+	 *
 	 * @param style
 	 *            the style to set.
 	 * @return the style previously used before this call.
@@ -362,9 +364,22 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		final boolean highlighted = ( highlightedEdgeId >= 0 ) && ( edge.getTrackSchemeEdgeId() == highlightedEdgeId );
 		final boolean selected = edge.isSelected();
 		final boolean ghost = vs.isGhost() && vt.isGhost();
+
+		final Color edgeColor;
+		final Color ghostEdgeColor;
+		if ( style.colorEdgeBy == ColorEdgeBy.FIXED )
+		{
+			edgeColor = style.edgeColor;
+			ghostEdgeColor = style.ghostEdgeColor;
+		}
+		else
+		{
+			edgeColor = edge.getColor();
+			ghostEdgeColor = edge.getColor();
+		}
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
-				style.edgeColor, style.selectedEdgeColor,
-				style.ghostEdgeColor, style.ghostSelectedEdgeColor );
+				edgeColor, style.selectedEdgeColor,
+				ghostEdgeColor, style.ghostSelectedEdgeColor );
 		g2.setColor( drawColor );
 		if ( highlighted )
 			g2.setStroke( style.edgeHighlightStroke );
@@ -393,10 +408,23 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		if ( highlighted || focused )
 			spotradius *= 1.5;
 
+		final Color vertexFillColor;
+		final Color ghostVertexFillColor;
+		if ( style.colorVertexBy == ColorVertexBy.FIXED )
+		{
+			vertexFillColor = style.simplifiedVertexFillColor;
+			ghostVertexFillColor = style.ghostSimplifiedVertexFillColor;
+		}
+		else
+		{
+			vertexFillColor = vertex.getColor();
+			ghostVertexFillColor = vertexFillColor;
+		}
+
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
-				disappear ? style.selectedSimplifiedVertexFillColor : style.simplifiedVertexFillColor,
+				disappear ? style.selectedSimplifiedVertexFillColor : vertexFillColor,
 				style.selectedSimplifiedVertexFillColor,
-				disappear ? style.ghostSelectedSimplifiedVertexFillColor : style.ghostSimplifiedVertexFillColor,
+				disappear ? style.ghostSelectedSimplifiedVertexFillColor : ghostVertexFillColor,
 				style.ghostSelectedSimplifiedVertexFillColor );
 
 		final double x = vertex.getX();
@@ -467,9 +495,21 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			spotdiameter *= ( 1 + ratio );
 		final double spotradius = spotdiameter / 2;
 
+		final Color vertexFillColor;
+		final Color ghostVertexFillColor;
+		if ( style.colorVertexBy == ColorVertexBy.FIXED )
+		{
+			vertexFillColor = style.vertexFillColor;
+			ghostVertexFillColor = style.ghostVertexFillColor;
+		}
+		else
+		{
+			vertexFillColor = vertex.getColor();
+			ghostVertexFillColor = vertexFillColor;
+		}
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
-				style.vertexFillColor, style.selectedVertexFillColor,
-				style.ghostVertexFillColor, style.ghostSelectedVertexFillColor );
+				vertexFillColor, style.selectedVertexFillColor,
+				ghostVertexFillColor, style.ghostSelectedVertexFillColor );
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
 				style.vertexDrawColor, style.selectedVertexDrawColor,
 				style.ghostVertexDrawColor, style.ghostSelectedVertexDrawColor );

@@ -18,6 +18,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
+import org.mastodon.revised.model.feature.DefaultFeatureRangeCalculator;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
 import org.mastodon.revised.ui.DisplaySettingsDialog;
@@ -49,14 +51,16 @@ public class MainWindow extends JFrame
 
 	private final TrackSchemeStyleManager trackSchemeStyleManager;
 
+	private final JButton displaySettingsButton;
+
 	public MainWindow( final InputTriggerConfig keyconf )
 	{
 		super( "test" );
 		this.keyconf = keyconf;
 
-		tgmmImportDialog = new TgmmImportDialog( this );
+		this.tgmmImportDialog = new TgmmImportDialog( this );
 		this.bdvSettingsManager = new RenderSettingsManager();
-		trackSchemeStyleManager = new TrackSchemeStyleManager();
+		this.trackSchemeStyleManager = new TrackSchemeStyleManager();
 
 		final JPanel buttonsPanel = new JPanel();
 		buttonsPanel.setLayout( new GridLayout( 10, 1 ) );
@@ -95,17 +99,7 @@ public class MainWindow extends JFrame
 		buttonsPanel.add( branchGraphButton );
 		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
 
-		/*
-		 * Display settings.
-		 */
-
-		final JButton displaySettingsButton = new JButton( "display settings" );
-		final DisplaySettingsDialog displaySettingsDialog =
-				new DisplaySettingsDialog( bdvSettingsManager, trackSchemeStyleManager );
-		displaySettingsDialog.setSize( 400, 850 );
-
-		displaySettingsButton.addActionListener(
-				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
+		this.displaySettingsButton = new JButton( "display settings" );
 		buttonsPanel.add( displaySettingsButton );
 		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
 
@@ -183,6 +177,28 @@ public class MainWindow extends JFrame
 				bdvSettingsManager,
 				trackSchemeStyleManager,
 				keyconf );
+
+		/*
+		 * Display settings.
+		 */
+
+		final FeatureRangeCalculator featureRangeCalculator =
+				new DefaultFeatureRangeCalculator<>( windowManager.getModel().getGraph(), windowManager.getModel().featureModel() );
+		final DisplaySettingsDialog displaySettingsDialog =
+				new DisplaySettingsDialog(
+						this,
+						bdvSettingsManager,
+						trackSchemeStyleManager,
+						windowManager.getModel().featureModel(),
+						featureRangeCalculator );
+		displaySettingsDialog.setSize( 400, 850 );
+
+		final ActionListener[] listeners = displaySettingsButton.getActionListeners();
+		for ( final ActionListener listener : listeners )
+			displaySettingsButton.removeActionListener( listener );
+
+		displaySettingsButton.addActionListener(
+				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
 	}
 
 	public void saveProject( final File projectFile ) throws IOException

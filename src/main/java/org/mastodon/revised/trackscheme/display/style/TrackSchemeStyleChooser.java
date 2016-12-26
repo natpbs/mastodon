@@ -11,6 +11,9 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.MutableComboBoxModel;
 
+import org.mastodon.revised.model.feature.FeatureKeys;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
+
 /**
  * @author Jean=Yves Tinevez
  */
@@ -23,7 +26,11 @@ public class TrackSchemeStyleChooser
 
 	private final MutableComboBoxModel< TrackSchemeStyle > model;
 
-	public TrackSchemeStyleChooser( final JFrame owner, final TrackSchemeStyleManager trackschemeStyleManager )
+	public TrackSchemeStyleChooser(
+			final JFrame owner,
+			final TrackSchemeStyleManager trackschemeStyleManager,
+			final FeatureKeys featureKeys,
+			final FeatureRangeCalculator featureRangeCalculator )
 	{
 
 		this.styleManager = trackschemeStyleManager;
@@ -31,7 +38,7 @@ public class TrackSchemeStyleChooser
 		if ( model.getSize() > 0 )
 			model.setSelectedItem( model.getElementAt( 0 ) );
 
-		this.panel = new TrackSchemeStyleChooserPanel( owner, model );
+		this.panel = new TrackSchemeStyleChooserPanel( owner, model, featureKeys, featureRangeCalculator );
 		panel.buttonDeleteStyle.addActionListener( new ActionListener()
 		{
 			@Override

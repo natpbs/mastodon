@@ -12,7 +12,8 @@ import org.mastodon.graph.Edges;
 import org.mastodon.revised.trackscheme.ScreenEdge.ScreenEdgePool;
 import org.mastodon.revised.trackscheme.ScreenVertex.ScreenVertexPool;
 import org.mastodon.revised.trackscheme.ScreenVertexRange.ScreenVertexRangePool;
-import org.mastodon.revised.trackscheme.display.style.LayoutColorGenerator;
+import org.mastodon.revised.ui.EdgeColorGenerator;
+import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.selection.Selection;
 
 import gnu.trove.iterator.TIntAlternatingIterator;
@@ -280,13 +281,16 @@ public class LineageTreeLayout
 	 *            the screen entities are shifted in X by this amount.
 	 * @param decorationsOffsetY
 	 *            the screen entities are shifted in Y by this amount.
+	 * @param vertexColorGenerator
+	 * @param edgeColorGenerator
 	 */
 	public void cropAndScale(
 			final ScreenTransform transform,
 			final ScreenEntities screenEntities,
 			final int decorationsOffsetX,
 			final int decorationsOffsetY,
-			final LayoutColorGenerator colorGenerator )
+			final VertexColorGenerator< TrackSchemeVertex > vertexColorGenerator,
+			final EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator )
 	{
 		final double minX = transform.getMinX();
 		final double maxX = transform.getMaxX();
@@ -363,8 +367,8 @@ public class LineageTreeLayout
 						final double x = ( v1.getLayoutX() - minX ) * xScale + decorationsOffsetX;
 						final boolean selected = selection.isSelected( v1 );
 						final boolean ghost = v1.isGhost();
-						screenVertexPool.create( sv ).init( id, x, y, selected, ghost,
-								colorGenerator.color( v1 ) );
+
+						screenVertexPool.create( sv ).init( id, x, y, selected, ghost, vertexColorGenerator.color( v1 ) );
 						screenVertices.add( sv );
 
 						minVertexScreenDist = Math.min( minVertexScreenDist, x - prevX );
@@ -382,7 +386,7 @@ public class LineageTreeLayout
 								final int targetScreenVertexIndex = v1si;
 								final boolean eselected = selection.isSelected( edge );
 								screenEdgePool.create( se ).init( eid, sourceScreenVertexIndex, targetScreenVertexIndex, eselected,
-										colorGenerator.color( edge ) );
+										edgeColorGenerator.color( edge ) );
 								screenEdges.add( se );
 								final int sei = se.getInternalPoolIndex();
 								edge.setScreenEdgeIndex( sei );

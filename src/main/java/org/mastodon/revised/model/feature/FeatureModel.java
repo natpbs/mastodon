@@ -1,24 +1,14 @@
 package org.mastodon.revised.model.feature;
 
-import java.util.Set;
-
 import org.mastodon.features.Feature;
 
-public interface FeatureModel< V, E >
+public interface FeatureModel< V, E > extends FeatureKeys
 {
 
 	public enum FeatureTarget
 	{
 		VERTEX, EDGE, GRAPH, TIMEPOINT;
 	}
-
-	public Set< String > getEdgeProjectionKeys();
-
-	public Set< String > getEdgeFeatureKeys();
-
-	public Set< String > getVertexProjectionKeys();
-
-	public Set< String > getVertexFeatureKeys();
 
 	public FeatureTarget getProjectionTarget( final String projectionKey );
 
