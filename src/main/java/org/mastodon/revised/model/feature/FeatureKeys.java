@@ -4,11 +4,12 @@ import java.util.Set;
 
 public interface FeatureKeys
 {
-	public Set< String > getEdgeProjectionKeys();
 
-	public Set< String > getEdgeFeatureKeys();
+	public FeatureTarget getFeatureTarget( final String featureKey );
 
-	public Set< String > getVertexProjectionKeys();
+	public Set< String > getFeatureKeys( FeatureTarget target );
 
-	public Set< String > getVertexFeatureKeys();
+	public FeatureTarget getProjectionTarget( final String projectionKey );
+
+	public Set< String > getProjectionKeys( FeatureTarget target );
 }

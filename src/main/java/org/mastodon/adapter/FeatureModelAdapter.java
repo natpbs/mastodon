@@ -5,9 +5,12 @@ import java.util.Set;
 import org.mastodon.features.Feature;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.Vertex;
+import org.mastodon.graph.branch.BranchEdge;
+import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.model.feature.FeatureComputer;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
+import org.mastodon.revised.model.feature.FeatureTarget;
 
 public class FeatureModelAdapter< V extends Vertex< E >, E extends Edge< V >, WV extends Vertex< WE >, WE extends Edge< WV > >
 		implements FeatureModel< WV, WE >
@@ -27,30 +30,6 @@ public class FeatureModelAdapter< V extends Vertex< E >, E extends Edge< V >, WV
 		this.featureModel = featureModel;
 		this.vertexMap = vertexMap;
 		this.edgeMap = edgeMap;
-	}
-
-	@Override
-	public Set< String > getEdgeProjectionKeys()
-	{
-		return featureModel.getEdgeProjectionKeys();
-	}
-
-	@Override
-	public Set< String > getEdgeFeatureKeys()
-	{
-		return featureModel.getEdgeFeatureKeys();
-	}
-
-	@Override
-	public Set< String > getVertexProjectionKeys()
-	{
-		return featureModel.getVertexProjectionKeys();
-	}
-
-	@Override
-	public Set< String > getVertexFeatureKeys()
-	{
-		return featureModel.getVertexFeatureKeys();
 	}
 
 	@Override
@@ -75,6 +54,30 @@ public class FeatureModelAdapter< V extends Vertex< E >, E extends Edge< V >, WV
 	public FeatureProjection< WV > getVertexProjection( final String projectionKey )
 	{
 		return new FeatureProjectionAdapter< V, WV >( featureModel.getVertexProjection( projectionKey ), vertexMap );
+	}
+
+	@Override
+	public FeatureProjection< BranchEdge > getBranchEdgeProjection( final String projectionKey )
+	{
+		return featureModel.getBranchEdgeProjection( projectionKey );
+	}
+
+	@Override
+	public FeatureProjection< BranchVertex > getBranchVertexProjection( final String projectionKey )
+	{
+		return featureModel.getBranchVertexProjection( projectionKey );
+	}
+
+	@Override
+	public Set< String > getFeatureKeys( final FeatureTarget target )
+	{
+		return featureModel.getFeatureKeys( target );
+	}
+
+	@Override
+	public Set< String > getProjectionKeys( final FeatureTarget target )
+	{
+		return featureModel.getProjectionKeys( target );
 	}
 
 	@Override
@@ -120,4 +123,5 @@ public class FeatureModelAdapter< V extends Vertex< E >, E extends Edge< V >, WV
 			return projection.value( map.getLeft( obj ) );
 		}
 	}
+
 }

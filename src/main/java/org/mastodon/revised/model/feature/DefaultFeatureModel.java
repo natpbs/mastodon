@@ -1,6 +1,7 @@
 package org.mastodon.revised.model.feature;
 
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,60 +10,71 @@ import java.util.Set;
 import org.mastodon.features.Feature;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.Vertex;
+import org.mastodon.graph.branch.BranchEdge;
+import org.mastodon.graph.branch.BranchVertex;
 
 public class DefaultFeatureModel< V extends Vertex< E >, E extends Edge< V > > implements FeatureModel< V, E >
 {
 
 	private final Map< String, FeatureTarget > featureTargets;
 
-	private final Map< String, Feature< ?, ?, ? > > feature;
-
-	private final Map< String, FeatureProjection< V > > vertexProjections;
-
-	private final Map< String, FeatureProjection< E > > edgeProjections;
-
 	private final Map< String, FeatureTarget > projectionTargets;
 
-	private final Set< String > vertexFeatureKeys;
+	private final Map< String, Feature< ?, ?, ? > > feature;
 
-	private final Set< String > edgeFeatureKeys;
+	private final Map< FeatureTarget, Map< String, FeatureProjection< ? > > > projections;
+
+	private final EnumMap< FeatureTarget, Set< String > > featureKeys;
+
+	private final EnumMap< FeatureTarget, Set< String > > projectionKeys;
 
 	public DefaultFeatureModel()
 	{
 		featureTargets = new HashMap<>();
 		feature = new HashMap<>();
-		vertexProjections = new HashMap<>();
-		edgeProjections = new HashMap<>();
-		vertexFeatureKeys = new HashSet<>();
-		edgeFeatureKeys = new HashSet<>();
+		projections = new EnumMap<>( FeatureTarget.class );
 		projectionTargets = new HashMap<>();
+		featureKeys = new EnumMap<>( FeatureTarget.class );
+		projectionKeys = new EnumMap<>( FeatureTarget.class );
 	}
 
 	@Override
-	@SuppressWarnings( "unchecked" )
 	public void declareFeature( final FeatureComputer< ?, ?, ? > fc )
 	{
+		// Features.
 		final FeatureTarget target = fc.getTarget();
 		final String featureKey = fc.getFeature().getKey();
 		featureTargets.put( featureKey, target );
 		feature.put( featureKey, fc.getFeature() );
-		switch ( target )
+
+		// Feature keys.
+		Set< String > fkeys = featureKeys.get( target );
+		if ( null == fkeys )
 		{
-		case EDGE:
-			edgeProjections.putAll( ( Map< ? extends String, ? extends FeatureProjection< E > > ) fc.getProjections() );
-			edgeFeatureKeys.add( featureKey );
-			break;
-		case GRAPH:
-			break;
-		case TIMEPOINT:
-			break;
-		case VERTEX:
-			vertexProjections.putAll( ( Map< ? extends String, ? extends FeatureProjection< V > > ) fc.getProjections() );
-			vertexFeatureKeys.add( featureKey );
-			break;
-		default:
-			break;
+			fkeys = new HashSet<>();
+			featureKeys.put( target, fkeys );
 		}
+		fkeys.add( featureKey );
+
+		// Projections.
+		Map< String, FeatureProjection< ? > > pmap = projections.get( target );
+		if ( null == pmap )
+		{
+			pmap = new HashMap<>();
+			projections.put( target, pmap );
+		}
+		pmap.putAll( fc.getProjections() );
+
+		// Projection keys.
+		Set< String > kset = projectionKeys.get( target );
+		if (null == kset)
+		{
+			kset = new HashSet<>();
+			projectionKeys.put( target, kset );
+		}
+		kset.addAll( fc.getProjections().keySet() );
+
+		// Projections target.
 		for ( final String projectionKey : fc.getProjections().keySet() )
 			projectionTargets.put( projectionKey, target );
 	}
@@ -72,29 +84,10 @@ public class DefaultFeatureModel< V extends Vertex< E >, E extends Edge< V > > i
 	{
 		featureTargets.clear();
 		feature.clear();
-		vertexFeatureKeys.clear();
-		edgeFeatureKeys.clear();
-		vertexProjections.clear();
-		edgeProjections.clear();
+		projections.clear();
 		projectionTargets.clear();
-	}
-
-	@Override
-	public FeatureProjection< V > getVertexProjection( final String projectionKey )
-	{
-		return vertexProjections.get( projectionKey );
-	}
-
-	@Override
-	public Feature< ?, ?, ? > getFeature( final String featureKey )
-	{
-		return feature.get( featureKey );
-	}
-
-	@Override
-	public FeatureProjection< E > getEdgeProjection( final String projectionKey )
-	{
-		return edgeProjections.get( projectionKey );
+		featureKeys.clear();
+		projectionKeys.clear();
 	}
 
 	@Override
@@ -110,26 +103,54 @@ public class DefaultFeatureModel< V extends Vertex< E >, E extends Edge< V > > i
 	}
 
 	@Override
-	public Set< String > getVertexFeatureKeys()
+	public Set< String > getFeatureKeys( final FeatureTarget target )
 	{
-		return Collections.unmodifiableSet( vertexFeatureKeys );
+		final Set< String > set = featureKeys.get( target );
+		if ( null == set )
+			return Collections.emptySet();
+		return Collections.unmodifiableSet( set );
 	}
 
 	@Override
-	public Set< String > getVertexProjectionKeys()
+	public Set< String > getProjectionKeys( final FeatureTarget target )
 	{
-		return Collections.unmodifiableSet( vertexProjections.keySet() );
+		final Set< String > set = projectionKeys.get( target );
+		if ( null == set )
+			return Collections.emptySet();
+		return Collections.unmodifiableSet( set );
 	}
 
 	@Override
-	public Set< String > getEdgeFeatureKeys()
+	public Feature< ?, ?, ? > getFeature( final String featureKey )
 	{
-		return Collections.unmodifiableSet( edgeFeatureKeys );
+		return feature.get( featureKey );
 	}
 
+	@SuppressWarnings( "unchecked" )
 	@Override
-	public Set< String > getEdgeProjectionKeys()
+	public FeatureProjection< E > getEdgeProjection( final String projectionKey )
 	{
-		return Collections.unmodifiableSet( edgeProjections.keySet() );
+		return ( FeatureProjection< E > ) projections.get( FeatureTarget.EDGE ).get( projectionKey );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	@Override
+	public FeatureProjection< V > getVertexProjection( final String projectionKey )
+	{
+		return ( FeatureProjection< V > ) projections.get( FeatureTarget.VERTEX ).get( projectionKey );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	@Override
+	public FeatureProjection< BranchEdge > getBranchEdgeProjection( final String projectionKey )
+	{
+		return ( FeatureProjection< BranchEdge > ) projections.get( FeatureTarget.BRANCH_EDGE ).get( projectionKey );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	@Override
+	public FeatureProjection< BranchVertex > getBranchVertexProjection( final String projectionKey )
+	{
+		return ( FeatureProjection< BranchVertex > ) projections.get( FeatureTarget.BRANCH_VERTEX ).get( projectionKey );
 	}
 }
