@@ -51,6 +51,7 @@ import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
+import org.mastodon.revised.model.branchgraph.BranchGraphAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphFocusAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphHighlightAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphNavigationHandlerAdapter;
@@ -360,6 +361,8 @@ public class WindowManager
 			final Set< String > features = new HashSet<>();
 			features.addAll( featureComputerService.getAvailableEdgeFeatureComputers() );
 			features.addAll( featureComputerService.getAvailableVertexFeatureComputers() );
+			features.addAll( featureComputerService.getAvailableBranchVertexFeatureComputers() );
+			features.addAll( featureComputerService.getAvailableBranchEdgeFeatureComputers() );
 			featureComputerService.compute( model, features );
 		}
 
@@ -698,7 +701,11 @@ public class WindowManager
 		final FeatureModel< Spot, Link > featureModel = model.featureModel();
 		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
 				new FeatureModelAdapter< Spot, Link, TrackSchemeVertex, TrackSchemeEdge >( featureModel, vertexMap, edgeMap );
-		final LayoutColorGenerator colorGenerator = new LayoutColorGenerator( trackSchemeGraph, trackSchemeFeatures );
+		final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraphAdapter =
+				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
+
+		final LayoutColorGenerator colorGenerator =
+				new LayoutColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
 
 		/*
 		 * TrackScheme ContextChooser.

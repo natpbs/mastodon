@@ -41,6 +41,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.mastodon.revised.model.feature.FeatureKeys;
 import org.mastodon.revised.model.feature.FeatureRangeCalculator;
+import org.mastodon.revised.model.feature.FeatureTarget;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.ui.util.CategoryJComboBox;
@@ -649,50 +650,67 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		 * Harvest possible choices.
 		 */
 		final Map< ColorEdgeBy, Collection< FeatureKeyWrapper > > items = new LinkedHashMap<>();
+		final Map< ColorEdgeBy, String > categoryNames = new HashMap<>();
 
 		// Fixed color.
 		final FeatureKeyWrapper fixedColor = new FeatureKeyWrapper( "Fixed color", "Fixed color" );
 		items.put( ColorEdgeBy.FIXED, Collections.singleton( fixedColor ) );
+		categoryNames.put( ColorEdgeBy.FIXED, "Fixed" );
 
 		// This edge.
 		final Collection< FeatureKeyWrapper > edgeProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getEdgeProjectionKeys() )
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.EDGE ) )
 			edgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
-		items.put( ColorEdgeBy.EDGE, edgeProjections );
+		if ( !edgeProjections.isEmpty() )
+		{
+			items.put( ColorEdgeBy.EDGE, edgeProjections );
+			categoryNames.put( ColorEdgeBy.EDGE, "Edge feature" );
+		}
 
 		// Source and target vertex.
 		final Collection< FeatureKeyWrapper > sourceVertexProjections = new ArrayList<>();
 		final Collection< FeatureKeyWrapper > targetVertexProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getVertexProjectionKeys() )
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.VERTEX ) )
 		{
 			sourceVertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 			targetVertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 		}
-		items.put( ColorEdgeBy.SOURCE_VERTEX, sourceVertexProjections );
-		items.put( ColorEdgeBy.TARGET_VERTEX, targetVertexProjections );
+		if ( !sourceVertexProjections.isEmpty() )
+		{
+			items.put( ColorEdgeBy.SOURCE_VERTEX, sourceVertexProjections );
+			items.put( ColorEdgeBy.TARGET_VERTEX, targetVertexProjections );
+			categoryNames.put( ColorEdgeBy.SOURCE_VERTEX, "Source vertex feature" );
+			categoryNames.put( ColorEdgeBy.TARGET_VERTEX, "Target vertex feature" );
+		}
+
+		// Branch edge.
+		final Collection< FeatureKeyWrapper > branchEdgeProjections = new ArrayList<>();
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.BRANCH_EDGE ) )
+			branchEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+		if ( !branchEdgeProjections.isEmpty() )
+		{
+			items.put( ColorEdgeBy.BRANCH_EDGE, branchEdgeProjections );
+			categoryNames.put( ColorEdgeBy.BRANCH_EDGE, "Branch edge" );
+		}
 
 		final Map< FeatureKeyWrapper, String > itemNames = null;
-		final Map< ColorEdgeBy, String > categoryNames = new HashMap<>();
-		categoryNames.put( ColorEdgeBy.FIXED, "Fixed" );
-		categoryNames.put( ColorEdgeBy.EDGE, "Edge feature" );
-		categoryNames.put( ColorEdgeBy.SOURCE_VERTEX, "Source vertex feature" );
-		categoryNames.put( ColorEdgeBy.TARGET_VERTEX, "Target vertex feature" );
-
-		final CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > comboBox = new CategoryJComboBox<>( items, itemNames, categoryNames );
+		final CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > comboBox =
+				new CategoryJComboBox<>( items, itemNames, categoryNames );
 
 		/*
 		 * Set selected item according to provided style.
 		 */
 
 		FeatureKeyWrapper fkw = fixedColor;
-		for ( final FeatureKeyWrapper key : items.get( style.colorEdgeBy ) )
-		{
-			if ( style.edgeColorFeatureKey.equals( key.featureKey ) )
+		if ( null != items.get( style.colorEdgeBy ) )
+			for ( final FeatureKeyWrapper key : items.get( style.colorEdgeBy ) )
 			{
-				fkw = key;
-				break;
+				if ( style.edgeColorFeatureKey.equals( key.featureKey ) )
+				{
+					fkw = key;
+					break;
+				}
 			}
-		}
 		comboBox.setSelectedItem( fkw );
 		return comboBox;
 	}
@@ -706,50 +724,66 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		 */
 
 		final Map< ColorVertexBy, Collection< FeatureKeyWrapper > > items = new LinkedHashMap<>();
+		final Map< ColorVertexBy, String > categoryNames = new HashMap<>();
 
 		// Fixed.
 		final FeatureKeyWrapper fixedColor = new FeatureKeyWrapper( "Fixed color", "Fixed color" );
 		items.put( ColorVertexBy.FIXED, Collections.singleton( fixedColor ) );
+		categoryNames.put( ColorVertexBy.FIXED, "Fixed" );
 
 		// This vertex.
 		final Collection< FeatureKeyWrapper > vertexProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getVertexProjectionKeys() )
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.VERTEX ) )
 			vertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
-		items.put( ColorVertexBy.VERTEX, vertexProjections );
+		if ( !vertexProjections.isEmpty() )
+		{
+			items.put( ColorVertexBy.VERTEX, vertexProjections );
+			categoryNames.put( ColorVertexBy.VERTEX, "Vertex feature" );
+		}
 
 		// Incoming and outgoing edges.
 		final Collection< FeatureKeyWrapper > incomingEdgeProjections = new ArrayList<>();
 		final Collection< FeatureKeyWrapper > outgoingEdgeProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getEdgeProjectionKeys() )
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.EDGE ) )
 		{
 			incomingEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 			outgoingEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 		}
-		items.put( ColorVertexBy.INCOMING_EDGE, incomingEdgeProjections );
-		items.put( ColorVertexBy.OUTGOING_EDGE, outgoingEdgeProjections );
+		if ( !incomingEdgeProjections.isEmpty() )
+		{
+			items.put( ColorVertexBy.INCOMING_EDGE, incomingEdgeProjections );
+			items.put( ColorVertexBy.OUTGOING_EDGE, outgoingEdgeProjections );
+			categoryNames.put( ColorVertexBy.INCOMING_EDGE, "Incoming edge feature" );
+			categoryNames.put( ColorVertexBy.OUTGOING_EDGE, "Outgoing edge feature" );
+		}
+
+		// Branch edge.
+		final Collection< FeatureKeyWrapper > branchEdgeProjections = new ArrayList<>();
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.BRANCH_EDGE ) )
+			branchEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+		if ( !branchEdgeProjections.isEmpty() )
+		{
+			items.put( ColorVertexBy.BRANCH_EDGE, branchEdgeProjections );
+			categoryNames.put( ColorVertexBy.BRANCH_EDGE, "Branch edge" );
+		}
 
 		final Map< FeatureKeyWrapper, String > itemNames = null;
-
-		final Map< ColorVertexBy, String > categoryNames = new HashMap<>();
-		categoryNames.put( ColorVertexBy.FIXED, "Fixed" );
-		categoryNames.put( ColorVertexBy.VERTEX, "Vertex feature" );
-		categoryNames.put( ColorVertexBy.INCOMING_EDGE, "Incoming edge feature" );
-		categoryNames.put( ColorVertexBy.OUTGOING_EDGE, "Outgoing edge feature" );
-
-		final CategoryJComboBox< ColorVertexBy, FeatureKeyWrapper > comboBox = new CategoryJComboBox<>( items, itemNames, categoryNames );
+		final CategoryJComboBox< ColorVertexBy, FeatureKeyWrapper > comboBox =
+				new CategoryJComboBox<>( items, itemNames, categoryNames );
 
 		/*
 		 * Set selected item according to provided style.
 		 */
 		FeatureKeyWrapper fkw = fixedColor;
-		for ( final FeatureKeyWrapper key : items.get( style.colorVertexBy ) )
-		{
-			if ( style.vertexColorFeatureKey.equals( key.featureKey ) )
+		if ( null != items.get( style.colorVertexBy ) )
+			for ( final FeatureKeyWrapper key : items.get( style.colorVertexBy ) )
 			{
-				fkw = key;
-				break;
+				if ( style.vertexColorFeatureKey.equals( key.featureKey ) )
+				{
+					fkw = key;
+					break;
+				}
 			}
-		}
 
 		comboBox.setSelectedItem( fkw );
 		return comboBox;

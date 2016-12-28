@@ -2,6 +2,8 @@ package org.mastodon.revised.trackscheme.display.style;
 
 import java.awt.Color;
 
+import org.mastodon.graph.branch.BranchEdge;
+import org.mastodon.graph.branch.BranchGraph;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
@@ -37,10 +39,14 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 
 	private final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features;
 
+	private final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraph;
+
 	public LayoutColorGenerator( final TrackSchemeGraph< ?, ? > graph,
+			final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraph,
 			final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features )
 	{
 		this.graph = graph;
+		this.branchGraph = branchGraph;
 		this.features = features;
 		trackSchemeStyleChanged();
 	}
@@ -79,6 +85,10 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			vcg = new ThisVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
 			vfp = features.getVertexProjection( style.vertexColorFeatureKey );
 			break;
+		case BRANCH_EDGE:
+			vcg = new BranchEdgeVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
+			vfp = features.getBranchEdgeProjection( style.vertexColorFeatureKey );
+			break;
 		}
 		vertexColorGenerator = vcg;
 		vertexFeatureProperties = vfp;
@@ -97,18 +107,21 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			efp = features.getEdgeProjection( style.edgeColorFeatureKey );
 			break;
 		case SOURCE_VERTEX:
-			ecg = new SourceVertexEdgeGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
+			ecg = new SourceVertexEdgeColorGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
 			efp = features.getVertexProjection( style.edgeColorFeatureKey );
 			break;
 		case TARGET_VERTEX:
-			ecg = new TargetVertexEdgeGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
+			ecg = new TargetVertexEdgeColorGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
 			efp = features.getVertexProjection( style.edgeColorFeatureKey );
+			break;
+		case BRANCH_EDGE:
+			ecg = new BranchEdgeEdgeColorGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
+			efp = features.getBranchEdgeProjection( style.edgeColorFeatureKey );
 			break;
 		}
 		edgeColorGenerator = ecg;
 		edgeFeatureProperties = efp;
 	}
-
 
 	@Override
 	public Color color( final TrackSchemeEdge edge )
@@ -249,7 +262,45 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 		}
 	}
 
-	private class FixedEdgeColorGenerator implements EdgeColorGenerator< TrackSchemeEdge >
+	private class BranchEdgeVertexColorGenerator implements VertexColorGenerator< TrackSchemeVertex >
+	{
+
+		private final ColorMap colorMap;
+
+		private final double min;
+
+		private final double max;
+
+		public BranchEdgeVertexColorGenerator( final ColorMap colorMap, final double min, final double max )
+		{
+			this.colorMap = colorMap;
+			this.min = min;
+			this.max = max;
+		}
+
+		@SuppressWarnings( "unchecked" )
+		@Override
+		public Color color( final TrackSchemeVertex vertex )
+		{
+			final Color color;
+			final BranchEdge ref = branchGraph.edgeRef();
+			final BranchEdge be = branchGraph.getBranchEdge( vertex, ref );
+
+			if ( null == be || !vertexFeatureProperties.isSet( be ) )
+			{
+				color = colorMap.getMissingColor();
+			}
+			else
+			{
+				final double value = vertexFeatureProperties.value( be );
+				color = colorMap.get( normalize( value, min, max ) );
+			}
+			branchGraph.releaseRef( ref );
+			return color;
+		}
+	}
+
+	private static class FixedEdgeColorGenerator implements EdgeColorGenerator< TrackSchemeEdge >
 	{
 
 		private final Color color;
@@ -293,7 +344,7 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 		}
 	}
 
-	private class SourceVertexEdgeGenerator implements EdgeColorGenerator< TrackSchemeEdge >
+	private class SourceVertexEdgeColorGenerator implements EdgeColorGenerator< TrackSchemeEdge >
 	{
 		private final ColorMap colorMap;
 
@@ -301,7 +352,7 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 
 		private final double max;
 
-		public SourceVertexEdgeGenerator( final ColorMap colorMap, final double min, final double max )
+		public SourceVertexEdgeColorGenerator( final ColorMap colorMap, final double min, final double max )
 		{
 			this.colorMap = colorMap;
 			this.min = min;
@@ -329,7 +380,7 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 		}
 	}
 
-	private class TargetVertexEdgeGenerator implements EdgeColorGenerator< TrackSchemeEdge >
+	private class TargetVertexEdgeColorGenerator implements EdgeColorGenerator< TrackSchemeEdge >
 	{
 		private final ColorMap colorMap;
 
@@ -337,7 +388,7 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 
 		private final double max;
 
-		public TargetVertexEdgeGenerator( final ColorMap colorMap, final double min, final double max )
+		public TargetVertexEdgeColorGenerator( final ColorMap colorMap, final double min, final double max )
 		{
 			this.colorMap = colorMap;
 			this.min = min;
@@ -361,6 +412,44 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 				color = colorMap.get( normalize( value, min, max ) );
 			}
 			graph.releaseRef( ref );
+			return color;
+		}
+	}
+
+	private class BranchEdgeEdgeColorGenerator implements EdgeColorGenerator< TrackSchemeEdge >
+	{
+
+		private final ColorMap colorMap;
+
+		private final double min;
+
+		private final double max;
+
+		public BranchEdgeEdgeColorGenerator( final ColorMap colorMap, final double min, final double max )
+		{
+			this.colorMap = colorMap;
+			this.min = min;
+			this.max = max;
+		}
+
+		@SuppressWarnings( "unchecked" )
+		@Override
+		public Color color( final TrackSchemeEdge edge )
+		{
+			final Color color;
+			final BranchEdge ref = branchGraph.edgeRef();
+			final BranchEdge be = branchGraph.getBranchEdge( edge, ref );
+
+			if ( !edgeFeatureProperties.isSet( be ) )
+			{
+				color = colorMap.getMissingColor();
+			}
+			else
+			{
+				final double value = edgeFeatureProperties.value( be );
+				color = colorMap.get( normalize( value, min, max ) );
+			}
+			branchGraph.releaseRef( ref );
 			return color;
 		}
 	}

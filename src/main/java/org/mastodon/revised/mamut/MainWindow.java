@@ -183,7 +183,10 @@ public class MainWindow extends JFrame
 		 */
 
 		final FeatureRangeCalculator featureRangeCalculator =
-				new DefaultFeatureRangeCalculator<>( windowManager.getModel().getGraph(), windowManager.getModel().featureModel() );
+				new DefaultFeatureRangeCalculator<>(
+						windowManager.getModel().getGraph(),
+						windowManager.getModel().getBranchGraph(),
+						windowManager.getModel().featureModel() );
 		final DisplaySettingsDialog displaySettingsDialog =
 				new DisplaySettingsDialog(
 						this,

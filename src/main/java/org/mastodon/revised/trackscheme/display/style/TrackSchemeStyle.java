@@ -17,12 +17,12 @@ public class TrackSchemeStyle
 
 	public enum ColorEdgeBy
 	{
-		FIXED, EDGE, SOURCE_VERTEX, TARGET_VERTEX;
+		FIXED, EDGE, SOURCE_VERTEX, TARGET_VERTEX, BRANCH_EDGE;
 	}
 
 	public enum ColorVertexBy
 	{
-		FIXED, VERTEX, INCOMING_EDGE, OUTGOING_EDGE;
+		FIXED, VERTEX, INCOMING_EDGE, OUTGOING_EDGE, BRANCH_EDGE;
 	}
 
 	public String name;
