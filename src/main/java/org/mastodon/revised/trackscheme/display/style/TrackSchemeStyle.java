@@ -22,7 +22,7 @@ public class TrackSchemeStyle
 
 	public enum ColorVertexBy
 	{
-		FIXED, VERTEX, INCOMING_EDGE, OUTGOING_EDGE, BRANCH_EDGE;
+		FIXED, VERTEX, INCOMING_EDGE, OUTGOING_EDGE, BRANCH_EDGE, BRANCH_VERTEX;
 	}
 
 	public String name;

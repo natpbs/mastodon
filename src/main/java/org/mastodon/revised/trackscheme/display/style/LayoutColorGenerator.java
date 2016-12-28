@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import org.mastodon.graph.branch.BranchEdge;
 import org.mastodon.graph.branch.BranchGraph;
+import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
@@ -84,6 +85,10 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 		case VERTEX:
 			vcg = new ThisVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
 			vfp = features.getVertexProjection( style.vertexColorFeatureKey );
+			break;
+		case BRANCH_VERTEX:
+			vcg = new BranchVertexVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
+			vfp = features.getBranchVertexProjection( style.vertexColorFeatureKey );
 			break;
 		case BRANCH_EDGE:
 			vcg = new BranchEdgeVertexColorGenerator( style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
@@ -260,6 +265,57 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			graph.releaseRef( ref );
 			return color;
 		}
+	}
+
+	private final class BranchVertexVertexColorGenerator implements VertexColorGenerator< TrackSchemeVertex >
+	{
+
+		private final ColorMap colorMap;
+
+		private final double min;
+
+		private final double max;
+
+		public BranchVertexVertexColorGenerator( final ColorMap colorMap, final double min, final double max )
+		{
+			this.colorMap = colorMap;
+			this.min = min;
+			this.max = max;
+		}
+
+		@SuppressWarnings( "unchecked" )
+		@Override
+		public Color color( final TrackSchemeVertex vertex )
+		{
+			final Color color;
+			final BranchVertex ref = branchGraph.vertexRef();
+			final TrackSchemeVertex vref = graph.vertexRef();
+			final TrackSchemeEdge eref = graph.edgeRef();
+
+			TrackSchemeVertex source = vertex;
+			BranchVertex bv = branchGraph.getBranchVertex( source, ref );
+			while ( null == bv && !source.incomingEdges().isEmpty() )
+			{
+				// Climb up to find branch vertex
+				source = source.incomingEdges().get( 0, eref ).getSource( vref );
+				bv = branchGraph.getBranchVertex( source, ref );
+			}
+
+			if ( null == bv || !vertexFeatureProperties.isSet( bv ) )
+			{
+				color = colorMap.getMissingColor();
+			}
+			else
+			{
+				final double value = vertexFeatureProperties.value( bv );
+				color = colorMap.get( normalize( value, min, max ) );
+			}
+			branchGraph.releaseRef( ref );
+			graph.releaseRef( vref );
+			graph.releaseRef( eref );
+			return color;
+		}
+
 	}
 
 	private class BranchEdgeVertexColorGenerator implements VertexColorGenerator< TrackSchemeVertex >

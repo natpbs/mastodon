@@ -5,6 +5,7 @@ import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
 import org.mastodon.graph.branch.BranchEdge;
 import org.mastodon.graph.branch.BranchGraph;
+import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.spatial.HasTimepoint;
 
 public class DefaultFeatureRangeCalculator< V extends Vertex< E > & HasTimepoint, E extends Edge< V > > implements FeatureRangeCalculator
@@ -55,6 +56,24 @@ public class DefaultFeatureRangeCalculator< V extends Vertex< E > & HasTimepoint
 			double min = Double.POSITIVE_INFINITY;
 			double max = Double.NEGATIVE_INFINITY;
 			for ( final V vertex : graph.vertices() )
+			{
+				if ( projection.isSet( vertex ) )
+				{
+					final double value = projection.value( vertex );
+					if ( value > max )
+						max = value;
+					if ( value < min )
+						min = value;
+				}
+			}
+			return new double[] { min, max };
+		}
+		case BRANCH_VERTEX:
+		{
+			final FeatureProjection< BranchVertex > projection = featureModel.getBranchVertexProjection( projectionKey );
+			double min = Double.POSITIVE_INFINITY;
+			double max = Double.NEGATIVE_INFINITY;
+			for ( final BranchVertex vertex : branchGraph.vertices() )
 			{
 				if ( projection.isSet( vertex ) )
 				{
