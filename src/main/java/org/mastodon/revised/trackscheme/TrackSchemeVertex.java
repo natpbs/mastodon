@@ -10,13 +10,14 @@ import org.mastodon.graph.ref.AbstractVertex;
 import org.mastodon.graph.ref.AbstractVertexPool;
 import org.mastodon.pool.ByteMappedElement;
 import org.mastodon.pool.PoolObject;
+import org.mastodon.spatial.HasTimepoint;
 
 /**
  * The vertex class for TrackScheme.
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackSchemeEdge, ByteMappedElement >
+public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackSchemeEdge, ByteMappedElement > implements HasTimepoint
 {
 	protected static final int ORIG_VERTEX_INDEX_OFFSET = AbstractVertex.SIZE_IN_BYTES;
 	protected static final int LAYOUT_TIMESTAMP_OFFSET = ORIG_VERTEX_INDEX_OFFSET + INDEX_SIZE;
@@ -101,6 +102,7 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 		modelVertex.setLabel( label );
 	}
 
+	@Override
 	public int getTimepoint()
 	{
 		return access.getInt( TIMEPOINT_OFFSET );
