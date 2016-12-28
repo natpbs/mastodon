@@ -49,6 +49,10 @@ public class DefaultMamutFeatureComputerService extends AbstractService implemen
 	 */
 	private Set< String > availableLinkFeatureComputers;
 
+	private Set< String > availableBranchLinkFeatureComputers;
+
+	private Set< String > availableBranchSpotFeatureComputers;
+
 	public DefaultMamutFeatureComputerService()
 	{}
 
@@ -58,6 +62,8 @@ public class DefaultMamutFeatureComputerService extends AbstractService implemen
 		super.initialize();
 		initializeAvailableSpotFeatureComputers();
 		initializeAvailableLinkFeatureComputers();
+		initializeAvailableBranchSpotFeatureComputers();
+		initializeAvailableBranchLinkFeatureComputers();
 	}
 
 	@Override
@@ -70,6 +76,18 @@ public class DefaultMamutFeatureComputerService extends AbstractService implemen
 	public Set< String > getAvailableEdgeFeatureComputers()
 	{
 		return availableLinkFeatureComputers;
+	}
+
+	@Override
+	public Set< String > getAvailableBranchVertexFeatureComputers()
+	{
+		return availableBranchSpotFeatureComputers;
+	}
+
+	@Override
+	public Set< String > getAvailableBranchEdgeFeatureComputers()
+	{
+		return availableBranchLinkFeatureComputers;
 	}
 
 	@Override
@@ -206,6 +224,20 @@ public class DefaultMamutFeatureComputerService extends AbstractService implemen
 	{
 		this.availableLinkFeatureComputers =
 				initializeFeatureComputers( LinkFeatureComputer.class );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	private void initializeAvailableBranchLinkFeatureComputers()
+	{
+		this.availableBranchLinkFeatureComputers =
+				initializeFeatureComputers( BranchLinkFeatureComputer.class );
+	}
+
+	@SuppressWarnings( "unchecked" )
+	private void initializeAvailableBranchSpotFeatureComputers()
+	{
+		this.availableBranchSpotFeatureComputers =
+				initializeFeatureComputers( BranchSpotFeatureComputer.class );
 	}
 
 	private < K extends FeatureComputer< ?, ?, Model > > Set< String > initializeFeatureComputers( final Class< K > cl )

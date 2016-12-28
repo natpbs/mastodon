@@ -12,6 +12,11 @@ public interface FeatureComputerService< AM extends AbstractModel< ?, ?, ? > > e
 
 	public Set< String > getAvailableEdgeFeatureComputers();
 
+	public Set< String > getAvailableBranchVertexFeatureComputers();
+
+	public Set< String > getAvailableBranchEdgeFeatureComputers();
+
 	public boolean compute( AM model, Set< String > computerNames );
+
 
 }

@@ -5,7 +5,6 @@ import java.util.Set;
 
 import org.mastodon.features.Feature;
 import org.mastodon.revised.model.AbstractModel;
-import  org.mastodon.revised.model.feature.FeatureModel.FeatureTarget;
 import org.scijava.plugin.SciJavaPlugin;
 
 /**
