@@ -693,6 +693,16 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 			categoryNames.put( ColorEdgeBy.BRANCH_EDGE, "Branch edge" );
 		}
 
+		// Branch vertex.
+		final Collection< FeatureKeyWrapper > branchVertexProjections = new ArrayList<>();
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.BRANCH_VERTEX ) )
+			branchVertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
+		if ( !branchVertexProjections.isEmpty() )
+		{
+			items.put( ColorEdgeBy.BRANCH_VERTEX, branchVertexProjections );
+			categoryNames.put( ColorEdgeBy.BRANCH_VERTEX, "Branch vertex" );
+		}
+
 		final Map< FeatureKeyWrapper, String > itemNames = null;
 		final CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > comboBox =
 				new CategoryJComboBox<>( items, itemNames, categoryNames );

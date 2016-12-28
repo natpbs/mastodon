@@ -17,7 +17,7 @@ public class TrackSchemeStyle
 
 	public enum ColorEdgeBy
 	{
-		FIXED, EDGE, SOURCE_VERTEX, TARGET_VERTEX, BRANCH_EDGE;
+		FIXED, EDGE, SOURCE_VERTEX, TARGET_VERTEX, BRANCH_EDGE, BRANCH_VERTEX;
 	}
 
 	public enum ColorVertexBy

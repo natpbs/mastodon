@@ -123,6 +123,10 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			ecg = new BranchEdgeEdgeColorGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
 			efp = features.getBranchEdgeProjection( style.edgeColorFeatureKey );
 			break;
+		case BRANCH_VERTEX:
+			ecg = new BranchVertexEdgeColorGenerator( style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
+			efp = features.getBranchVertexProjection( style.edgeColorFeatureKey );
+			break;
 		}
 		edgeColorGenerator = ecg;
 		edgeFeatureProperties = efp;
@@ -508,6 +512,57 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 			branchGraph.releaseRef( ref );
 			return color;
 		}
+	}
+
+	private final class BranchVertexEdgeColorGenerator implements EdgeColorGenerator< TrackSchemeEdge >
+	{
+
+		private final ColorMap colorMap;
+
+		private final double min;
+
+		private final double max;
+
+		public BranchVertexEdgeColorGenerator( final ColorMap colorMap, final double min, final double max )
+		{
+			this.colorMap = colorMap;
+			this.min = min;
+			this.max = max;
+		}
+
+		@SuppressWarnings( "unchecked" )
+		@Override
+		public Color color( final TrackSchemeEdge edge )
+		{
+			final Color color;
+			final BranchVertex ref = branchGraph.vertexRef();
+			final TrackSchemeVertex vref = graph.vertexRef();
+			final TrackSchemeEdge eref = graph.edgeRef();
+
+			TrackSchemeVertex source = edge.getSource( vref );
+			BranchVertex bv = branchGraph.getBranchVertex( source, ref );
+			while ( null == bv && !source.incomingEdges().isEmpty() )
+			{
+				// Climb up to find branch vertex
+				source = source.incomingEdges().get( 0, eref ).getSource( vref );
+				bv = branchGraph.getBranchVertex( source, ref );
+			}
+
+			if ( null == bv || !edgeFeatureProperties.isSet( bv ) )
+			{
+				color = colorMap.getMissingColor();
+			}
+			else
+			{
+				final double value = edgeFeatureProperties.value( bv );
+				color = colorMap.get( normalize( value, min, max ) );
+			}
+			branchGraph.releaseRef( ref );
+			graph.releaseRef( vref );
+			graph.releaseRef( eref );
+			return color;
+		}
+
 	}
 
 	private static final double normalize( final double value, final double min, final double max )
