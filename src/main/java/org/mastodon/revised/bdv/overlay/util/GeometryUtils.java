@@ -1,9 +1,6 @@
-package org.mastodon.revised;
+package org.mastodon.revised.bdv.overlay.util;
 
-
-// TODO rename to something more specifice, e.g., "GeometryUtils"
-// TODO move (to package ...trackscheme.util ?)
-public class Util
+public class GeometryUtils
 {
 	/**
 	 * Computes the distance of a point {@code A0 (x0, y0)} to a segment
@@ -29,7 +26,8 @@ public class Util
 	public static final double segmentDist( final double x0, final double y0, final double x1, final double y1, final double x2, final double y2 )
 	{
 		final double l12sq = ( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 );
-
+		if ( l12sq <= Double.MIN_NORMAL )
+			return Math.sqrt( ( x0 - x1 ) * ( x0 - x1 ) + ( y0 - y1 ) * ( y0 - y1 ) );
 		final double x = ( ( x0 - x1 ) * ( x2 - x1 ) + ( y0 - y1 ) * ( y2 - y1 ) ) / l12sq;
 		if ( x < 0 ) { return Math.sqrt( ( x0 - x1 ) * ( x0 - x1 ) + ( y0 - y1 ) * ( y0 - y1 ) ); }
 		if ( x > 1 ) { return Math.sqrt( ( x0 - x2 ) * ( x0 - x2 ) + ( y0 - y2 ) * ( y0 - y2 ) ); }
@@ -40,7 +38,7 @@ public class Util
 		return d;
 	}
 
-	private Util()
+	private GeometryUtils()
 	{}
 
 }

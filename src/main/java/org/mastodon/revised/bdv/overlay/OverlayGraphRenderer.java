@@ -14,7 +14,7 @@ import org.mastodon.collection.RefCollection;
 import org.mastodon.collection.RefCollections;
 import org.mastodon.collection.RefList;
 import org.mastodon.kdtree.ClipConvexPolytope;
-import org.mastodon.revised.Util;
+import org.mastodon.revised.bdv.overlay.util.GeometryUtils;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 import org.mastodon.revised.ui.selection.Selection;
@@ -829,7 +829,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 						transform.apply( gPosT, lPosT );
 						final double x2 = lPosT[ 0 ];
 						final double y2 = lPosT[ 1 ];
-						final double dist = Util.segmentDist( x, y, x1, y1, x2, y2 );
+						final double dist = GeometryUtils.segmentDist( x, y, x1, y1, x2, y2 );
 						if ( dist <= bestDist )
 						{
 							bestDist = dist;
