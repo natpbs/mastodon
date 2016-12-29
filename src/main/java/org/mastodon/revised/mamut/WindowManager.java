@@ -81,6 +81,7 @@ import org.mastodon.revised.trackscheme.action.TrackSchemeStyleAction;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
+import org.mastodon.revised.trackscheme.display.style.BranchGraphTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeFeaturesColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
@@ -920,7 +921,8 @@ public class WindowManager
 		TrackSchemeOptions options = TrackSchemeOptions.options().
 				inputTriggerConfig( keyconf ).
 				vertexColorGenerator( colorGenerator ).
-				edgeColorGenerator( colorGenerator );
+				edgeColorGenerator( colorGenerator ).
+				trackSchemeOverlayFactory( new BranchGraphTrackSchemeOverlay.Factory() );
 		
 		/*
 		 * Show TrackSchemeFrame.
