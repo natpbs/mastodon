@@ -12,7 +12,6 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Rectangle2D;
 
-import org.mastodon.revised.Util;
 import org.mastodon.revised.trackscheme.ScreenColumn;
 import org.mastodon.revised.trackscheme.ScreenEdge;
 import org.mastodon.revised.trackscheme.ScreenEntities;
@@ -26,6 +25,7 @@ import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
+import org.mastodon.revised.trackscheme.util.GeometryUtils;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 
@@ -70,7 +70,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 	private final Color[] shadowColors;
 
-	private TrackSchemeStyle style;
+	protected TrackSchemeStyle style;
 
 	public DefaultTrackSchemeOverlay(
 			final TrackSchemeGraph< ?, ? > graph,
@@ -299,7 +299,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		final double y1 = source.getY();
 		final double x2 = target.getX();
 		final double y2 = target.getY();
-		final double d = Util.segmentDist( x0, y0, x1, y1, x2, y2 );
+		final double d = GeometryUtils.segmentDist( x0, y0, x1, y1, x2, y2 );
 		return d;
 	}
 
@@ -363,21 +363,11 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		final boolean selected = edge.isSelected();
 		final boolean ghost = vs.isGhost() && vt.isGhost();
 
-		final Color edgeColor;
-		final Color ghostEdgeColor;
-		if ( style.colorEdgeBy == ColorEdgeBy.FIXED )
-		{
-			edgeColor = style.edgeColor;
-			ghostEdgeColor = style.ghostEdgeColor;
-		}
-		else
-		{
-			edgeColor = edge.getColor();
-			ghostEdgeColor = edge.getColor();
-		}
+		final Color edgeColor = ( style.colorEdgeBy == ColorEdgeBy.FIXED )
+				? style.edgeColor : edge.getColor();
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
 				edgeColor, style.selectedEdgeColor,
-				ghostEdgeColor, style.ghostSelectedEdgeColor );
+				style.ghostEdgeColor, style.ghostSelectedEdgeColor );
 		g2.setColor( drawColor );
 		if ( highlighted )
 			g2.setStroke( style.edgeHighlightStroke );
