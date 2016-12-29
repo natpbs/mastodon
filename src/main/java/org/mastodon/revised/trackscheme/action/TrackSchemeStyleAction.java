@@ -39,12 +39,13 @@ public class TrackSchemeStyleAction extends AbstractNamedAction
 	{
 		colorGenerator.setStyle( style );
 
-		final TrackSchemeStyle oldStyle = overlay.setStyle( style );
+		final TrackSchemeStyle oldStyle = overlay.getStyle();
 		oldStyle.removeUpdateListener( panelRepainter );
 		oldStyle.removeUpdateListener( colorGenerator );
 
 		style.addUpdateListener( panelRepainter );
 		style.addUpdateListener( colorGenerator );
+		overlay.setStyle( style );
 
 		panelRepainter.trackSchemeStyleChanged();
 	}

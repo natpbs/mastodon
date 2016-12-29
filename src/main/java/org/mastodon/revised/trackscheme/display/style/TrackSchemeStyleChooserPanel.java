@@ -107,7 +107,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final Selection< TrackSchemeVertex, TrackSchemeEdge > selection = new SelectionAdapter<>( ex.getSelection(), vertexMap, edgeMap );
 		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation = new NavigationHandlerAdapter<>( new NavigationHandlerImp<>( new GroupManager().createGroupHandle() ), vertexMap, edgeMap );
 		colorGenerator = new DummyLayoutColorGenerator( graph, model );
-		TrackSchemeOptions options = TrackSchemeOptions.options().
+		final TrackSchemeOptions options = TrackSchemeOptions.options().
 				vertexColorGenerator( colorGenerator ).
 				edgeColorGenerator( colorGenerator );
 		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, options );
@@ -249,8 +249,8 @@ class TrackSchemeStyleChooserPanel extends JPanel
 				final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
 				final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
 
-				final TrackSchemeStyle oldStyle = dtso.setStyle( style );
-				oldStyle.removeUpdateListener( this );
+				dtso.getStyle().removeUpdateListener( this );
+				dtso.setStyle( style );
 
 				if ( null != editorPanel )
 					contentPanel.remove( editorPanel );

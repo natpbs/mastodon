@@ -516,7 +516,8 @@ public class TrackSchemeStyle
 
 	private void notifyListeners()
 	{
-		for ( final UpdateListener l : updateListeners )
+		final ArrayList< UpdateListener > ul = new ArrayList<>( updateListeners );
+		for ( final UpdateListener l : ul )
 			l.trackSchemeStyleChanged();
 	}
 

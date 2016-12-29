@@ -94,13 +94,10 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 	 *
 	 * @param style
 	 *            the style to set.
-	 * @return the style previously used before this call.
 	 */
-	public TrackSchemeStyle setStyle( final TrackSchemeStyle style )
+	public synchronized void setStyle( final TrackSchemeStyle style )
 	{
-		final TrackSchemeStyle oldStyle = this.style;
 		this.style = style;
-		return oldStyle;
 	}
 
 	public TrackSchemeStyle getStyle()
