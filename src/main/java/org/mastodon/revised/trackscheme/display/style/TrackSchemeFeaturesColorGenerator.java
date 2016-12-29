@@ -16,12 +16,12 @@ import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.util.ColorMap;
 
 /**
- * Generate color generators for vertices and edges following hints from a
- * {@link TrackSchemeStyle}.
+ * Color generator for vertices and edges from a feature model, following hints
+ * from a {@link TrackSchemeStyle}.
  *
  * @author Jean-Yves Tinevez
  */
-public class LayoutColorGenerator implements UpdateListener, VertexColorGenerator< TrackSchemeVertex >, EdgeColorGenerator< TrackSchemeEdge >
+public class TrackSchemeFeaturesColorGenerator implements UpdateListener, VertexColorGenerator< TrackSchemeVertex >, EdgeColorGenerator< TrackSchemeEdge >
 {
 
 	private final TrackSchemeGraph< ?, ? > graph;
@@ -42,7 +42,7 @@ public class LayoutColorGenerator implements UpdateListener, VertexColorGenerato
 
 	private final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraph;
 
-	public LayoutColorGenerator( final TrackSchemeGraph< ?, ? > graph,
+	public TrackSchemeFeaturesColorGenerator( final TrackSchemeGraph< ?, ? > graph,
 			final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraph,
 			final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > features )
 	{
