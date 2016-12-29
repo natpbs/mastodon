@@ -106,6 +106,11 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		return oldStyle;
 	}
 
+	public TrackSchemeStyle getStyle()
+	{
+		return style;
+	}
+
 	@Override
 	protected void paintBackground( final Graphics2D g2, final ScreenEntities screenEntities )
 	{
@@ -592,4 +597,5 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 					: color;
 		}
 	}
+
 }

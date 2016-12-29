@@ -52,8 +52,10 @@ import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
 import org.mastodon.revised.model.branchgraph.BranchGraphAdapter;
+import org.mastodon.revised.model.branchgraph.BranchGraphFeatureModelAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphFocusAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphHighlightAdapter;
+import org.mastodon.revised.model.branchgraph.BranchGraphIdentity;
 import org.mastodon.revised.model.branchgraph.BranchGraphNavigationHandlerAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphSelectionAdapter;
 import org.mastodon.revised.model.branchgraph.DefaultBranchGraphProperties;
@@ -731,7 +733,7 @@ public class WindowManager
 				contextChooser,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
 
-		installTrackSchemeMenu( frame, colorGenerator );
+		installTrackSchemeMenu( frame, colorGenerator, false );
 
 		/*
 		 * Register this TrackScheme in the TrackSchemeService.
@@ -880,7 +882,32 @@ public class WindowManager
 				new FocusAdapter<>( branchGraphFocus, vertexMap, edgeMap );
 
 		/*
-		 * show TrackSchemeFrame
+		 * Only branch vertex and edge features are accessible.
+		 */
+
+		final FeatureModel< Spot, Link > featureModel = model.featureModel();
+		final FeatureModel< BranchVertex, BranchEdge > branchGraphFeatureModel =
+				new BranchGraphFeatureModelAdapter<>( featureModel );
+		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
+				new FeatureModelAdapter<>( branchGraphFeatureModel, vertexMap, edgeMap );
+
+		/*
+		 * Map this graph of BranchVertex and BranchEdge to itself as a branch
+		 * graph.
+		 */
+		final BranchGraph< BranchVertex, BranchEdge > branchGraph =
+				new BranchGraphIdentity<>( graph );
+		/*
+		 * Then map it to a branch graph of TrackSchemeVertex and
+		 * TrackSchemeEdge. So meta.
+		 */
+		final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraphAdapter =
+				new BranchGraphAdapter<>( branchGraph, vertexMap, edgeMap );
+		final LayoutColorGenerator colorGenerator =
+				new LayoutColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
+
+		/*
+		 * Show TrackSchemeFrame.
 		 */
 		final TrackSchemeFrame frame = new TrackSchemeFrame(
 				trackSchemeGraph,
@@ -888,14 +915,14 @@ public class WindowManager
 				trackSchemeFocus,
 				trackSchemeSelection,
 				trackSchemeNavigation,
-				null,
-				null,
+				colorGenerator,
+				colorGenerator,
 				model,
 				groupHandle,
 				null,
 				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
 
-		installTrackSchemeMenu( frame, null );
+		installTrackSchemeMenu( frame, colorGenerator, true );
 		frame.setTitle( "Branch graph" );
 		frame.getTrackschemePanel().setTimepointRange( minTimepoint, maxTimepoint );
 		frame.getTrackschemePanel().graphChanged();
@@ -936,7 +963,7 @@ public class WindowManager
 		return renderSettingsManager;
 	}
 
-	private void installTrackSchemeMenu( final TrackSchemeFrame frame, final LayoutColorGenerator colorGenerator )
+	private void installTrackSchemeMenu( final TrackSchemeFrame frame, final LayoutColorGenerator colorGenerator, final boolean isBranchGraph )
 	{
 
 		final JMenuBar menu;
@@ -948,6 +975,7 @@ public class WindowManager
 		// Styles auto-populated from TrackScheme style manager.
 		if ( frame.getTrackschemePanel().getGraphOverlay() instanceof DefaultTrackSchemeOverlay )
 		{
+			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) frame.getTrackschemePanel().getGraphOverlay();
 			// Update listener that repaint this TrackScheme when its style
 			// changes
 			final UpdateListener panelRepainter = new UpdateListener()
@@ -955,12 +983,38 @@ public class WindowManager
 				@Override
 				public void trackSchemeStyleChanged()
 				{
+					if ( isBranchGraph )
+					{
+						// Forbid styles that do not work for branch graph.
+						final TrackSchemeStyle style = overlay.getStyle();
+						switch ( style.colorVertexBy )
+						{
+						case BRANCH_EDGE:
+						case BRANCH_VERTEX:
+						case FIXED:
+							break;
+						default:
+							overlay.setStyle( TrackSchemeStyle.defaultStyle() );
+							colorGenerator.setStyle( TrackSchemeStyle.defaultStyle() );
+							break;
+						}
+						switch ( style.colorEdgeBy )
+						{
+						case BRANCH_VERTEX:
+						case BRANCH_EDGE:
+						case FIXED:
+							break;
+						default:
+							overlay.setStyle( TrackSchemeStyle.defaultStyle() );
+							colorGenerator.setStyle( TrackSchemeStyle.defaultStyle() );
+							break;
+						}
+					}
 					// Trigger relayout to get the new colors.
 					frame.getTrackschemePanel().graphChanged();
 				}
 			};
 
-			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) frame.getTrackschemePanel().getGraphOverlay();
 			final JMenu styleMenu = new JMenu( "Styles" );
 
 			styleMenu.addMenuListener( new MenuListener()
@@ -970,8 +1024,32 @@ public class WindowManager
 				{
 					styleMenu.removeAll();
 					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
+					{
+						// Branch graph cannot get styles not set to a branch feature.
+						if (isBranchGraph )
+						{
+							switch(style.colorVertexBy)
+							{
+							case BRANCH_EDGE:
+							case BRANCH_VERTEX:
+							case FIXED:
+								break;
+							default:
+								continue;
+							}
+							switch ( style.colorEdgeBy )
+							{
+							case FIXED:
+							case BRANCH_EDGE:
+							case BRANCH_VERTEX:
+								break;
+							default:
+								continue;
+							}
+						}
 						styleMenu.add( new JMenuItem(
 								new TrackSchemeStyleAction( style, overlay, panelRepainter, colorGenerator ) ) );
+					}
 				}
 
 				@Override
