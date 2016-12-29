@@ -1,4 +1,4 @@
-package org.mastodon.revised.trackscheme.display;
+package org.mastodon.revised.trackscheme.display.style;
 
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.APPEAR;
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.DISAPPEAR;
@@ -23,7 +23,7 @@ import org.mastodon.revised.trackscheme.ScreenVertexRange;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
+import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.ui.selection.FocusModel;
@@ -78,10 +78,9 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			final TrackSchemeGraph< ?, ? > graph,
 			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
-			final TrackSchemeOptions options,
 			final TrackSchemeStyle style )
 	{
-		super( graph, highlight, focus, options );
+		super( graph, highlight, focus );
 		this.style = style;
 
 		final int[] shadowAlphas = new int[] { 28, 22, 17, 12, 8, 6, 3 };
@@ -413,23 +412,12 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		if ( highlighted || focused )
 			spotradius *= 1.5;
 
-		final Color vertexFillColor;
-		final Color ghostVertexFillColor;
-		if ( style.colorVertexBy == ColorVertexBy.FIXED )
-		{
-			vertexFillColor = style.simplifiedVertexFillColor;
-			ghostVertexFillColor = style.ghostSimplifiedVertexFillColor;
-		}
-		else
-		{
-			vertexFillColor = vertex.getColor();
-			ghostVertexFillColor = vertexFillColor;
-		}
-
+		final Color vertexFillColor = ( style.colorVertexBy == ColorVertexBy.FIXED )
+				? style.simplifiedVertexFillColor : vertex.getColor();
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
 				disappear ? style.selectedSimplifiedVertexFillColor : vertexFillColor,
 				style.selectedSimplifiedVertexFillColor,
-				disappear ? style.ghostSelectedSimplifiedVertexFillColor : ghostVertexFillColor,
+				disappear ? style.ghostSelectedSimplifiedVertexFillColor :  style.ghostSimplifiedVertexFillColor,
 				style.ghostSelectedSimplifiedVertexFillColor );
 
 		final double x = vertex.getX();
@@ -500,21 +488,11 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			spotdiameter *= ( 1 + ratio );
 		final double spotradius = spotdiameter / 2;
 
-		final Color vertexFillColor;
-		final Color ghostVertexFillColor;
-		if ( style.colorVertexBy == ColorVertexBy.FIXED )
-		{
-			vertexFillColor = style.vertexFillColor;
-			ghostVertexFillColor = style.ghostVertexFillColor;
-		}
-		else
-		{
-			vertexFillColor = vertex.getColor();
-			ghostVertexFillColor = vertexFillColor;
-		}
+		final Color vertexFillColor = ( style.colorVertexBy == ColorVertexBy.FIXED )
+				? style.vertexFillColor : vertex.getColor();
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
 				vertexFillColor, style.selectedVertexFillColor,
-				ghostVertexFillColor, style.ghostSelectedVertexFillColor );
+				style.ghostVertexFillColor, style.ghostSelectedVertexFillColor );
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
 				style.vertexDrawColor, style.selectedVertexDrawColor,
 				style.ghostVertexDrawColor, style.ghostSelectedVertexDrawColor );
@@ -598,4 +576,21 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		}
 	}
 
+	/*
+	 * FACTORY.
+	 */
+
+	public static final class Factory implements TrackSchemeOverlayFactory
+	{
+
+		@Override
+		public AbstractTrackSchemeOverlay create(
+				final TrackSchemeGraph< ?, ? > graph,
+				final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
+				final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus )
+		{
+			return new DefaultTrackSchemeOverlay( graph, highlight, focus, TrackSchemeStyle.defaultStyle() );
+		}
+
+	}
 }

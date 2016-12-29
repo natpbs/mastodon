@@ -78,11 +78,11 @@ import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviourProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeService;
 import org.mastodon.revised.trackscheme.action.TrackSchemeStyleAction;
-import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
-import org.mastodon.revised.trackscheme.display.style.LayoutColorGenerator;
+import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeFeaturesColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
@@ -706,9 +706,6 @@ public class WindowManager
 		final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraphAdapter =
 				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
 
-		final LayoutColorGenerator colorGenerator =
-				new LayoutColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
-
 		/*
 		 * TrackScheme ContextChooser.
 		 */
@@ -718,20 +715,30 @@ public class WindowManager
 		final ContextChooser< Spot > contextChooser = new ContextChooser<>( contextListener );
 
 		/*
+		 * Tune TrackScheme options to use a feature-based coloring scheme.
+		 */
+
+		final TrackSchemeFeaturesColorGenerator colorGenerator =
+				new TrackSchemeFeaturesColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
+		final TrackSchemeOptions options  = TrackSchemeOptions.options().
+			inputTriggerConfig( keyconf ).
+			vertexColorGenerator( colorGenerator ).
+			edgeColorGenerator( colorGenerator );
+
+		/*
 		 * Show TrackSchemeFrame.
 		 */
+
 		final TrackSchemeFrame frame = new TrackSchemeFrame(
 				trackSchemeGraph,
 				trackSchemeHighlight,
 				trackSchemeFocus,
 				trackSchemeSelection,
 				trackSchemeNavigation,
-				colorGenerator,
-				colorGenerator,
 				model,
 				groupHandle,
 				contextChooser,
-				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
+				options );
 
 		installTrackSchemeMenu( frame, colorGenerator, false );
 
@@ -903,9 +910,18 @@ public class WindowManager
 		 */
 		final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraphAdapter =
 				new BranchGraphAdapter<>( branchGraph, vertexMap, edgeMap );
-		final LayoutColorGenerator colorGenerator =
-				new LayoutColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
+		final TrackSchemeFeaturesColorGenerator colorGenerator =
+				new TrackSchemeFeaturesColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
 
+		/*
+		 * TrackScheme options.
+		 */
+		
+		TrackSchemeOptions options = TrackSchemeOptions.options().
+				inputTriggerConfig( keyconf ).
+				vertexColorGenerator( colorGenerator ).
+				edgeColorGenerator( colorGenerator );
+		
 		/*
 		 * Show TrackSchemeFrame.
 		 */
@@ -915,12 +931,10 @@ public class WindowManager
 				trackSchemeFocus,
 				trackSchemeSelection,
 				trackSchemeNavigation,
-				colorGenerator,
-				colorGenerator,
 				model,
 				groupHandle,
 				null,
-				TrackSchemeOptions.options().inputTriggerConfig( keyconf ) );
+				options );
 
 		installTrackSchemeMenu( frame, colorGenerator, true );
 		frame.setTitle( "Branch graph" );
@@ -963,7 +977,7 @@ public class WindowManager
 		return renderSettingsManager;
 	}
 
-	private void installTrackSchemeMenu( final TrackSchemeFrame frame, final LayoutColorGenerator colorGenerator, final boolean isBranchGraph )
+	private void installTrackSchemeMenu( final TrackSchemeFrame frame, final TrackSchemeFeaturesColorGenerator colorGenerator, final boolean isBranchGraph )
 	{
 
 		final JMenuBar menu;

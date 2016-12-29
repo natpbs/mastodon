@@ -18,8 +18,6 @@ import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.TrackSchemeNavigator.NavigatorEtiquette;
-import org.mastodon.revised.ui.EdgeColorGenerator;
-import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.context.ContextChooserPanel;
 import org.mastodon.revised.ui.grouping.GroupHandle;
 import org.mastodon.revised.ui.grouping.GroupLocksPanel;
@@ -40,6 +38,8 @@ import net.imglib2.ui.util.GuiUtil;
 
 public class TrackSchemeFrame extends JFrame
 {
+	private static final long serialVersionUID = 1L;
+
 	private final TrackSchemePanel trackschemePanel;
 
 	private final JPanel settingsPanel;
@@ -52,21 +52,17 @@ public class TrackSchemeFrame extends JFrame
 
 	private final EditFocusVertexBehaviour editFocusVertex;
 
-	private final UndoPointMarker undoPointMarker; // TODO: unused, remove?
-
 	public TrackSchemeFrame(
 			final TrackSchemeGraph< ?, ? > graph,
 			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
 			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
-			final VertexColorGenerator< TrackSchemeVertex > vertexColorGenerator,
-			final EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator,
 			final UndoPointMarker undoPointMarker,
 			final GroupHandle groupHandle,
 			final ContextChooser< ? > contextChooser )
 	{
-		this( graph, highlight, focus, selection, navigation, vertexColorGenerator, edgeColorGenerator, undoPointMarker, groupHandle, contextChooser, TrackSchemeOptions.options() );
+		this( graph, highlight, focus, selection, navigation, undoPointMarker, groupHandle, contextChooser, TrackSchemeOptions.options() );
 	}
 
 	public TrackSchemeFrame(
@@ -75,15 +71,12 @@ public class TrackSchemeFrame extends JFrame
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
 			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
-			final VertexColorGenerator<  TrackSchemeVertex > vertexColorGenerator,
-			final EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator,
 			final UndoPointMarker undoPointMarker,
 			final GroupHandle groupHandle,
 			final ContextChooser< ? > contextChooser,
 			final TrackSchemeOptions optional )
 	{
 		super( "TrackScheme", GuiUtil.getSuitableGraphicsConfiguration( GuiUtil.RGB_COLOR_MODEL ) );
-		this.undoPointMarker = undoPointMarker;
 		getRootPane().setDoubleBuffered( true );
 
 		trackschemePanel = new TrackSchemePanel(
@@ -92,8 +85,6 @@ public class TrackSchemeFrame extends JFrame
 				focus,
 				selection,
 				navigation,
-				vertexColorGenerator,
-				edgeColorGenerator,
 				optional );
 		add( trackschemePanel, BorderLayout.CENTER );
 

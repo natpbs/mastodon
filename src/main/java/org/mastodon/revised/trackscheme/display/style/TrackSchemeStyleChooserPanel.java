@@ -34,7 +34,6 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.TrackSchemeVertexBimap;
 import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
@@ -108,7 +107,10 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final Selection< TrackSchemeVertex, TrackSchemeEdge > selection = new SelectionAdapter<>( ex.getSelection(), vertexMap, edgeMap );
 		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation = new NavigationHandlerAdapter<>( new NavigationHandlerImp<>( new GroupManager().createGroupHandle() ), vertexMap, edgeMap );
 		colorGenerator = new DummyLayoutColorGenerator( graph, model );
-		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, colorGenerator, colorGenerator, TrackSchemeOptions.options() );
+		TrackSchemeOptions options = TrackSchemeOptions.options().
+				vertexColorGenerator( colorGenerator ).
+				edgeColorGenerator( colorGenerator );
+		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, options );
 		panelPreview.setTimepointRange( 0, 7 );
 		panelPreview.timePointChanged( 2 );
 		panelPreview.graphChanged();

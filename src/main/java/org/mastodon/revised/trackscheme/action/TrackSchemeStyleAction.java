@@ -2,8 +2,8 @@ package org.mastodon.revised.trackscheme.action;
 
 import java.awt.event.ActionEvent;
 
-import org.mastodon.revised.trackscheme.display.DefaultTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.LayoutColorGenerator;
+import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeFeaturesColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
@@ -23,9 +23,9 @@ public class TrackSchemeStyleAction extends AbstractNamedAction
 
 	private final DefaultTrackSchemeOverlay overlay;
 
-	private final LayoutColorGenerator colorGenerator;
+	private final TrackSchemeFeaturesColorGenerator colorGenerator;
 
-	public TrackSchemeStyleAction( final TrackSchemeStyle style, final DefaultTrackSchemeOverlay overlay, final UpdateListener panelRepainter, final LayoutColorGenerator colorGenerator )
+	public TrackSchemeStyleAction( final TrackSchemeStyle style, final DefaultTrackSchemeOverlay overlay, final UpdateListener panelRepainter, final TrackSchemeFeaturesColorGenerator colorGenerator )
 	{
 		super( style.name );
 		this.style = style;

@@ -29,6 +29,13 @@
 package org.mastodon.revised.trackscheme.display;
 
 import org.mastodon.revised.trackscheme.ScreenTransform;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge;
+import org.mastodon.revised.trackscheme.TrackSchemeVertex;
+import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay.TrackSchemeOverlayFactory;
+import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeColorGenerator;
+import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
+import org.mastodon.revised.ui.EdgeColorGenerator;
+import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.selection.NavigationEtiquette;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 
@@ -105,7 +112,7 @@ public class TrackSchemeOptions
 	}
 
 	/**
-	 * Sets the input trigger config. TODO is this config option necessary?
+	 * Sets the input trigger config.
 	 *
 	 * @param c
 	 *            the input trigger config.
@@ -118,8 +125,33 @@ public class TrackSchemeOptions
 	}
 
 	/**
+	 * Sets the factory used to create this TrackScheme's overlay.
+	 *
+	 * @param factory
+	 *            the factory.
+	 * @return this instance.
+	 */
+	public TrackSchemeOptions trackSchemeOverlayFactory( final TrackSchemeOverlayFactory factory )
+	{
+		values.trackSchemeOverlayFactory = factory;
+		return this;
+	}
+
+	public TrackSchemeOptions vertexColorGenerator( final VertexColorGenerator< TrackSchemeVertex > vertexColorGenerator )
+	{
+		values.vertexColorGenerator = vertexColorGenerator;
+		return this;
+	}
+
+	public TrackSchemeOptions edgeColorGenerator( final EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator )
+	{
+		values.edgeColorGenerator = edgeColorGenerator;
+		return this;
+	}
+
+	/**
 	 * Sets the navigation etiquette.
-	 * 
+	 *
 	 * @param navigationEtiquette
 	 *            the navigation etiquette.
 	 * @return this instance.
@@ -135,17 +167,25 @@ public class TrackSchemeOptions
 	 */
 	public static class Values
 	{
+		private TrackSchemeOverlayFactory trackSchemeOverlayFactory =
+				new DefaultTrackSchemeOverlay.Factory();
+
 		private int width = 800;
 
 		private int height = 600;
 
-		private TransformEventHandlerFactory< ScreenTransform > transformEventHandlerFactory = InertialScreenTransformEventHandler.factory( new InputTriggerConfig() );
+		private TransformEventHandlerFactory< ScreenTransform > transformEventHandlerFactory =
+				InertialScreenTransformEventHandler.factory( new InputTriggerConfig() );
 
 		private long animationDurationMillis = 250;
 
 		private InputTriggerConfig inputTriggerConfig = null;
 
 		private NavigationEtiquette navigationEtiquette = NavigationEtiquette.MINIMAL;
+
+		private VertexColorGenerator< TrackSchemeVertex > vertexColorGenerator;
+
+		private EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator;
 
 		public TrackSchemeOptions optionsFromValues()
 		{
@@ -155,7 +195,17 @@ public class TrackSchemeOptions
 				transformEventHandlerFactory( transformEventHandlerFactory ).
 				animationDurationMillis( animationDurationMillis ).
 				inputTriggerConfig( inputTriggerConfig ).
-				navigationEtiquette( navigationEtiquette );
+					navigationEtiquette( navigationEtiquette ).
+					trackSchemeOverlayFactory( trackSchemeOverlayFactory ).
+					vertexColorGenerator( vertexColorGenerator ).
+					edgeColorGenerator( edgeColorGenerator );
+		}
+
+		public Values()
+		{
+			final DefaultTrackSchemeColorGenerator cg = new DefaultTrackSchemeColorGenerator();
+			vertexColorGenerator = cg;
+			edgeColorGenerator = cg;
 		}
 
 		public int getWidth()
@@ -187,5 +237,21 @@ public class TrackSchemeOptions
 		{
 			return navigationEtiquette;
 		}
+
+		public TrackSchemeOverlayFactory getTrackSchemeOverlayFactory()
+		{
+			return trackSchemeOverlayFactory;
+		}
+
+		public VertexColorGenerator< TrackSchemeVertex > getVertexColorGenerator()
+		{
+			return vertexColorGenerator;
+		}
+
+		public EdgeColorGenerator< TrackSchemeEdge > getEdgeColorGenerator()
+		{
+			return edgeColorGenerator;
+		}
 	}
+
 }

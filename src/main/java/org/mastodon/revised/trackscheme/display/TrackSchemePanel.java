@@ -25,7 +25,6 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions.Values;
 import org.mastodon.revised.trackscheme.display.animate.AbstractAnimator;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.ui.EdgeColorGenerator;
 import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.selection.FocusListener;
@@ -162,34 +161,31 @@ public class TrackSchemePanel extends JPanel implements
 			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
 			final Selection< TrackSchemeVertex, TrackSchemeEdge > selection,
 			final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation,
-			final VertexColorGenerator< TrackSchemeVertex > vertexColorGenerator,
-			final EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator,
 			final TrackSchemeOptions optional )
 	{
 		super( new BorderLayout(), false );
 		this.graph = graph;
 		this.focus = focus;
-		this.vertexColorGenerator = vertexColorGenerator;
-		this.edgeColorGenerator = edgeColorGenerator;
 
 		final Values options = optional.values;
 
-		graph.addGraphChangeListener( this );
-		navigation.addNavigationListener( this );
+		vertexColorGenerator = options.getVertexColorGenerator();
+		edgeColorGenerator = options.getEdgeColorGenerator();
 
 		final int w = options.getWidth();
 		final int h = options.getHeight();
 		display = new InteractiveDisplayCanvasComponent<>( w, h, options.getTransformEventHandlerFactory() );
 		display.addTransformListener( this );
 
+		graphOverlay = options.getTrackSchemeOverlayFactory().create( graph, highlight, focus );
+		graphOverlay.setCanvasSize( w, h );
+		display.addOverlayRenderer( graphOverlay );
+
+		graph.addGraphChangeListener( this );
+		navigation.addNavigationListener( this );
 		highlight.addHighlightListener( this );
 		focus.addFocusListener( this );
 		selection.addSelectionListener( this );
-
-		final TrackSchemeStyle style = TrackSchemeStyle.defaultStyle();
-		graphOverlay = new DefaultTrackSchemeOverlay( graph, highlight, focus, optional, style );
-
-		display.addOverlayRenderer( graphOverlay );
 
 		// This should be the last OverlayRenderer in display.
 		// It triggers repainting if there is currently an ongoing animation.

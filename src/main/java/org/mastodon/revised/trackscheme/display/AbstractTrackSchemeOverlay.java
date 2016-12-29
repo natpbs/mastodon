@@ -36,18 +36,18 @@ import net.imglib2.ui.OverlayRenderer;
  * {@link #drawOverlays(Graphics)} method is called, the following sequence of
  * abstract methods is executed:
  * <ol>
- * <li>{@link #paintBackground(Graphics2D, ScreenEntities)} to paint background
+ * <li>{@code #paintBackground(Graphics2D, ScreenEntities)} to paint background
  * decorations.
- * <li> {@link #beforeDrawEdge(Graphics2D)} to configure the Graphics2D object
+ * <li>{@code #beforeDrawEdge(Graphics2D)} to configure the Graphics2D object
  * prior to painting edges.
- * <li> {@link #drawEdge(Graphics2D, ScreenEdge, ScreenVertex, ScreenVertex)} for
+ * <li>{@code #drawEdge(Graphics2D, ScreenEdge, ScreenVertex, ScreenVertex)} for
  * each edge.
- * <li>{@link #beforeDrawVertex(Graphics2D)} to configure the Graphics2D object
+ * <li>{@code #beforeDrawVertex(Graphics2D)} to configure the Graphics2D object
  * prior to painting vertices.
- * <li> {@link #drawVertex(Graphics2D, ScreenVertex)} for each vertex.
- * <li> {@link #beforeDrawVertexRange(Graphics2D)} to configure the Graphics2D
+ * <li>{@code #drawVertex(Graphics2D, ScreenVertex)} for each vertex.
+ * <li>{@code #beforeDrawVertexRange(Graphics2D)} to configure the Graphics2D
  * object prior to painting vertex ranges.
- * <li>{@link #drawVertexRange(Graphics2D, ScreenVertexRange)} for each vertex
+ * <li>{@code #drawVertexRange(Graphics2D, ScreenVertexRange)} for each vertex
  * range.
  * </ol>
  * <p>
@@ -124,20 +124,15 @@ public abstract class AbstractTrackSchemeOverlay implements OverlayRenderer, Off
 	 *            highlighted.
 	 * @param focus
 	 *            the focus model that indicates which vertex is focused.
-	 * @param options
-	 *            options for TrackScheme look.
 	 */
 	public AbstractTrackSchemeOverlay(
 			final TrackSchemeGraph< ?, ? > graph,
 			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
-			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus,
-			final TrackSchemeOptions options )
+			final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus )
 	{
 		this.graph = graph;
 		this.highlight = highlight;
 		this.focus = focus;
-		width = options.values.getWidth();
-		height = options.values.getHeight();
 		entities = new ScreenEntities( graph );
 		overlayRenderers = new CopyOnWriteArrayList<>();
 	}
@@ -569,4 +564,12 @@ public abstract class AbstractTrackSchemeOverlay implements OverlayRenderer, Off
 	 *            the edge target vertex.
 	 */
 	protected abstract void drawEdge( Graphics2D g2, ScreenEdge edge, ScreenVertex vs, ScreenVertex vt );
+
+	public static interface TrackSchemeOverlayFactory
+	{
+		public AbstractTrackSchemeOverlay create(
+				TrackSchemeGraph< ?, ? > graph,
+				HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
+				FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus );
+	}
 }
