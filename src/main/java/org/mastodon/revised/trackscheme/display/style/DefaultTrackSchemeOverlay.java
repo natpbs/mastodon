@@ -29,8 +29,6 @@ import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVert
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 
-import net.imglib2.RealLocalizable;
-
 /**
  * An AbstractTrackSchemeOverlay implementation that:
  * <ul>
@@ -294,12 +292,9 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			drawVertexSimplifiedIfHighlighted( g2, vertex );
 	}
 
-	// TODO: take double x, y instead of RealLocalizable parameter
 	@Override
-	protected double distanceToPaintedEdge( final RealLocalizable pos, final ScreenEdge edge, final ScreenVertex source, final ScreenVertex target )
+	protected double distanceToPaintedEdge( final double x0, final double y0, final ScreenEdge edge, final ScreenVertex source, final ScreenVertex target )
 	{
-		final double x0 = pos.getDoublePosition( 0 );
-		final double y0 = pos.getDoublePosition( 1 );
 		final double x1 = source.getX();
 		final double y1 = source.getY();
 		final double x2 = target.getX();
@@ -308,9 +303,8 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		return d;
 	}
 
-	// TODO: take double x, y instead of RealLocalizable parameter
 	@Override
-	protected boolean isInsidePaintedVertex( final RealLocalizable pos, final ScreenVertex vertex )
+	protected boolean isInsidePaintedVertex( final double x0, final double y0, final ScreenVertex vertex )
 	{
 		final double d = vertex.getVertexDist();
 		double radius = 0;
@@ -323,8 +317,8 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		{
 			radius = simplifiedVertexRadius + simplifiedVertexSelectTolerance;
 		}
-		final double x = pos.getDoublePosition( 0 ) - vertex.getX();
-		final double y = pos.getDoublePosition( 1 ) - vertex.getY();
+		final double x = x0 - vertex.getX();
+		final double y = y0 - vertex.getY();
 		return ( x * x + y * y < radius * radius );
 	}
 
