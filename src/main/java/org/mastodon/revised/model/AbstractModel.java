@@ -1,8 +1,6 @@
 package org.mastodon.revised.model;
 
 import org.mastodon.graph.GraphIdBimap;
-import org.mastodon.graph.branch.BranchGraph;
-import org.mastodon.graph.branch.DefaultBranchGraph;
 import org.mastodon.graph.ref.AbstractListenableEdge;
 import org.mastodon.revised.model.feature.DefaultFeatureModel;
 import org.mastodon.revised.model.feature.FeatureModel;
@@ -15,7 +13,7 @@ import org.mastodon.revised.model.feature.FeatureModel;
 public class AbstractModel<
 		MG extends AbstractModelGraph< MG, ?, ?, V, E, ? >,
 		V extends AbstractSpot< V, E, ?, MG >,
-		E extends AbstractListenableEdge< E, V, ? > >
+		E extends AbstractListenableEdge< E, V, ? >>
 {
 	/**
 	 * Exposes the graph managed by this model.
@@ -38,11 +36,6 @@ public class AbstractModel<
 		return modelGraph.idmap;
 	}
 
-	public BranchGraph< V, E > getBranchGraph()
-	{
-		return branchGraph;
-	}
-
 	public FeatureModel< V, E > featureModel()
 	{
 		return featureModel;
@@ -50,24 +43,16 @@ public class AbstractModel<
 
 	protected final MG modelGraph;
 
-	protected final BranchGraph< V, E > branchGraph;
-
 	protected final FeatureModel< V, E > featureModel;
 
 	protected AbstractModel( final MG modelGraph )
 	{
 		this.modelGraph = modelGraph;
-		this.branchGraph = createBranchGraph( modelGraph );
 		this.featureModel = createFeatureModel();
 	}
 
 	protected FeatureModel< V, E > createFeatureModel()
 	{
 		return new DefaultFeatureModel<>();
-	}
-
-	protected BranchGraph< V, E > createBranchGraph( final MG graph )
-	{
-		return new DefaultBranchGraph<>( graph );
 	}
 }
