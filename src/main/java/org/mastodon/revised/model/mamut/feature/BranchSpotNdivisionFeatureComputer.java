@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.mastodon.features.IntFeature;
-import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.model.feature.DefaultFeatureProjectors;
 import org.mastodon.revised.model.feature.FeatureProjection;
 import org.mastodon.revised.model.mamut.Model;
+import org.mastodon.revised.model.mamut.branchgraph.BranchVertex;
 import org.scijava.plugin.Plugin;
 
 @Plugin( type = SpotFeatureComputer.class, name = "N divisions" )

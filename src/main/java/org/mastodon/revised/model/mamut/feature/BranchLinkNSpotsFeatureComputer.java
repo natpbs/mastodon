@@ -5,15 +5,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.mastodon.features.IntFeature;
-import org.mastodon.graph.branch.BranchEdge;
-import org.mastodon.graph.branch.BranchGraph;
-import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.model.feature.DefaultFeatureProjectors;
 import org.mastodon.revised.model.feature.FeatureProjection;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelGraph;
 import org.mastodon.revised.model.mamut.Spot;
+import org.mastodon.revised.model.mamut.branchgraph.BranchEdge;
+import org.mastodon.revised.model.mamut.branchgraph.BranchVertex;
+import org.mastodon.revised.model.mamut.branchgraph.ModelBranchGraph;
 import org.scijava.plugin.Plugin;
 
 @Plugin( type = BranchLinkFeatureComputer.class, name = "Branch N spots" )
@@ -36,7 +36,7 @@ public class BranchLinkNSpotsFeatureComputer extends BranchLinkFeatureComputer< 
 	public void compute( final Model model )
 	{
 		final ModelGraph graph = model.getGraph();
-		final BranchGraph< Spot, Link > branchGraph = model.getBranchGraph();
+		final ModelBranchGraph branchGraph = model.getBranchGraph();
 
 		final Link eref = graph.edgeRef();
 		final Spot vref = graph.vertexRef();

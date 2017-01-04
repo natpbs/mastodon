@@ -104,12 +104,17 @@ public class DefaultMamutFeatureComputerService extends AbstractService implemen
 			return false;
 		}
 
-		model.featureModel().clear();
+		model.getGraphFeatureModel().clear();
+		model.getBranchGraphFeatureModel().clear();
 		for ( final ObjectVertex< FeatureComputer< ?, ?, Model > > v : sorter.get() )
 		{
 			final FeatureComputer< ?, ?, Model > computer = v.getContent();
 			computer.compute( model );
-			model.featureModel().declareFeature( computer );
+			// We have to declare feature to the right graph.
+			if ( ( computer instanceof BranchLinkFeatureComputer || computer instanceof BranchSpotFeatureComputer ) )
+				model.getBranchGraphFeatureModel().declareFeature( computer );
+			else
+				model.getGraphFeatureModel().declareFeature( computer );
 		}
 
 		return true;
