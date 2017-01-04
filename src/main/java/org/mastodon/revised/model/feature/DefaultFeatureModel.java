@@ -10,8 +10,6 @@ import java.util.Set;
 import org.mastodon.features.Feature;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.Vertex;
-import org.mastodon.graph.branch.BranchEdge;
-import org.mastodon.graph.branch.BranchVertex;
 
 public class DefaultFeatureModel< V extends Vertex< E >, E extends Edge< V > > implements FeatureModel< V, E >
 {
@@ -138,19 +136,5 @@ public class DefaultFeatureModel< V extends Vertex< E >, E extends Edge< V > > i
 	public FeatureProjection< V > getVertexProjection( final String projectionKey )
 	{
 		return ( FeatureProjection< V > ) projections.get( FeatureTarget.VERTEX ).get( projectionKey );
-	}
-
-	@SuppressWarnings( "unchecked" )
-	@Override
-	public FeatureProjection< BranchEdge > getBranchEdgeProjection( final String projectionKey )
-	{
-		return ( FeatureProjection< BranchEdge > ) projections.get( FeatureTarget.BRANCH_EDGE ).get( projectionKey );
-	}
-
-	@SuppressWarnings( "unchecked" )
-	@Override
-	public FeatureProjection< BranchVertex > getBranchVertexProjection( final String projectionKey )
-	{
-		return ( FeatureProjection< BranchVertex > ) projections.get( FeatureTarget.BRANCH_VERTEX ).get( projectionKey );
 	}
 }

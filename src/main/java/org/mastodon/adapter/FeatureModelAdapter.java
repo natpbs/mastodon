@@ -5,8 +5,6 @@ import java.util.Set;
 import org.mastodon.features.Feature;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.Vertex;
-import org.mastodon.graph.branch.BranchEdge;
-import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.model.feature.FeatureComputer;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
@@ -54,18 +52,6 @@ public class FeatureModelAdapter< V extends Vertex< E >, E extends Edge< V >, WV
 	public FeatureProjection< WV > getVertexProjection( final String projectionKey )
 	{
 		return new FeatureProjectionAdapter< V, WV >( featureModel.getVertexProjection( projectionKey ), vertexMap );
-	}
-
-	@Override
-	public FeatureProjection< BranchEdge > getBranchEdgeProjection( final String projectionKey )
-	{
-		return featureModel.getBranchEdgeProjection( projectionKey );
-	}
-
-	@Override
-	public FeatureProjection< BranchVertex > getBranchVertexProjection( final String projectionKey )
-	{
-		return featureModel.getBranchVertexProjection( projectionKey );
 	}
 
 	@Override
