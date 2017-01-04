@@ -27,9 +27,7 @@ import org.mastodon.adapter.SelectionAdapter;
 import org.mastodon.graph.GraphChangeListener;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.graph.ListenableReadOnlyGraph;
-import org.mastodon.graph.branch.BranchEdge;
 import org.mastodon.graph.branch.BranchGraph;
-import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.bdv.BigDataViewerMaMuT;
 import org.mastodon.revised.bdv.SharedBigDataViewerData;
 import org.mastodon.revised.bdv.overlay.BdvHighlightHandler;
@@ -52,19 +50,19 @@ import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
 import org.mastodon.revised.model.branchgraph.BranchGraphAdapter;
-import org.mastodon.revised.model.branchgraph.BranchGraphFeatureModelAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphFocusAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphHighlightAdapter;
-import org.mastodon.revised.model.branchgraph.BranchGraphIdentity;
 import org.mastodon.revised.model.branchgraph.BranchGraphNavigationHandlerAdapter;
 import org.mastodon.revised.model.branchgraph.BranchGraphSelectionAdapter;
-import org.mastodon.revised.model.branchgraph.DefaultBranchGraphProperties;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.mamut.BoundingSphereRadiusStatistics;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelOverlayProperties;
 import org.mastodon.revised.model.mamut.Spot;
+import org.mastodon.revised.model.mamut.branchgraph.BranchEdge;
+import org.mastodon.revised.model.mamut.branchgraph.BranchVertex;
+import org.mastodon.revised.model.mamut.branchgraph.ModelBranchGraph;
 import org.mastodon.revised.model.mamut.feature.DefaultMamutFeatureComputerService;
 import org.mastodon.revised.trackscheme.TrackSchemeContextListener;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
@@ -83,7 +81,8 @@ import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.style.BranchGraphTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeFeaturesColorGenerator;
+import org.mastodon.revised.trackscheme.display.style.FeaturesColorGenerator;
+import org.mastodon.revised.trackscheme.display.style.FeaturesColorGeneratorBranchGraph;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
@@ -663,8 +662,8 @@ public class WindowManager
 		/*
 		 * TrackSchemeGraph listening to model.
 		 */
-		final ModelGraphProperties< Spot, Link > properties = new DefaultModelGraphProperties<>();
-		final TrackSchemeGraph< Spot, Link > trackSchemeGraph = new TrackSchemeGraph<>( graph, idmap, properties );
+		final ModelGraphProperties< Spot, Link > graphProperties = new DefaultModelGraphProperties<>();
+		final TrackSchemeGraph< Spot, Link > trackSchemeGraph = new TrackSchemeGraph<>( graph, idmap, graphProperties );
 		final RefBimap< Spot, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, trackSchemeGraph );
 		final RefBimap< Link, TrackSchemeEdge > edgeMap = new TrackSchemeEdgeBimap<>( idmap, trackSchemeGraph );
 
@@ -701,11 +700,9 @@ public class WindowManager
 		/*
 		 * Features for TrackScheme.
 		 */
-		final FeatureModel< Spot, Link > featureModel = model.featureModel();
+		final FeatureModel< Spot, Link > featureModel = model.getGraphFeatureModel();
 		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
-				new FeatureModelAdapter< Spot, Link, TrackSchemeVertex, TrackSchemeEdge >( featureModel, vertexMap, edgeMap );
-		final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraphAdapter =
-				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
+				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
 
 		/*
 		 * TrackScheme ContextChooser.
@@ -719,8 +716,11 @@ public class WindowManager
 		 * Tune TrackScheme options to use a feature-based coloring scheme.
 		 */
 
-		final TrackSchemeFeaturesColorGenerator colorGenerator =
-				new TrackSchemeFeaturesColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
+		final BranchGraph< BranchVertex, BranchEdge, TrackSchemeVertex, TrackSchemeEdge > trackSchemeBranchGraph =
+				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
+		final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
+				new FeaturesColorGeneratorBranchGraph<>( trackSchemeGraph, trackSchemeFeatures, trackSchemeBranchGraph, model.getBranchGraphFeatureModel() );
+
 		final TrackSchemeOptions options  = TrackSchemeOptions.options().
 			inputTriggerConfig( keyconf ).
 			vertexColorGenerator( colorGenerator ).
@@ -837,14 +837,13 @@ public class WindowManager
 
 	public void createBranchGraphTrackScheme()
 	{
-		final BranchGraph< Spot, Link > graph = model.getBranchGraph();
+		final ModelBranchGraph graph = model.getBranchGraph();
 		final GraphIdBimap< BranchVertex, BranchEdge > idmap = graph.getGraphIdBimap();
 
 		/*
 		 * TrackSchemeGraph listening to branch graph.
 		 */
-		final ModelGraphProperties< BranchVertex, BranchEdge > properties =
-				new DefaultBranchGraphProperties< Spot, Link >( graph, model.getGraph() );
+		final ModelGraphProperties< BranchVertex, BranchEdge > properties = new DefaultModelGraphProperties<>();
 		final TrackSchemeGraph< BranchVertex, BranchEdge > trackSchemeGraph =
 				new TrackSchemeGraph< BranchVertex, BranchEdge >( graph, idmap, properties );
 		final RefBimap< BranchVertex, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, trackSchemeGraph );
@@ -876,7 +875,7 @@ public class WindowManager
 		 */
 		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandlerImp<>( groupHandle );
 		final NavigationHandler< BranchVertex, BranchEdge > branchGraphNavigation =
-				new BranchGraphNavigationHandlerAdapter< Spot, Link >( graph, model.getGraph(), navigationHandler );
+				new BranchGraphNavigationHandlerAdapter<>( graph, model.getGraph(), navigationHandler );
 		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > trackSchemeNavigation =
 				new NavigationHandlerAdapter<>( branchGraphNavigation, vertexMap, edgeMap );
 
@@ -885,45 +884,33 @@ public class WindowManager
 		 */
 
 		final FocusModel< BranchVertex, BranchEdge > branchGraphFocus =
-				new BranchGraphFocusAdapter< Spot, Link >( graph, model.getGraph(), focusModel );
+				new BranchGraphFocusAdapter<>( graph, model.getGraph(), focusModel );
 		final FocusModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFocus =
 				new FocusAdapter<>( branchGraphFocus, vertexMap, edgeMap );
 
 		/*
-		 * Only branch vertex and edge features are accessible.
+		 * Branch graph features.
 		 */
 
-		final FeatureModel< Spot, Link > featureModel = model.featureModel();
-		final FeatureModel< BranchVertex, BranchEdge > branchGraphFeatureModel =
-				new BranchGraphFeatureModelAdapter<>( featureModel );
+		/*
+		 * Features for TrackScheme.
+		 */
+		final FeatureModel< BranchVertex, BranchEdge > featureModel = model.getBranchGraphFeatureModel();
 		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
-				new FeatureModelAdapter<>( branchGraphFeatureModel, vertexMap, edgeMap );
-
-		/*
-		 * Map this graph of BranchVertex and BranchEdge to itself as a branch
-		 * graph.
-		 */
-		final BranchGraph< BranchVertex, BranchEdge > branchGraph =
-				new BranchGraphIdentity<>( graph );
-		/*
-		 * Then map it to a branch graph of TrackSchemeVertex and
-		 * TrackSchemeEdge. So meta.
-		 */
-		final BranchGraph< TrackSchemeVertex, TrackSchemeEdge > branchGraphAdapter =
-				new BranchGraphAdapter<>( branchGraph, vertexMap, edgeMap );
-		final TrackSchemeFeaturesColorGenerator colorGenerator =
-				new TrackSchemeFeaturesColorGenerator( trackSchemeGraph, branchGraphAdapter, trackSchemeFeatures );
+				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
+		final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
+				new FeaturesColorGenerator<>( trackSchemeGraph, trackSchemeFeatures );
 
 		/*
 		 * TrackScheme options.
 		 */
-		
-		TrackSchemeOptions options = TrackSchemeOptions.options().
+
+		final TrackSchemeOptions options = TrackSchemeOptions.options().
 				inputTriggerConfig( keyconf ).
 				vertexColorGenerator( colorGenerator ).
 				edgeColorGenerator( colorGenerator ).
 				trackSchemeOverlayFactory( new BranchGraphTrackSchemeOverlay.Factory() );
-		
+
 		/*
 		 * Show TrackSchemeFrame.
 		 */
@@ -979,7 +966,10 @@ public class WindowManager
 		return renderSettingsManager;
 	}
 
-	private void installTrackSchemeMenu( final TrackSchemeFrame frame, final TrackSchemeFeaturesColorGenerator colorGenerator, final boolean isBranchGraph )
+	private void installTrackSchemeMenu(
+			final TrackSchemeFrame frame,
+			final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator,
+			final boolean isBranchGraph )
 	{
 
 		final JMenuBar menu;

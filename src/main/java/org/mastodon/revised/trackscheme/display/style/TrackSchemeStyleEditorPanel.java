@@ -68,11 +68,12 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 	public TrackSchemeStyleEditorPanel(
 			final TrackSchemeStyle style,
 			final FeatureKeys featureKeys,
-			final FeatureRangeCalculator featureRangeCalculator )
+			final FeatureRangeCalculator featureRangeCalculator,
+			final FeatureKeys branchGraphFeatureKeys,
+			final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 		super( new GridBagLayout() );
 		colorChooser = new JColorChooser();
-
 
 		final GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets( 0, 5, 0, 5 );
@@ -95,7 +96,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		c.gridx++;
 		c.gridwidth = 3;
-		this.colorVertexChoices = vertexColorBy( style, featureKeys );
+		this.colorVertexChoices = vertexColorBy( style, featureKeys, branchGraphFeatureKeys );
 		add( colorVertexChoices, c );
 
 		// Colormap and ranges.
@@ -221,7 +222,18 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 					{
 						try
 						{
-							final double[] range = featureRangeCalculator.getRange( style.vertexColorFeatureKey );
+							final ColorVertexBy category = colorVertexChoices.getSelectedCategory();
+							final double[] range;
+							switch ( category )
+							{
+							case BRANCH_EDGE:
+							case BRANCH_VERTEX:
+								range = branchGraphFeatureRangeCalculator.getRange( style.vertexColorFeatureKey );
+								break;
+							default:
+								range = featureRangeCalculator.getRange( style.vertexColorFeatureKey );
+								break;
+							}
 							style.minVertexColorRange = range[ 0 ];
 							style.maxVertexColorRange( range[ 1 ] );
 							min1.setValue( Double.valueOf( range[ 0 ] ) );
@@ -257,7 +269,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		c.gridx++;
 		c.gridwidth = 3;
-		this.colorEdgeChoices = edgeColorBy( style, featureKeys );
+		this.colorEdgeChoices = edgeColorBy( style, featureKeys, branchGraphFeatureKeys );
 		add( colorEdgeChoices, c );
 
 		// Colormap and ranges.
@@ -383,7 +395,18 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 					{
 						try
 						{
-							final double[] range = featureRangeCalculator.getRange( style.edgeColorFeatureKey );
+							final ColorEdgeBy category = colorEdgeChoices.getSelectedCategory();
+							final double[] range;
+							switch ( category )
+							{
+							case BRANCH_EDGE:
+							case BRANCH_VERTEX:
+								range = branchGraphFeatureRangeCalculator.getRange( style.edgeColorFeatureKey );
+								break;
+							default:
+								range = featureRangeCalculator.getRange( style.edgeColorFeatureKey );
+								break;
+							}
 							style.minEdgeColorRange = range[ 0 ];
 							style.maxEdgeColorRange( range[ 1 ] );
 							min2.setValue( Double.valueOf( range[ 0 ] ) );
@@ -397,7 +420,6 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 						}
 					};
 				}.start();
-
 			}
 		} );
 
@@ -644,7 +666,8 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 	private static CategoryJComboBox< ColorEdgeBy, FeatureKeyWrapper > edgeColorBy(
 			final TrackSchemeStyle style,
-			final FeatureKeys featureKeys )
+			final FeatureKeys featureKeys,
+			final FeatureKeys branchGraphFeatureKeys )
 	{
 		/*
 		 * Harvest possible choices.
@@ -685,7 +708,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		// Branch edge.
 		final Collection< FeatureKeyWrapper > branchEdgeProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.BRANCH_EDGE ) )
+		for ( final String projectionKey : branchGraphFeatureKeys.getProjectionKeys( FeatureTarget.EDGE ) )
 			branchEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 		if ( !branchEdgeProjections.isEmpty() )
 		{
@@ -695,7 +718,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		// Branch vertex.
 		final Collection< FeatureKeyWrapper > branchVertexProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.BRANCH_VERTEX ) )
+		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.VERTEX ) )
 			branchVertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 		if ( !branchVertexProjections.isEmpty() )
 		{
@@ -727,7 +750,8 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 	private static CategoryJComboBox< ColorVertexBy, FeatureKeyWrapper > vertexColorBy(
 			final TrackSchemeStyle style,
-			final FeatureKeys featureKeys )
+			final FeatureKeys featureKeys,
+			final FeatureKeys branchGraphFeatureKeys )
 	{
 		/*
 		 * Harvest possible choices.
@@ -769,7 +793,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		// Branch vertex.
 		final Collection< FeatureKeyWrapper > branchVertexProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.BRANCH_VERTEX ) )
+		for ( final String projectionKey : branchGraphFeatureKeys.getProjectionKeys( FeatureTarget.VERTEX ) )
 			branchVertexProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 		if ( !branchVertexProjections.isEmpty() )
 		{
@@ -779,7 +803,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		// Branch edge.
 		final Collection< FeatureKeyWrapper > branchEdgeProjections = new ArrayList<>();
-		for ( final String projectionKey : featureKeys.getProjectionKeys( FeatureTarget.BRANCH_EDGE ) )
+		for ( final String projectionKey : branchGraphFeatureKeys.getProjectionKeys( FeatureTarget.EDGE ) )
 			branchEdgeProjections.add( new FeatureKeyWrapper( projectionKey, projectionKey ) );
 		if ( !branchEdgeProjections.isEmpty() )
 		{

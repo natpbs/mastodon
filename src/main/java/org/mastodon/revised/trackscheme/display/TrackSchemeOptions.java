@@ -32,7 +32,7 @@ import org.mastodon.revised.trackscheme.ScreenTransform;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay.TrackSchemeOverlayFactory;
-import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeColorGenerator;
+import org.mastodon.revised.trackscheme.display.style.DefaultColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.ui.EdgeColorGenerator;
 import org.mastodon.revised.ui.VertexColorGenerator;
@@ -203,7 +203,7 @@ public class TrackSchemeOptions
 
 		public Values()
 		{
-			final DefaultTrackSchemeColorGenerator cg = new DefaultTrackSchemeColorGenerator();
+			final DefaultColorGenerator cg = new DefaultColorGenerator();
 			vertexColorGenerator = cg;
 			edgeColorGenerator = cg;
 		}

@@ -84,16 +84,24 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 	private final FeatureRangeCalculator featureRangeCalculator;
 
+	private final FeatureKeys branchGraphFeatureKeys;
+
+	private final FeatureRangeCalculator branchGraphFeatureRangeCalculator;
+
 	private final DummyLayoutColorGenerator colorGenerator;
 
 	public TrackSchemeStyleChooserPanel(
 			final Frame owner,
 			final MutableComboBoxModel< TrackSchemeStyle > model,
 			final FeatureKeys featureKeys,
-			final FeatureRangeCalculator featureRangeCalculator )
+			final FeatureRangeCalculator featureRangeCalculator,
+			final FeatureKeys branchGraphFeatureKeys,
+			final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 		this.featureKeys = featureKeys;
 		this.featureRangeCalculator = featureRangeCalculator;
+		this.branchGraphFeatureKeys = branchGraphFeatureKeys;
+		this.branchGraphFeatureRangeCalculator = branchGraphFeatureRangeCalculator;
 
 		final Examples ex = DummyGraph.Examples.CELEGANS;
 		final DummyGraph example = ex.getGraph();
@@ -246,9 +254,8 @@ class TrackSchemeStyleChooserPanel extends JPanel
 			final AbstractTrackSchemeOverlay overlay = panelPreview.getGraphOverlay();
 			if ( overlay instanceof DefaultTrackSchemeOverlay )
 			{
-				final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
 				final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
-
+				final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
 				dtso.getStyle().removeUpdateListener( this );
 				dtso.setStyle( style );
 
@@ -256,7 +263,9 @@ class TrackSchemeStyleChooserPanel extends JPanel
 					contentPanel.remove( editorPanel );
 
 				editorPanel = new TrackSchemeStyleEditorPanel(
-						comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ), featureKeys, featureRangeCalculator );
+						comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ),
+						featureKeys, featureRangeCalculator,
+						branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 				contentPanel.add( editorPanel, BorderLayout.SOUTH );
 
 				style.addUpdateListener( this );

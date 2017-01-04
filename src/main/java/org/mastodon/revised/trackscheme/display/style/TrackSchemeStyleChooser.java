@@ -29,8 +29,8 @@ public class TrackSchemeStyleChooser
 	public TrackSchemeStyleChooser(
 			final JFrame owner,
 			final TrackSchemeStyleManager trackschemeStyleManager,
-			final FeatureKeys featureKeys,
-			final FeatureRangeCalculator featureRangeCalculator )
+			final FeatureKeys graphFeatureKeys, final FeatureRangeCalculator graphFeatureRangeCalculator,
+			final FeatureKeys branchGraphFeatureKeys, final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 
 		this.styleManager = trackschemeStyleManager;
@@ -38,7 +38,9 @@ public class TrackSchemeStyleChooser
 		if ( model.getSize() > 0 )
 			model.setSelectedItem( model.getElementAt( 0 ) );
 
-		this.panel = new TrackSchemeStyleChooserPanel( owner, model, featureKeys, featureRangeCalculator );
+		this.panel = new TrackSchemeStyleChooserPanel( owner, model,
+				graphFeatureKeys, graphFeatureRangeCalculator,
+				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 		panel.buttonDeleteStyle.addActionListener( new ActionListener()
 		{
 			@Override

@@ -22,8 +22,10 @@ public class DisplaySettingsDialog extends JDialog
 			final JFrame owner,
 			final RenderSettingsManager renderSettingsManager,
 			final TrackSchemeStyleManager trackschemeStyleManager,
-			final FeatureKeys featureKeys,
-			final FeatureRangeCalculator featureRangeCalculator )
+			final FeatureKeys graphFeatureKeys,
+			final FeatureRangeCalculator graphFeatureRangeCalculator,
+			final FeatureKeys branchGraphFeatureKeys,
+			final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 		setTitle( "Display settings" );
 		setLayout( new BorderLayout() );
@@ -33,7 +35,9 @@ public class DisplaySettingsDialog extends JDialog
 
 		// TrackScheme display settings.
 		final TrackSchemeStyleChooser trackSchemeStyleChooser =
-				new TrackSchemeStyleChooser( owner, trackschemeStyleManager, featureKeys, featureRangeCalculator );
+				new TrackSchemeStyleChooser( owner, trackschemeStyleManager,
+						graphFeatureKeys, graphFeatureRangeCalculator,
+						branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 
 		// Tabbed pane.
 		final JTabbedPane tabbedPane = new JTabbedPane();

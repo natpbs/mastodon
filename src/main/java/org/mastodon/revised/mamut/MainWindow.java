@@ -182,18 +182,25 @@ public class MainWindow extends JFrame
 		 * Display settings.
 		 */
 
-		final FeatureRangeCalculator featureRangeCalculator =
+		final FeatureRangeCalculator graphFeatureRangeCalculator =
 				new DefaultFeatureRangeCalculator<>(
 						windowManager.getModel().getGraph(),
+						windowManager.getModel().getGraphFeatureModel() );
+
+		final FeatureRangeCalculator branchGraphFeatureRangeCalculator =
+				new DefaultFeatureRangeCalculator<>(
 						windowManager.getModel().getBranchGraph(),
-						windowManager.getModel().featureModel() );
+						windowManager.getModel().getBranchGraphFeatureModel() );
+
 		final DisplaySettingsDialog displaySettingsDialog =
 				new DisplaySettingsDialog(
 						this,
 						bdvSettingsManager,
 						trackSchemeStyleManager,
-						windowManager.getModel().featureModel(),
-						featureRangeCalculator );
+						windowManager.getModel().getGraphFeatureModel(),
+						graphFeatureRangeCalculator,
+						windowManager.getModel().getBranchGraphFeatureModel(),
+						branchGraphFeatureRangeCalculator );
 		displaySettingsDialog.setSize( 400, 850 );
 
 		final ActionListener[] listeners = displaySettingsButton.getActionListeners();
