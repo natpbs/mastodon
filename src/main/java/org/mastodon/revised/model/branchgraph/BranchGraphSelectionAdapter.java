@@ -7,25 +7,26 @@ import org.mastodon.collection.RefSet;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
-import org.mastodon.graph.branch.BranchEdge;
 import org.mastodon.graph.branch.BranchGraph;
-import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.ui.selection.Selection;
 import org.mastodon.revised.ui.selection.SelectionListener;
-import org.mastodon.spatial.HasTimepoint;
 
-public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, E extends Edge< V > >
-		implements Selection< BranchVertex, BranchEdge >
+public class BranchGraphSelectionAdapter<
+	V extends Vertex< E > ,
+	E extends Edge< V >,
+	BV extends Vertex< BE >,
+	BE extends Edge< BV >>
+		implements Selection< BV, BE >
 {
 
-	private final BranchGraph< V, E > branchGraph;
+	private final BranchGraph< BV, BE, V, E > branchGraph;
 
 	private final ReadOnlyGraph< V, E > graph;
 
 	private final Selection< V, E > selection;
 
 	public BranchGraphSelectionAdapter(
-			final BranchGraph< V, E > branchGraph,
+			final BranchGraph< BV, BE, V, E > branchGraph,
 			final ReadOnlyGraph< V, E > graph,
 			final Selection< V, E > selection )
 	{
@@ -59,7 +60,7 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public boolean isSelected( final BranchVertex vertex )
+	public boolean isSelected( final BV vertex )
 	{
 		final V vRef = graph.vertexRef();
 		final boolean selected = selection.isSelected( branchGraph.getLinkedVertex( vertex, vRef ) );
@@ -69,11 +70,11 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public boolean isSelected( final BranchEdge edge )
+	public boolean isSelected( final BE edge )
 	{
 		boolean selected = true;
 
-		final BranchEdge beRef = branchGraph.edgeRef();
+		final BE beRef = branchGraph.edgeRef();
 		final E eRef = graph.edgeRef();
 		final V vRef = graph.vertexRef();
 
@@ -122,7 +123,7 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public void setSelected( final BranchVertex vertex, final boolean selected )
+	public void setSelected( final BV vertex, final boolean selected )
 	{
 		final V vRef = graph.vertexRef();
 		selection.setSelected( branchGraph.getLinkedVertex( vertex, vRef ), selected );
@@ -130,7 +131,7 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public void setSelected( final BranchEdge edge, final boolean selected )
+	public void setSelected( final BE edge, final boolean selected )
 	{
 		selection.pauseListeners();
 		setEdgeSelected( edge, selected );
@@ -147,12 +148,12 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	 * @return <code>true</code> if the selection model has been changed by this
 	 *         call.
 	 */
-	private boolean setEdgeSelected( final BranchEdge edge, final boolean selected )
+	private boolean setEdgeSelected( final BE edge, final boolean selected )
 	{
 		boolean changed = false;
 		final E eRef = graph.edgeRef();
 		final V vRef = graph.vertexRef();
-		final BranchEdge beRef = branchGraph.edgeRef();
+		final BE beRef = branchGraph.edgeRef();
 
 		E e = branchGraph.getLinkedEdge( edge, eRef );
 		if ( !changed && ( selection.isSelected( e ) != selected ) )
@@ -189,24 +190,24 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public void toggle( final BranchVertex vertex )
+	public void toggle( final BV vertex )
 	{
 		setSelected( vertex, !isSelected( vertex ) );
 	}
 
 	@Override
-	public void toggle( final BranchEdge edge )
+	public void toggle( final BE edge )
 	{
 		setSelected( edge, !isSelected( edge ) );
 	}
 
 	@Override
-	public boolean setEdgesSelected( final Collection< BranchEdge > edges, final boolean selected )
+	public boolean setEdgesSelected( final Collection< BE > edges, final boolean selected )
 	{
 		boolean changed = false;
 		selection.pauseListeners();
 
-		for ( final BranchEdge edge : edges )
+		for ( final BE edge : edges )
 			changed = setEdgeSelected( edge, selected ) || changed;
 
 		selection.resumeListeners();
@@ -214,13 +215,13 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public boolean setVerticesSelected( final Collection< BranchVertex > vertices, final boolean selected )
+	public boolean setVerticesSelected( final Collection< BV > vertices, final boolean selected )
 	{
 		boolean changed = false;
 		selection.pauseListeners();
 
 		final V vRef = graph.vertexRef();
-		for ( final BranchVertex vertex : vertices )
+		for ( final BV vertex : vertices )
 		{
 			final V v = branchGraph.getLinkedVertex( vertex, vRef );
 			if ( !changed && ( selection.isSelected( v ) != selected ) )
@@ -234,16 +235,16 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public RefSet< BranchEdge > getSelectedEdges()
+	public RefSet< BE > getSelectedEdges()
 	{
-		final RefSet< BranchEdge > edges = RefCollections.createRefSet( branchGraph.edges() );
+		final RefSet< BE > edges = RefCollections.createRefSet( branchGraph.edges() );
 
 		// Find branch edges linked to selected edges.
 		final RefSet< E > selectedEdges = selection.getSelectedEdges();
-		final BranchEdge beRef = branchGraph.edgeRef();
+		final BE beRef = branchGraph.edgeRef();
 		for ( final E e : selectedEdges )
 		{
-			final BranchEdge edge = branchGraph.getBranchEdge( e, beRef );
+			final BE edge = branchGraph.getBranchEdge( e, beRef );
 			// Test if it is selected according to branch edge selection.
 			if ( isSelected( edge ) )
 				edges.add( edge );
@@ -253,7 +254,7 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 		final RefSet< V > selectedVertices = selection.getSelectedVertices();
 		for ( final V v : selectedVertices )
 		{
-			final BranchEdge edge = branchGraph.getBranchEdge( v, beRef );
+			final BE edge = branchGraph.getBranchEdge( v, beRef );
 			// Test if it is selected according to branch edge selection.
 			if ( null != edge && isSelected( edge ) )
 				edges.add( edge);
@@ -264,15 +265,15 @@ public class BranchGraphSelectionAdapter< V extends Vertex< E > & HasTimepoint, 
 	}
 
 	@Override
-	public RefSet< BranchVertex > getSelectedVertices()
+	public RefSet< BV > getSelectedVertices()
 	{
 		final RefSet< V > selectedVertices = selection.getSelectedVertices();
-		final RefSet< BranchVertex > vertices = RefCollections.createRefSet( branchGraph.vertices() );
+		final RefSet< BV > vertices = RefCollections.createRefSet( branchGraph.vertices() );
 
-		final BranchVertex bvRef = branchGraph.vertexRef();
+		final BV bvRef = branchGraph.vertexRef();
 		for ( final V v : selectedVertices )
 		{
-			final BranchVertex vertex = branchGraph.getBranchVertex( v, bvRef );
+			final BV vertex = branchGraph.getBranchVertex( v, bvRef );
 			if ( null != vertex )
 				vertices.add( vertex );
 		}

@@ -6,27 +6,28 @@ import java.util.Map;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
-import org.mastodon.graph.branch.BranchEdge;
 import org.mastodon.graph.branch.BranchGraph;
-import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.ui.selection.NavigationHandler;
 import org.mastodon.revised.ui.selection.NavigationListener;
-import org.mastodon.spatial.HasTimepoint;
 
-public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTimepoint, E extends Edge< V > >
-		implements NavigationHandler< BranchVertex, BranchEdge >
+public class BranchGraphNavigationHandlerAdapter< 
+	V extends Vertex< E >, 
+	E extends Edge< V >, 
+	BV extends Vertex< BE >, 
+	BE extends Edge< BV > >
+		implements NavigationHandler< BV, BE >
 {
 
-	private final BranchGraph< V, E > branchGraph;
+	private final BranchGraph< BV, BE, V, E > branchGraph;
 
 	private final ReadOnlyGraph< V, E > graph;
 
 	private final NavigationHandler< V, E > navigation;
 
-	private final Map< NavigationListener< BranchVertex, BranchEdge >, NavigationListenerBranchTranslator > translators;
+	private final Map< NavigationListener< BV, BE >, NavigationListenerBranchTranslator > translators;
 
 	public BranchGraphNavigationHandlerAdapter(
-			final BranchGraph< V, E > branchGraph,
+			final BranchGraph< BV, BE, V, E > branchGraph,
 			final ReadOnlyGraph< V, E > graph,
 			final NavigationHandler< V, E > navigation )
 	{
@@ -37,7 +38,7 @@ public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTim
 	}
 
 	@Override
-	public void notifyNavigateToVertex( final BranchVertex vertex )
+	public void notifyNavigateToVertex( final BV vertex )
 	{
 		final V vref = graph.vertexRef();
 		final V v = branchGraph.getLinkedVertex( vertex, vref );
@@ -46,7 +47,7 @@ public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTim
 	}
 
 	@Override
-	public void notifyNavigateToEdge( final BranchEdge edge )
+	public void notifyNavigateToEdge( final BE edge )
 	{
 		final E eref = graph.edgeRef();
 		final E e = branchGraph.getLinkedEdge( edge, eref );
@@ -55,7 +56,7 @@ public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTim
 	}
 
 	@Override
-	public boolean addNavigationListener( final NavigationListener< BranchVertex, BranchEdge > listener )
+	public boolean addNavigationListener( final NavigationListener< BV, BE > listener )
 	{
 		final NavigationListenerBranchTranslator translator = new NavigationListenerBranchTranslator( listener );
 		final NavigationListenerBranchTranslator old = translators.put( listener, translator );
@@ -66,7 +67,7 @@ public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTim
 	}
 
 	@Override
-	public boolean removeNavigationListener( final NavigationListener< BranchVertex, BranchEdge > listener )
+	public boolean removeNavigationListener( final NavigationListener< BV, BE > listener )
 	{
 		return navigation.removeNavigationListener( translators.get( listener ) );
 	}
@@ -80,9 +81,9 @@ public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTim
 	private class NavigationListenerBranchTranslator implements NavigationListener< V, E >
 	{
 
-		private final NavigationListener< BranchVertex, BranchEdge > listener;
+		private final NavigationListener< BV, BE > listener;
 
-		public NavigationListenerBranchTranslator( final NavigationListener< BranchVertex, BranchEdge > listener )
+		public NavigationListenerBranchTranslator( final NavigationListener< BV, BE > listener )
 		{
 			this.listener = listener;
 		}
@@ -90,16 +91,16 @@ public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTim
 		@Override
 		public void navigateToVertex( final V vertex )
 		{
-			final BranchVertex bvref = branchGraph.vertexRef();
-			final BranchVertex bv = branchGraph.getBranchVertex( vertex, bvref );
+			final BV bvref = branchGraph.vertexRef();
+			final BV bv = branchGraph.getBranchVertex( vertex, bvref );
 			if ( bv != null )
 			{
 				listener.navigateToVertex( bv );
 			}
 			else
 			{
-				final BranchEdge beref = branchGraph.edgeRef();
-				final BranchEdge be = branchGraph.getBranchEdge( vertex, beref );
+				final BE beref = branchGraph.edgeRef();
+				final BE be = branchGraph.getBranchEdge( vertex, beref );
 				listener.navigateToEdge( be );
 				branchGraph.releaseRef( beref );
 			}
@@ -109,8 +110,8 @@ public class BranchGraphNavigationHandlerAdapter< V extends Vertex< E > & HasTim
 		@Override
 		public void navigateToEdge( final E edge )
 		{
-			final BranchEdge beref = branchGraph.edgeRef();
-			final BranchEdge be = branchGraph.getBranchEdge( edge, beref );
+			final BE beref = branchGraph.edgeRef();
+			final BE be = branchGraph.getBranchEdge( edge, beref );
 			listener.navigateToEdge( be );
 			branchGraph.releaseRef( beref );
 		}

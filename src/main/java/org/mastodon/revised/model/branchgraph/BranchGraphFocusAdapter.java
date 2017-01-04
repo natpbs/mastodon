@@ -3,25 +3,26 @@ package org.mastodon.revised.model.branchgraph;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
-import org.mastodon.graph.branch.BranchEdge;
 import org.mastodon.graph.branch.BranchGraph;
-import org.mastodon.graph.branch.BranchVertex;
 import org.mastodon.revised.ui.selection.FocusListener;
 import org.mastodon.revised.ui.selection.FocusModel;
-import org.mastodon.spatial.HasTimepoint;
 
-public class BranchGraphFocusAdapter< V extends Vertex< E > & HasTimepoint, E extends Edge< V > >
-		implements FocusModel< BranchVertex, BranchEdge >
+public class BranchGraphFocusAdapter<
+	V extends Vertex< E >,
+	E extends Edge< V >,
+	BV extends Vertex< BE >,
+	BE extends Edge< BV > >
+		implements FocusModel< BV, BE >
 {
 
-	private final BranchGraph< V, E > branchGraph;
+	private final BranchGraph< BV, BE, V, E > branchGraph;
 
 	private final ReadOnlyGraph< V, E > graph;
 
 	private final FocusModel< V, E > focus;
 
 	public BranchGraphFocusAdapter(
-			final BranchGraph< V, E > branchGraph,
+			final BranchGraph< BV, BE, V, E > branchGraph,
 			final ReadOnlyGraph< V, E > graph,
 			final FocusModel< V, E > focus )
 	{
@@ -43,7 +44,7 @@ public class BranchGraphFocusAdapter< V extends Vertex< E > & HasTimepoint, E ex
 	}
 
 	@Override
-	public void focusVertex( final BranchVertex vertex )
+	public void focusVertex( final BV vertex )
 	{
 		if ( null == vertex )
 			focus.focusVertex( null );
@@ -57,7 +58,7 @@ public class BranchGraphFocusAdapter< V extends Vertex< E > & HasTimepoint, E ex
 	}
 
 	@Override
-	public BranchVertex getFocusedVertex( final BranchVertex ref )
+	public BV getFocusedVertex( final BV ref )
 	{
 		final V vref = graph.vertexRef();
 		final V focused = focus.getFocusedVertex( vref );
@@ -67,7 +68,7 @@ public class BranchGraphFocusAdapter< V extends Vertex< E > & HasTimepoint, E ex
 			return null;
 		}
 
-		final BranchVertex bv = branchGraph.getBranchVertex( focused, ref );
+		final BV bv = branchGraph.getBranchVertex( focused, ref );
 		graph.releaseRef( vref );
 		return bv;
 	}
