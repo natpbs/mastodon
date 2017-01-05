@@ -75,12 +75,13 @@ public class BranchGraphSelectionAdapter<
 		boolean selected = true;
 
 		final BE beRef = branchGraph.edgeRef();
+		final BV bvRef = branchGraph.vertexRef();
 		final E eRef = graph.edgeRef();
 		final V vRef = graph.vertexRef();
 
 		/*
 		 * The branch edge is selected iff all the edges and vertices of the
-		 * branch are selected.
+		 * branch are selected, except the source and target.
 		 */
 
 		E e = branchGraph.getLinkedEdge( edge, eRef );
@@ -97,7 +98,7 @@ public class BranchGraphSelectionAdapter<
 			}
 			else
 			{
-				while ( edge.equals( branchGraph.getBranchEdge( target, beRef ) ) )
+				do
 				{
 					/*
 					 * The target vertex is still linked to the branch edge, so
@@ -106,16 +107,19 @@ public class BranchGraphSelectionAdapter<
 					 */
 					e = target.outgoingEdges().get( 0, eRef );
 					target = e.getTarget( vRef );
-					if ( !selection.isSelected( target ) )
+					if ( !selection.isSelected( e ) ||
+							( branchGraph.getBranchVertex( target, bvRef ) == null && !selection.isSelected( target ) ) )
 					{
 						selected = false;
 						break;
 					}
 				}
+				while ( edge.equals( branchGraph.getBranchEdge( target, beRef ) ) );
 			}
 		}
 
 		branchGraph.releaseRef( beRef );
+		branchGraph.releaseRef( bvRef );
 		graph.releaseRef( eRef );
 		graph.releaseRef( vRef );
 
