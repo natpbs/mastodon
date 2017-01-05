@@ -70,17 +70,17 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 
 	private final AffineTransform3D renderTransform;
 
-	private int renderTimepoint;
+	protected int renderTimepoint;
 
-	private final OverlayGraph< V, E > graph;
+	protected final OverlayGraph< V, E > graph;
 
-	private final SpatioTemporalIndex< V > index;
+	protected final SpatioTemporalIndex< V > index;
 
-	private final HighlightModel< V, E > highlight;
+	protected final HighlightModel< V, E > highlight;
 
-	private final FocusModel< V, E > focus;
+	protected final FocusModel< V, E > focus;
 
-	private final Selection< V, E > selection;
+	protected final Selection< V, E > selection;
 
 	public OverlayGraphRenderer(
 			final OverlayGraph< V, E > graph,
@@ -152,57 +152,57 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	/**
 	 * Antialiasing {@link RenderingHints}.
 	 */
-	private Object antialiasing;
+	protected Object antialiasing;
 
 	/**
 	 * If {@code true}, draw links using a gradient from source color to target
 	 * color. If {@code false}, draw links using the target color.
 	 */
-	private boolean useGradient;
+	protected boolean useGradient;
 
 	/**
 	 * Maximum number of timepoints into the past for which outgoing edges
 	 * should be drawn.
 	 */
-	private int timeLimit;
+	protected int timeLimit;
 
 	/**
 	 * Whether to draw links (at all).
 	 * For specific settings, see TODO
 	 */
-	private boolean drawLinks;
+	protected boolean drawLinks;
 
 
 	/**
 	 * Whether to draw spots (at all).
 	 * For specific settings, see TODO
 	 */
-	private boolean drawSpots;
+	protected boolean drawSpots;
 
 	/**
 	 * Whether to draw the intersections of spot ellipsoids with the view plane.
 	 */
-	private boolean drawEllipsoidSliceProjection;
+	protected boolean drawEllipsoidSliceProjection;
 
 	/**
 	 * Whether to draw the projections of spot ellipsoids onto the view plane.
 	 */
-	private boolean drawEllipsoidSliceIntersection;
+	protected boolean drawEllipsoidSliceIntersection;
 
 	/**
 	 * Whether to draw spot centers.
 	 */
-	private boolean drawPoints;
+	protected boolean drawPoints;
 
 	/**
 	 * Whether to draw spot centers also for those points that are visible as ellipses.
 	 */
-	private boolean drawPointsForEllipses;
+	protected boolean drawPointsForEllipses;
 
 	/**
 	 * Whether to draw spot labels next to ellipses.
 	 */
-	private boolean drawSpotLabels;
+	protected boolean drawSpotLabels;
 
 	/**
 	 * Maximum distance from view plane up to which to draw spots.
@@ -222,7 +222,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * Ellipsoids are drawn increasingly translucent the closer they are to
 	 * {@link #focusLimit}. See {@link #ellipsoidFadeDepth}.
 	 */
-	private double focusLimit;
+	protected double focusLimit;
 
 	/**
 	 * Whether the {@link #focusLimit} is relative to the the current
@@ -236,7 +236,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * coordinates. A value of 100 means that spots will be visible up to 100
 	 * units (of the global coordinate system) from the view plane.
 	 */
-	private boolean isFocusLimitViewRelative;
+	protected boolean isFocusLimitViewRelative;
 
 	/**
 	 * The ratio of {@link #focusLimit} at which ellipsoids start to
@@ -244,7 +244,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * to {@link #focusLimit}. Up to ratio {@link #ellipsoidFadeDepth}
 	 * they are fully opaque, then their alpha value goes to 0 linearly.
 	 */
-	private double ellipsoidFadeDepth;
+	protected double ellipsoidFadeDepth;
 
 	/**
 	 * The ratio of {@link #focusLimit} at which points start to
@@ -252,49 +252,49 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * to {@link #focusLimit}. Up to ratio {@link #pointFadeDepth}
 	 * they are fully opaque, then their alpha value goes to 0 linearly.
 	 */
-	private double pointFadeDepth;
+	protected double pointFadeDepth;
 
 	/**
 	 * The stroke used to paint the spot outlines.
 	 */
-	private Stroke defaultVertexStroke;
+	protected Stroke defaultVertexStroke;
 
 	/**
 	 * The stroke used to paint the selected spot outlines.
 	 */
-	private Stroke highlightedVertexStroke;
+	protected Stroke highlightedVertexStroke;
 
 	/**
 	 * The stroke used to paint the focused spot outlines.
 	 */
-	private Stroke focusedVertexStroke;
+	protected Stroke focusedVertexStroke;
 
 	/**
 	 * The stroke used to paint links.
 	 */
-	private Stroke defaultEdgeStroke;
+	protected Stroke defaultEdgeStroke;
 
 	/**
 	 * The stroke used to paint highlighted links.
 	 */
-	private Stroke highlightedEdgeStroke;
+	protected Stroke highlightedEdgeStroke;
 
 	/**
 	 * The first color to paint links. The actual color of edges is interpolated
 	 * from {@link #color1} to {@link #color2} along time.
 	 */
-	private Color color1;
+	protected Color color1;
 
 	/**
 	 * The second color to paint edges. The actual color of edges is
 	 * interpolated from {@link #color1} to {@link #color2} along time.
 	 */
-	private Color color2;
+	protected Color color2;
 
 	/**
 	 * Whether do draw link arrow heads.
 	 */
-	private boolean drawLinkArrows;
+	protected boolean drawLinkArrows;
 
 	/**
 	 * Return signed distance of p to z=0 plane, truncated at cutoff and scaled
@@ -302,7 +302,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * farther behind the plane has d=1. A point that is at -cutoff or more in
 	 * front of the plane has d=-1.
 	 */
-	private static double sliceDistance( final double z, final double cutoff )
+	protected static double sliceDistance( final double z, final double cutoff )
 	{
 		if ( z > 0 )
 			return Math.min( z, cutoff ) / cutoff;
@@ -315,7 +315,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * scaled by 1/cutoff. t=t0 has d=0. t&lt;=t0-cutoff has d=-1.
 	 * t=&gt;t0+cutoff has d=1.
 	 */
-	private static double timeDistance( final double t, final double t0, final double cutoff )
+	protected static double timeDistance( final double t, final double t0, final double cutoff )
 	{
 		final double d = t - t0;
 		if ( d > 0 )
@@ -357,7 +357,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * @param isSelected whether to use selected or un-selected color scheme.
 	 * @return vertex/edge color.
 	 */
-	private static Color getColor( final double sd, final double td, final double sdFade, final double tdFade, final boolean isSelected, final Color color1, final Color color2 )
+	protected static Color getColor( final double sd, final double td, final double sdFade, final double tdFade, final boolean isSelected, final Color color1, final Color color2 )
 	{
 		/*
 		 * |sf| = {                  0  for  |sd| <= sdFade,
@@ -501,7 +501,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	 * TODO
 	 * @return
 	 */
-	private AffineTransform3D getRenderTransformCopy()
+	protected AffineTransform3D getRenderTransformCopy()
 	{
 		final AffineTransform3D transform = new AffineTransform3D();
 		synchronized ( renderTransform )

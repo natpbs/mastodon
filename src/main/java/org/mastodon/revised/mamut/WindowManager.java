@@ -34,15 +34,18 @@ import org.mastodon.revised.bdv.overlay.BdvHighlightHandler;
 import org.mastodon.revised.bdv.overlay.BdvSelectionBehaviours;
 import org.mastodon.revised.bdv.overlay.EditBehaviours;
 import org.mastodon.revised.bdv.overlay.EditSpecialBehaviours;
+import org.mastodon.revised.bdv.overlay.OverlayBranchGraphRenderer;
 import org.mastodon.revised.bdv.overlay.OverlayContext;
 import org.mastodon.revised.bdv.overlay.OverlayGraphRenderer;
 import org.mastodon.revised.bdv.overlay.OverlayNavigation;
 import org.mastodon.revised.bdv.overlay.RenderSettings;
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
+import org.mastodon.revised.bdv.overlay.wrap.OverlayBranchGraphWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayContextWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayEdgeWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayEdgeWrapperBimap;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayGraphWrapper;
+import org.mastodon.revised.bdv.overlay.wrap.OverlayProperties;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayVertexWrapper;
 import org.mastodon.revised.bdv.overlay.wrap.OverlayVertexWrapperBimap;
 import org.mastodon.revised.context.Context;
@@ -56,8 +59,10 @@ import org.mastodon.revised.model.branchgraph.BranchGraphNavigationHandlerAdapte
 import org.mastodon.revised.model.branchgraph.BranchGraphSelectionAdapter;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.mamut.BoundingSphereRadiusStatistics;
+import org.mastodon.revised.model.mamut.BranchGraphModelOverlayProperties;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
+import org.mastodon.revised.model.mamut.ModelGraph;
 import org.mastodon.revised.model.mamut.ModelOverlayProperties;
 import org.mastodon.revised.model.mamut.Spot;
 import org.mastodon.revised.model.mamut.branchgraph.BranchEdge;
@@ -435,11 +440,7 @@ public class WindowManager
 		final Selection< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlaySelection = new SelectionAdapter<>( selection, vertexMap, edgeMap );
 		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandlerImp<>( bdvGroupHandle );
 		final NavigationHandler< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > overlayNavigationHandler = new NavigationHandlerAdapter<>( navigationHandler, vertexMap, edgeMap );
-		final String windowTitle = "BigDataViewer " + ( bdvName++ ); // TODO:
-																		// use
-																		// JY
-																		// naming
-																		// scheme
+		final String windowTitle = "BigDataViewer " + ( bdvName++ );
 		final BigDataViewerMaMuT bdv = BigDataViewerMaMuT.open( sharedBdvData, windowTitle, bdvGroupHandle );
 		final ViewerFrame viewerFrame = bdv.getViewerFrame();
 		final ViewerPanel viewer = bdv.getViewer();
@@ -583,6 +584,198 @@ public class WindowManager
 
 		final BdvWindow bdvWindow = new BdvWindow( viewerFrame, tracksOverlay, bdvGroupHandle, contextProvider );
 		addBdvWindow( bdvWindow );
+	}
+
+	public void createBranchGraphBigDataViewer()
+	{
+		final GroupHandle bdvGroupHandle = groupManager.createGroupHandle();
+		final ModelBranchGraph branchGraph = model.getBranchGraph();
+		final ModelGraph graph = model.getGraph();
+
+		final OverlayGraphWrapper< Spot, Link > overlayGraph = new OverlayGraphWrapper<>(
+				model.getGraph(),
+				model.getGraphIdBimap(),
+				model.getSpatioTemporalIndex(),
+				new ModelOverlayProperties( model.getGraph(), radiusStats ) );
+
+		final OverlayProperties< BranchVertex, BranchEdge > properties =
+				new BranchGraphModelOverlayProperties( branchGraph, graph, radiusStats );
+		final OverlayBranchGraphWrapper< BranchVertex, BranchEdge, Spot, Link > overlayBranchGraph =
+				new OverlayBranchGraphWrapper<>(
+						model.getBranchGraph(),
+						model.getBranchGraph().getGraphIdBimap(),
+						model.getBranchGraphSpatioTemporalIndex(),
+						properties,
+						overlayGraph );
+		final RefBimap< BranchVertex, OverlayVertexWrapper< BranchVertex, BranchEdge > > vertexMap = new OverlayVertexWrapperBimap<>( overlayBranchGraph );
+		final RefBimap< BranchEdge, OverlayEdgeWrapper< BranchVertex, BranchEdge > > edgeMap = new OverlayEdgeWrapperBimap<>( overlayBranchGraph );
+
+		// Highlight.
+		final HighlightModel< BranchVertex, BranchEdge > branchHighlightModel =
+				new BranchGraphHighlightAdapter<>( branchGraph, graph, highlightModel );
+		final HighlightModel< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > overlayHighlight =
+				new HighlightAdapter<>( branchHighlightModel, vertexMap, edgeMap );
+
+		// Focus
+		final FocusModel< BranchVertex, BranchEdge > branchFocusfocusModel =
+				new BranchGraphFocusAdapter<>( branchGraph, graph, focusModel );
+		final FocusModel< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > overlayFocus =
+				new FocusAdapter<>( branchFocusfocusModel, vertexMap, edgeMap );
+
+		// Selection
+		final Selection< BranchVertex, BranchEdge > branchSelection =
+				new BranchGraphSelectionAdapter<>( branchGraph, graph, selection );
+		final Selection< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > overlaySelection =
+				new SelectionAdapter<>( branchSelection, vertexMap, edgeMap );
+
+		// Navigation.
+		final NavigationHandler< Spot, Link > navigationHandler = new NavigationHandlerImp<>( bdvGroupHandle );
+		final NavigationHandler< BranchVertex, BranchEdge > branchGraphNavigation =
+				new BranchGraphNavigationHandlerAdapter<>( branchGraph, graph, navigationHandler );
+		final NavigationHandler< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > overlayNavigationHandler =
+				new NavigationHandlerAdapter<>( branchGraphNavigation, vertexMap, edgeMap );
+
+
+		// BDV.
+		final String windowTitle = "BigDataViewer branches " + ( bdvName++ );
+		final BigDataViewerMaMuT bdv = BigDataViewerMaMuT.open( sharedBdvData, windowTitle, bdvGroupHandle );
+		final ViewerFrame viewerFrame = bdv.getViewerFrame();
+		final ViewerPanel viewer = bdv.getViewer();
+
+		viewer.setTimepoint( currentTimepoint );
+		final OverlayGraphRenderer< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > tracksOverlay =
+				new OverlayBranchGraphRenderer<>(
+						overlayBranchGraph,
+						overlayGraph,
+						overlayHighlight,
+						overlayFocus,
+						overlaySelection );
+		viewer.getDisplay().addOverlayRenderer( tracksOverlay );
+		viewer.addRenderTransformListener( tracksOverlay );
+		viewer.addTimePointListener( tracksOverlay );
+		overlayHighlight.addHighlightListener( new HighlightListener()
+		{
+			@Override
+			public void highlightChanged()
+			{
+				viewer.getDisplay().repaint();
+			}
+		} );
+		overlayFocus.addFocusListener( new FocusListener()
+		{
+			@Override
+			public void focusChanged()
+			{
+				viewer.getDisplay().repaint();
+			}
+		} );
+		model.getGraph().addGraphChangeListener( new GraphChangeListener()
+		{
+			@Override
+			public void graphChanged()
+			{
+				viewer.getDisplay().repaint();
+			}
+		} );
+		model.getGraph().addVertexPositionListener( ( v ) -> viewer.getDisplay().repaint() );
+		overlaySelection.addSelectionListener( new SelectionListener()
+		{
+			@Override
+			public void selectionChanged()
+			{
+				viewer.getDisplay().repaint();
+			}
+		} );
+		// TODO: remember those listeners and remove them when the BDV window is
+		// closed!!!
+
+		final OverlayNavigation< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > overlayNavigation = new OverlayNavigation<>( viewer, overlayBranchGraph );
+		overlayNavigationHandler.addNavigationListener( overlayNavigation );
+
+		final BdvHighlightHandler< ?, ? > highlightHandler = new BdvHighlightHandler<>( overlayBranchGraph, tracksOverlay, overlayHighlight );
+		viewer.getDisplay().addHandler( highlightHandler );
+		viewer.addRenderTransformListener( highlightHandler );
+
+		final BdvSelectionBehaviours< ?, ? > selectionBehaviours = new BdvSelectionBehaviours<>( overlayBranchGraph, tracksOverlay, overlaySelection, overlayNavigationHandler );
+		selectionBehaviours.installBehaviourBindings( viewerFrame.getTriggerbindings(), keyconf );
+
+		// TODO: use the branch context in branch TrackScheme.
+		final OverlayContext< OverlayVertexWrapper< BranchVertex, BranchEdge > > overlayContext = new OverlayContext<>( overlayBranchGraph, tracksOverlay );
+		viewer.addRenderTransformListener( overlayContext );
+		final BdvContextAdapter< BranchVertex > contextProvider = new BdvContextAdapter<>( windowTitle );
+		final OverlayContextWrapper< BranchVertex, BranchEdge > overlayContextWrapper = new OverlayContextWrapper<>(
+				overlayContext,
+				contextProvider );
+
+		UndoActions.installActionBindings( viewerFrame.getKeybindings(), model, keyconf );
+		EditBehaviours.installActionBindings( viewerFrame.getTriggerbindings(), keyconf, overlayBranchGraph, tracksOverlay, model );
+		EditSpecialBehaviours.installActionBindings( viewerFrame.getTriggerbindings(), keyconf, viewerFrame.getViewerPanel(), overlayBranchGraph, tracksOverlay, model );
+		HighlightBehaviours.installActionBindings(
+				viewerFrame.getTriggerbindings(),
+				keyconf,
+				new String[] { "bdv" },
+				model.getGraph(),
+				model.getGraph(),
+				highlightModel,
+				model );
+		SelectionActions.installActionBindings(
+				viewerFrame.getKeybindings(),
+				keyconf,
+				new String[] { "bdv" },
+				model.getGraph(),
+				model.getGraph(),
+				selection,
+				model );
+
+		/*
+		 * TODO: this is still wrong. There should be one central entity syncing
+		 * time for several BDV frames and TrackSchemePanel should listen to
+		 * that. Ideally windows should be configurable to "share" timepoints or
+		 * not.
+		 */
+		viewer.addTimePointListener( tpl );
+
+		/*
+		 * BDV menu.
+		 */
+
+		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer );
+		final JMenu styleMenu = new JMenu( "Styles" );
+		styleMenu.addMenuListener( new MenuListener()
+		{
+			@Override
+			public void menuSelected( final MenuEvent e )
+			{
+				styleMenu.removeAll();
+				for ( final RenderSettings rs : renderSettingsManager.getRenderSettings() )
+					styleMenu.add( new JMenuItem(
+							new BdvRenderSettingsAction( rs, panelRepainter ) ) );
+
+			}
+
+			@Override
+			public void menuDeselected( final MenuEvent e )
+			{}
+
+			@Override
+			public void menuCanceled( final MenuEvent e )
+			{}
+		} );
+		viewerFrame.getJMenuBar().add( styleMenu );
+
+		/*
+		 * De-register render settings listener upon window closing.
+		 */
+		viewerFrame.addWindowListener( new WindowAdapter()
+		{
+			@Override
+			public void windowClosing( final WindowEvent e )
+			{
+				for ( final RenderSettings rs : renderSettingsManager.getRenderSettings() )
+					rs.removeUpdateListener( panelRepainter );
+			};
+		} );
+
 	}
 
 	private class BdvRenderSettingsUpdater implements org.mastodon.revised.bdv.overlay.RenderSettings.UpdateListener

@@ -63,7 +63,7 @@ public class MainWindow extends JFrame
 		this.trackSchemeStyleManager = new TrackSchemeStyleManager();
 
 		final JPanel buttonsPanel = new JPanel();
-		buttonsPanel.setLayout( new GridLayout( 10, 1 ) );
+		buttonsPanel.setLayout( new GridLayout( 11, 1 ) );
 		final JButton bdvButton = new JButton( "bdv" );
 		bdvButton.addActionListener( new ActionListener()
 		{
@@ -84,8 +84,18 @@ public class MainWindow extends JFrame
 					windowManager.createTrackScheme();
 			}
 		} );
-		final JButton branchGraphButton = new JButton( "branch graph" );
-		branchGraphButton.addActionListener( new ActionListener()
+		final JButton branchBDVButton = new JButton( "branch bdv" );
+		branchBDVButton.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				if ( windowManager != null )
+					windowManager.createBranchGraphBigDataViewer();
+			}
+		} );
+		final JButton branchTrackSchemeButton = new JButton( "branch trackscheme" );
+		branchTrackSchemeButton.addActionListener( new ActionListener()
 		{
 			@Override
 			public void actionPerformed( final ActionEvent e )
@@ -96,7 +106,8 @@ public class MainWindow extends JFrame
 		} );
 		buttonsPanel.add( bdvButton );
 		buttonsPanel.add( trackschemeButton );
-		buttonsPanel.add( branchGraphButton );
+		buttonsPanel.add( branchBDVButton );
+		buttonsPanel.add( branchTrackSchemeButton );
 		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
 
 		this.displaySettingsButton = new JButton( "display settings" );

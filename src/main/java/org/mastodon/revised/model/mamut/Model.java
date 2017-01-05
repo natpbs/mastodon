@@ -45,6 +45,8 @@ public class Model extends AbstractModel< ModelGraph, Spot, Link > implements Un
 	 */
 	private final SpatioTemporalIndex< Spot > index;
 
+	private final SpatioTemporalIndex< BranchVertex > branchIndex;
+
 	private final List< Feature< ?, Spot, ? > > vertexFeaturesToSerialize;
 
 	private final List< Feature< ?, Link, ? > > edgeFeaturesToSerialize;
@@ -57,12 +59,14 @@ public class Model extends AbstractModel< ModelGraph, Spot, Link > implements Un
 
 	private final FeatureModel< BranchVertex, BranchEdge > branchGraphFeatureModel;
 
+
 	public Model()
 	{
 		super( new ModelGraph() );
 		index = new SpatioTemporalIndexImp<>( modelGraph, modelGraph.idmap().vertexIdBimap() );
 
 		branchGraph = new ModelBranchGraph( modelGraph, modelGraph.idmap().vertexIdBimap() );
+		branchIndex = new SpatioTemporalIndexImp<>( branchGraph, branchGraph.getGraphIdBimap().vertexIdBimap() );
 
 		graphFeatureModel = new DefaultFeatureModel<>();
 		branchGraphFeatureModel = new DefaultFeatureModel<>();
@@ -116,6 +120,11 @@ public class Model extends AbstractModel< ModelGraph, Spot, Link > implements Un
 	public SpatioTemporalIndex< Spot > getSpatioTemporalIndex()
 	{
 		return index;
+	}
+
+	public SpatioTemporalIndex< BranchVertex > getBranchGraphSpatioTemporalIndex()
+	{
+		return branchIndex;
 	}
 
 	public void undo()
