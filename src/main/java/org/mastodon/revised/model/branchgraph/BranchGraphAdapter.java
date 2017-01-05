@@ -2,6 +2,7 @@ package org.mastodon.revised.model.branchgraph;
 
 import java.util.Iterator;
 
+import org.mastodon.adapter.IteratorAdapter;
 import org.mastodon.adapter.RefBimap;
 import org.mastodon.collection.RefCollection;
 import org.mastodon.graph.Edge;
@@ -11,6 +12,28 @@ import org.mastodon.graph.GraphListener;
 import org.mastodon.graph.Vertex;
 import org.mastodon.graph.branch.BranchGraph;
 
+/**
+ * Translates a branch graph of branch objects <code>BV</code> and
+ * <code>BE</code> linked to a graph of <code>V</code> and <code>E</code> into a
+ * branch graph of branch objects <code>BV</code> and <code>BE</code> linked to
+ * a graph of <code>WV</code> and <code>WE</code>. Only the linked graph type
+ * changes.
+ * 
+ * @author Jean-Yves Tinevez
+ *
+ * @param <BV>
+ *            the type of branch vertices.
+ * @param <BE>
+ *            the type of branch edges.
+ * @param <V>
+ *            the type of the graph vertices to adapt.
+ * @param <E>
+ *            the type of the graph edges to adapt.
+ * @param <WV>
+ *            the type of the graph vertices exposed by this adapter.
+ * @param <WE>
+ *            the type of the graph edges exposed by this adapter.
+ */
 public class BranchGraphAdapter<
 	BV extends Vertex< BE >,
 	BE extends Edge< BV >,
@@ -40,141 +63,124 @@ public class BranchGraphAdapter<
 	@Override
 	public boolean addGraphListener( final GraphListener< BV, BE > listener )
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return branchGraph.addGraphListener( listener );
 	}
 
 	@Override
 	public boolean removeGraphListener( final GraphListener< BV, BE > listener )
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return branchGraph.removeGraphListener( listener );
 	}
 
 	@Override
 	public boolean addGraphChangeListener( final GraphChangeListener listener )
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return branchGraph.addGraphChangeListener( listener );
 	}
 
 	@Override
 	public boolean removeGraphChangeListener( final GraphChangeListener listener )
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return branchGraph.removeGraphChangeListener( listener );
 	}
 
 	@Override
 	public BE getEdge( final BV source, final BV target )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.getEdge( source, target );
 	}
 
 	@Override
 	public BE getEdge( final BV source, final BV target, final BE ref )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.getEdge( source, target, ref );
 	}
 
 	@Override
 	public BV vertexRef()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.vertexRef();
 	}
 
 	@Override
 	public BE edgeRef()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.edgeRef();
 	}
 
 	@Override
 	public void releaseRef( final BV ref )
 	{
-		// TODO Auto-generated method stub
-
+		branchGraph.releaseRef( ref );
 	}
 
 	@Override
 	public void releaseRef( final BE ref )
 	{
-		// TODO Auto-generated method stub
-
+		branchGraph.releaseRef( ref );
 	}
 
 	@Override
 	public RefCollection< BV > vertices()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.vertices();
 	}
 
 	@Override
 	public RefCollection< BE > edges()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.edges();
 	}
 
 	@Override
 	public WE getLinkedEdge( final BE be, final WE ref )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		final E eref = edgeMap.reusableLeftRef( ref );
+		final E e = branchGraph.getLinkedEdge( be, eref );
+		return edgeMap.getRight( e, ref );
 	}
 
 	@Override
 	public WV getLinkedVertex( final BV bv, final WV ref )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		final V vref = vertexMap.reusableLeftRef( ref );
+		final V v = branchGraph.getLinkedVertex( bv, vref );
+		return vertexMap.getRight( v, ref );
 	}
 
 	@Override
 	public BE getBranchEdge( final WE edge, final BE ref )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.getBranchEdge( edgeMap.getLeft( edge ), ref );
 	}
 
 	@Override
 	public BE getBranchEdge( final WV vertex, final BE ref )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.getBranchEdge( vertexMap.getLeft( vertex ), ref );
 	}
 
 	@Override
 	public BV getBranchVertex( final WV vertex, final BV ref )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.getBranchVertex( vertexMap.getLeft( vertex ), ref );
 	}
 
 	@Override
 	public GraphIdBimap< BV, BE > getGraphIdBimap()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return branchGraph.getGraphIdBimap();
 	}
 
 	@Override
 	public Iterator< WV > vertexBranchIterator( final BE edge )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new IteratorAdapter<>( branchGraph.vertexBranchIterator( edge ), vertexMap );
 	}
 
 	@Override
 	public Iterator< WE > edgeBranchIterator( final BE edge )
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return new IteratorAdapter<>( branchGraph.edgeBranchIterator( edge ), edgeMap );
 	}
-
 }
