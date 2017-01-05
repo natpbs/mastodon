@@ -7,6 +7,8 @@ import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.ui.EdgeColorGenerator;
 import org.mastodon.revised.ui.VertexColorGenerator;
@@ -15,9 +17,19 @@ import org.mastodon.revised.ui.util.ColorMap;
 /**
  * Color generator for vertices and edges from a feature model, following hints
  * from a {@link TrackSchemeStyle}.
+ * <p>
+ * This color generator can deal with vertex and edge features and attribute
+ * them to vertices and edges. Interestingly, it can color a vertex using an
+ * edge feature, and vice-versa, abiding to the different modes of
+ * {@link ColorVertexBy} and {@link ColorEdgeBy}. This color generator does not
+ * deal with the {@link ColorVertexBy#BRANCH_VERTEX},
+ * {@link ColorVertexBy#BRANCH_EDGE}, {@link ColorEdgeBy#BRANCH_VERTEX} and
+ * {@link ColorEdgeBy#BRANCH_EDGE} cases.
  *
  * @param <V>
+ *            the type of vertices to color.
  * @param <E>
+ *            the type of edges to color.
  * @author Jean-Yves Tinevez
  */
 public class FeaturesColorGenerator< V extends Vertex< E >, E extends Edge< V > >

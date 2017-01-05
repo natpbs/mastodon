@@ -8,21 +8,32 @@ import org.mastodon.graph.Vertex;
 import org.mastodon.graph.branch.BranchGraph;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.ui.EdgeColorGenerator;
 import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.util.ColorMap;
 
 /**
- * Color generator for vertices and edges from a feature model and a branch
- * graph, following hints from a {@link TrackSchemeStyle}.
+ * This color generator expands the {@link FeaturesColorGenerator} by adding the
+ * capability to color vertices and edges using branch vertices and edges
+ * features. The branch graph and its feature model have to be specified.
+ * <p>
+ * This color generator can deal with the {@link ColorVertexBy#BRANCH_VERTEX},
+ * {@link ColorVertexBy#BRANCH_EDGE}, {@link ColorEdgeBy#BRANCH_VERTEX} and
+ * {@link ColorEdgeBy#BRANCH_EDGE} cases.
  *
  * @param <V>
+ *            the type of vertices to color.
  * @param <E>
+ *            the type of edges to color.
  * @param <BV>
+ *            the type of the branch vertices.
  * @param <BE>
+ *            the type of the branch edges.
  * @author Jean-Yves Tinevez
  */
-public class FeaturesColorGeneratorBranchGraph<
+public class FeaturesColorGeneratorBranchFeatures<
 	V extends Vertex< E >,
 	E extends Edge< V >,
 	BV extends Vertex< BE >,
@@ -34,7 +45,7 @@ public class FeaturesColorGeneratorBranchGraph<
 
 	private final FeatureModel< BV, BE > branchFeatures;
 
-	public FeaturesColorGeneratorBranchGraph(
+	public FeaturesColorGeneratorBranchFeatures(
 			final ReadOnlyGraph< V, E > graph,
 			final FeatureModel< V, E > features,
 			final BranchGraph< BV, BE, V, E > branchGraph,
