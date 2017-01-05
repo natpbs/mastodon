@@ -79,6 +79,7 @@ import org.mastodon.revised.trackscheme.action.TrackSchemeStyleAction;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
+import org.mastodon.revised.trackscheme.display.style.BranchGraphFeaturesColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.BranchGraphTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.FeaturesColorGenerator;
@@ -898,8 +899,8 @@ public class WindowManager
 		final FeatureModel< BranchVertex, BranchEdge > featureModel = model.getBranchGraphFeatureModel();
 		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
 				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
-		final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
-				new FeaturesColorGenerator<>( trackSchemeGraph, trackSchemeFeatures );
+		final BranchGraphFeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
+				new BranchGraphFeaturesColorGenerator<>( trackSchemeGraph, trackSchemeFeatures );
 
 		/*
 		 * TrackScheme options.
