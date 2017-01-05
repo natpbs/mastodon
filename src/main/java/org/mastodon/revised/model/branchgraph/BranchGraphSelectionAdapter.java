@@ -98,7 +98,7 @@ public class BranchGraphSelectionAdapter<
 			}
 			else
 			{
-				do
+				while ( edge.equals( branchGraph.getBranchEdge( target, beRef ) ) )
 				{
 					/*
 					 * The target vertex is still linked to the branch edge, so
@@ -114,7 +114,6 @@ public class BranchGraphSelectionAdapter<
 						break;
 					}
 				}
-				while ( edge.equals( branchGraph.getBranchEdge( target, beRef ) ) );
 			}
 		}
 
