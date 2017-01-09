@@ -594,7 +594,7 @@ public class TrackSchemeStyle implements ColorMode
 	static
 	{
 		final Color fill = new Color( 128, 255, 128 );
-		df = new TrackSchemeStyle().name( "default" ).
+		df = new TrackSchemeStyle().name( "Default" ).
 				vertexColorMode( VertexColorMode.FIXED ).
 				edgeColorFeatureKey( "" ).
 				vertexColorFeatureKey( "" ).
@@ -654,7 +654,7 @@ public class TrackSchemeStyle implements ColorMode
 		final Color fill = new Color( 64, 106, 102 );
 		final Color selfill = new Color( 255, 128, 128 );
 		final Color currenttp = new Color( 38, 175, 185 );
-		modern = new TrackSchemeStyle().name( "modern" ).
+		modern = new TrackSchemeStyle().name( "Modern" ).
 				edgeColorMode(  EdgeColorMode.FIXED ).
 				vertexColorMode( VertexColorMode.FIXED ).
 				edgeColorFeatureKey( "" ).
@@ -715,7 +715,7 @@ public class TrackSchemeStyle implements ColorMode
 		final Color selfill = new Color( 53, 107, 154 );
 		final Color seldraw = new Color( 230, 245, 255 );
 		final Color seledge = new Color( 91, 137, 158 );
-		hmdyk = new TrackSchemeStyle().name( "lorry" ).
+		hmdyk = new TrackSchemeStyle().name( "Lorry" ).
 				edgeColorMode( EdgeColorMode.FIXED ).
 				vertexColorMode( VertexColorMode.FIXED ).
 				edgeColorFeatureKey( "" ).

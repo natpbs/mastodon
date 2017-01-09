@@ -28,13 +28,13 @@ public class RenderSettings
 	public static final double DEFAULT_ELLIPSOID_FADE_DEPTH = 0.2;
 	public static final double DEFAULT_POINT_FADE_DEPTH = 0.2;
 	public static final Stroke DEFAULT_SPOT_STROKE  = new BasicStroke();
-	public static final Stroke DEFAULT_SPOT_HIGHLIGHT_STROKE  = new BasicStroke( 4f ); 
+	public static final Stroke DEFAULT_SPOT_HIGHLIGHT_STROKE  = new BasicStroke( 4f );
 	public static final Stroke DEFAULT_SPOT_FOCUS_STROKE  = new BasicStroke( 2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[] { 8f, 3f }, 0 );
 	public static final Stroke DEFAULT_LINK_STROKE  = new BasicStroke();
 	public static final Stroke DEFAULT_LINK_HIGHLIGHT_STROKE  = new BasicStroke( 3f );
 	public static final Color DEFAULT_COLOR_1 = new Color(0f, 1f, 0.1f);
 	public static final Color DEFAULT_COLOR_2 = new Color(1f, 0f, 0.1f);
-	
+
 	public interface UpdateListener
 	{
 		public void renderSettingsChanged();
@@ -365,7 +365,7 @@ public class RenderSettings
 
 	/**
 	 * Gets whether to draw link arrow heads.
-	 * 
+	 *
 	 * @return {@code true} if link arrow heads are drawn.
 	 */
 	public boolean getDrawLinkArrows()
@@ -391,7 +391,7 @@ public class RenderSettings
 	/**
 	 * Gets the first color to paint links. The actual color of edges is
 	 * interpolated from {@code color1} to {@code color2} along time.
-	 * 
+	 *
 	 * @return the first link color.
 	 */
 	public Color getLinkColor1()
@@ -402,7 +402,7 @@ public class RenderSettings
 	/**
 	 * Sets the first color to paint links. The actual color of edges is
 	 * interpolated from {@code color1} to {@code color2} along time.
-	 * 
+	 *
 	 * @param color1
 	 *            the first link color.
 	 */
@@ -418,7 +418,7 @@ public class RenderSettings
 	/**
 	 * Gets the second color to paint links. The actual color of edges is
 	 * interpolated from {@code color1} to {@code color2} along time.
-	 * 
+	 *
 	 * @return the second link color.
 	 */
 	public Color getLinkColor2()
@@ -429,7 +429,7 @@ public class RenderSettings
 	/**
 	 * Sets the second color to paint links. The actual color of edges is
 	 * interpolated from {@code color1} to {@code color2} along time.
-	 * 
+	 *
 	 * @param color2
 	 *            the first link color.
 	 */
@@ -444,7 +444,7 @@ public class RenderSettings
 
 	/**
 	 * Gets the stroke used to paint links.
-	 * 
+	 *
 	 * @return the stroke used to paint links.
 	 */
 	public Stroke getLinkStroke()
@@ -454,7 +454,7 @@ public class RenderSettings
 
 	/**
 	 * Sets the stroke used to paint links.
-	 * 
+	 *
 	 * @param linkStroke
 	 *            the stroke used to paint links.
 	 */
@@ -469,7 +469,7 @@ public class RenderSettings
 
 	/**
 	 * Gets the stroke used to paint highlighted links.
-	 * 
+	 *
 	 * @return the stroke used to paint links.
 	 */
 	public Stroke getLinkHighlightStroke()
@@ -479,7 +479,7 @@ public class RenderSettings
 
 	/**
 	 * Sets the stroke used to paint highlighted links.
-	 * 
+	 *
 	 * @param linkHighlightStroke
 	 *            the stroke used to paint highlighted links.
 	 */
@@ -684,7 +684,7 @@ public class RenderSettings
 
 	/**
 	 * Gets the stroke used to paint the spot outlines.
-	 * 
+	 *
 	 * @return the stroke used to paint the spot outlines.
 	 */
 	public Stroke getSpotStroke()
@@ -694,7 +694,7 @@ public class RenderSettings
 
 	/**
 	 * Sets the stroke used to paint the spot outlines.
-	 * 
+	 *
 	 * @param spotStroke
 	 *            the stroke used to paint the spot outlines.
 	 */
@@ -709,7 +709,7 @@ public class RenderSettings
 
 	/**
 	 * Gets the stroke used to paint the focused spot outlines.
-	 * 
+	 *
 	 * @return the stroke used to paint the focused spot outlines.
 	 */
 	public Stroke getSpotFocusStroke()
@@ -719,7 +719,7 @@ public class RenderSettings
 
 	/**
 	 * Sets the stroke used to paint the focused spot outlines.
-	 * 
+	 *
 	 * @param spotFocusStroke
 	 *            the stroke used to paint the focused spot outlines.
 	 */
@@ -734,7 +734,7 @@ public class RenderSettings
 
 	/**
 	 * Gets the stroke used to paint the highlighted spot outlines.
-	 * 
+	 *
 	 * @return the stroke used to paint the highlighted spot outlines.
 	 */
 	public Stroke getSpotHighlightStroke()
@@ -744,7 +744,7 @@ public class RenderSettings
 
 	/**
 	 * Sets the stroke used to paint the highlighted spot outlines.
-	 * 
+	 *
 	 * @param spotHighlightStroke
 	 *            the stroke used to paint the highlighted spot outlines.
 	 */
@@ -899,7 +899,7 @@ public class RenderSettings
 
 	/**
 	 * Gets the name of this render settings object.
-	 * 
+	 *
 	 * @return the name of this render settings object.
 	 */
 	public String getName()
@@ -909,7 +909,7 @@ public class RenderSettings
 
 	/**
 	 * Sets the name of this render settings object.
-	 * 
+	 *
 	 * @param name
 	 *            the name of this render settings object.
 	 */
@@ -920,7 +920,7 @@ public class RenderSettings
 
 	/**
 	 * Copy these render settings using the specified name.
-	 * 
+	 *
 	 * @param name
 	 *            the name for the new render settings.
 	 * @return a new render settings, identical to this one, but for the name.
@@ -964,13 +964,13 @@ public class RenderSettings
 		df.linkHighlightStroke = DEFAULT_LINK_HIGHLIGHT_STROKE;
 		df.color1 = DEFAULT_COLOR_1;
 		df.color2 = DEFAULT_COLOR_2;
-		df.name = "default";
+		df.name = "Default";
 	}
 
 	private static RenderSettings POINT_CLOUD;
 	static
 	{
-		POINT_CLOUD = df.copy( "point cloud" );
+		POINT_CLOUD = df.copy( "Point cloud" );
 		POINT_CLOUD.drawLinks = false;
 		POINT_CLOUD.drawEllipsoidSliceIntersection = false;
 		POINT_CLOUD.isFocusLimitViewRelative = false;
@@ -979,7 +979,7 @@ public class RenderSettings
 	private static RenderSettings ARROWS;
 	static
 	{
-		ARROWS = df.copy( "arrows" );
+		ARROWS = df.copy( "Arrows" );
 		ARROWS.drawSpots = false;
 		ARROWS.drawLinkArrows = true;
 		ARROWS.color2 = new Color( 55, 150, 126, 255 );
@@ -988,7 +988,7 @@ public class RenderSettings
 	private static RenderSettings NONE;
 	static
 	{
-		NONE = df.copy( "no overlay" );
+		NONE = df.copy( "No overlay" );
 		NONE.drawLinks = false;
 		NONE.drawSpots = false;
 	}

@@ -12,10 +12,10 @@ import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.Spot;
 import org.scijava.plugin.Plugin;
 
-@Plugin( type = SpotFeatureComputer.class, name = "spot_nlinks" )
+@Plugin( type = SpotFeatureComputer.class, name = "Spot N links" )
 public class SpotNLinksComputer extends SpotFeatureComputer< IntFeature< Spot >, Model >
 {
-	private static final String NAME = "spot_nlinks";
+	private static final String NAME = "Spot N links";
 
 	private static final IntFeature< Spot > FEATURE = new IntFeature<>( NAME, -1 );
 

@@ -13,11 +13,11 @@ import org.mastodon.revised.model.mamut.ModelGraph;
 import org.mastodon.revised.model.mamut.Spot;
 import org.scijava.plugin.Plugin;
 
-@Plugin( type = LinkFeatureComputer.class, name = "link_velocity" )
+@Plugin( type = LinkFeatureComputer.class, name = "Link velocity" )
 public class LinkVelocityFeatureComputer extends LinkFeatureComputer< DoubleFeature< Link >, Model >
 {
 
-	public static final String NAME = "link_velocity";
+	public static final String NAME = "Link velocity";
 
 	public static final DoubleFeature< Link > FEATURE = new DoubleFeature<>( NAME, Double.NaN );
 
