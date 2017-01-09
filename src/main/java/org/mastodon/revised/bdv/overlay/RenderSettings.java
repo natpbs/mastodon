@@ -6,7 +6,10 @@ import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class RenderSettings
+import org.mastodon.revised.ui.ColorMode;
+import org.mastodon.revised.ui.util.ColorMap;
+
+public class RenderSettings implements ColorMode
 {
 	/*
 	 * PUBLIC DISPLAY CONFIG DEFAULTS.
@@ -72,11 +75,11 @@ public class RenderSettings
 		spotHighlightStroke = settings.spotHighlightStroke;
 		linkStroke = settings.linkStroke;
 		linkHighlightStroke = settings.linkHighlightStroke;
-
 		notifyListeners();
 	}
 
-	private void notifyListeners()
+	@Override
+	public void notifyListeners()
 	{
 		for ( final UpdateListener l : updateListeners )
 			l.renderSettingsChanged();
@@ -250,6 +253,26 @@ public class RenderSettings
 	 */
 	private Color color2;
 
+	private EdgeColorMode edgeColorMode;
+
+	private VertexColorMode vertexColorMode;
+
+	private String vertexFeatureKey;
+
+	private ColorMap vertexColorMap;
+
+	private double minVertexColorRange;
+
+	private double maxVertexColorRange;
+
+	private String edgeFeatureKey;
+
+	private ColorMap edgeColorMap;
+
+	private double minEdgeColorRange;
+
+	private double maxEdgeColorRange;
+
 	/*
 	 * ACCESSOR METHODS.
 	 */
@@ -272,11 +295,7 @@ public class RenderSettings
 	 */
 	public synchronized void setUseAntialiasing( final boolean useAntialiasing )
 	{
-		if ( this.useAntialiasing != useAntialiasing )
-		{
-			this.useAntialiasing = useAntialiasing;
-			notifyListeners();
-		}
+		this.useAntialiasing = useAntialiasing;
 	}
 
 	/**
@@ -302,11 +321,7 @@ public class RenderSettings
 	 */
 	public synchronized void setUseGradient( final boolean useGradient )
 	{
-		if ( this.useGradient != useGradient )
-		{
-			this.useGradient = useGradient;
-			notifyListeners();
-		}
+		this.useGradient = useGradient;
 	}
 
 	/**
@@ -329,11 +344,7 @@ public class RenderSettings
 	 */
 	public synchronized void setTimeLimit( final int timeLimit )
 	{
-		if ( this.timeLimit != timeLimit )
-		{
-			this.timeLimit = timeLimit;
-			notifyListeners();
-		}
+		this.timeLimit = timeLimit;
 	}
 
 	/**
@@ -356,11 +367,7 @@ public class RenderSettings
 	 */
 	public synchronized void setDrawLinks( final boolean drawLinks )
 	{
-		if ( this.drawLinks != drawLinks )
-		{
-			this.drawLinks = drawLinks;
-			notifyListeners();
-		}
+		this.drawLinks = drawLinks;
 	}
 
 	/**
@@ -381,11 +388,7 @@ public class RenderSettings
 	 */
 	public synchronized void setDrawLinkArrows( final boolean drawLinkArrows )
 	{
-		if ( this.drawLinkArrows != drawLinkArrows )
-		{
-			this.drawLinkArrows = drawLinkArrows;
-			notifyListeners();
-		}
+		this.drawLinkArrows = drawLinkArrows;
 	}
 
 	/**
@@ -408,11 +411,7 @@ public class RenderSettings
 	 */
 	public synchronized void setLinkColor1( final Color color1 )
 	{
-		if ( this.color1 != color1 )
-		{
-			this.color1 = color1;
-			notifyListeners();
-		}
+		this.color1 = color1;
 	}
 
 	/**
@@ -435,11 +434,7 @@ public class RenderSettings
 	 */
 	public synchronized void setLinkColor2( final Color color2 )
 	{
-		if ( this.color2 != color2 )
-		{
-			this.color2 = color2;
-			notifyListeners();
-		}
+		this.color2 = color2;
 	}
 
 	/**
@@ -460,11 +455,7 @@ public class RenderSettings
 	 */
 	public synchronized void setLinkStroke( final Stroke linkStroke )
 	{
-		if ( this.linkStroke != linkStroke )
-		{
-			this.linkStroke = linkStroke;
-			notifyListeners();
-		}
+		this.linkStroke = linkStroke;
 	}
 
 	/**
@@ -485,11 +476,7 @@ public class RenderSettings
 	 */
 	public synchronized void setLinkHighlightStroke( final Stroke linkHighlightStroke )
 	{
-		if ( this.linkHighlightStroke != linkHighlightStroke )
-		{
-			this.linkHighlightStroke = linkHighlightStroke;
-			notifyListeners();
-		}
+		this.linkHighlightStroke = linkHighlightStroke;
 	}
 
 	/**
@@ -530,11 +517,7 @@ public class RenderSettings
 	 */
 	public synchronized void setDrawSpots( final boolean drawSpots )
 	{
-		if ( this.drawSpots != drawSpots )
-		{
-			this.drawSpots = drawSpots;
-			notifyListeners();
-		}
+		this.drawSpots = drawSpots;
 	}
 
 	/**
@@ -559,11 +542,7 @@ public class RenderSettings
 	 */
 	public synchronized void setDrawEllipsoidSliceProjection( final boolean drawEllipsoidSliceProjection )
 	{
-		if ( this.drawEllipsoidSliceProjection != drawEllipsoidSliceProjection )
-		{
-			this.drawEllipsoidSliceProjection = drawEllipsoidSliceProjection;
-			notifyListeners();
-		}
+		this.drawEllipsoidSliceProjection = drawEllipsoidSliceProjection;
 	}
 
 	/**
@@ -588,11 +567,7 @@ public class RenderSettings
 	 */
 	public synchronized void setDrawEllipsoidSliceIntersection( final boolean drawEllipsoidSliceIntersection )
 	{
-		if ( this.drawEllipsoidSliceIntersection != drawEllipsoidSliceIntersection )
-		{
-			this.drawEllipsoidSliceIntersection = drawEllipsoidSliceIntersection;
-			notifyListeners();
-		}
+		this.drawEllipsoidSliceIntersection = drawEllipsoidSliceIntersection;
 	}
 
 	/**
@@ -621,11 +596,7 @@ public class RenderSettings
 	 */
 	public synchronized void setDrawSpotCenters( final boolean drawPoints )
 	{
-		if ( this.drawPoints != drawPoints )
-		{
-			this.drawPoints = drawPoints;
-			notifyListeners();
-		}
+		this.drawPoints = drawPoints;
 	}
 
 	/**
@@ -650,11 +621,7 @@ public class RenderSettings
 	 */
 	public synchronized void setDrawSpotCentersForEllipses( final boolean drawPointsForEllipses )
 	{
-		if ( this.drawPointsForEllipses != drawPointsForEllipses )
-		{
-			this.drawPointsForEllipses = drawPointsForEllipses;
-			notifyListeners();
-		}
+		this.drawPointsForEllipses = drawPointsForEllipses;
 	}
 
 	/**
@@ -675,11 +642,7 @@ public class RenderSettings
 	 */
 	public void setDrawSpotLabels( final boolean drawSpotLabels )
 	{
-		if ( this.drawSpotLabels != drawSpotLabels )
-		{
-			this.drawSpotLabels = drawSpotLabels;
-			notifyListeners();
-		}
+		this.drawSpotLabels = drawSpotLabels;
 	}
 
 	/**
@@ -700,11 +663,7 @@ public class RenderSettings
 	 */
 	public synchronized void setSpotStroke( final Stroke spotStroke )
 	{
-		if ( this.spotStroke != spotStroke )
-		{
-			this.spotStroke = spotStroke;
-			notifyListeners();
-		}
+		this.spotStroke = spotStroke;
 	}
 
 	/**
@@ -725,11 +684,7 @@ public class RenderSettings
 	 */
 	public synchronized void setSpotFocusStroke( final Stroke spotFocusStroke )
 	{
-		if ( this.spotFocusStroke != spotFocusStroke )
-		{
-			this.spotFocusStroke = spotFocusStroke;
-			notifyListeners();
-		}
+		this.spotFocusStroke = spotFocusStroke;
 	}
 
 	/**
@@ -750,11 +705,7 @@ public class RenderSettings
 	 */
 	public synchronized void setSpotHighlightStroke( final Stroke spotHighlightStroke )
 	{
-		if ( this.spotHighlightStroke != spotHighlightStroke )
-		{
-			this.spotHighlightStroke = spotHighlightStroke;
-			notifyListeners();
-		}
+		this.spotHighlightStroke = spotHighlightStroke;
 	}
 
 	/**
@@ -792,11 +743,7 @@ public class RenderSettings
 	 */
 	public synchronized void setFocusLimit( final double focusLimit )
 	{
-		if ( this.focusLimit != focusLimit )
-		{
-			this.focusLimit = focusLimit;
-			notifyListeners();
-		}
+		this.focusLimit = focusLimit;
 	}
 
 	/**
@@ -828,11 +775,7 @@ public class RenderSettings
 	 */
 	public synchronized void setFocusLimitViewRelative( final boolean isFocusLimitViewRelative )
 	{
-		if ( this.isFocusLimitViewRelative != isFocusLimitViewRelative )
-		{
-			this.isFocusLimitViewRelative = isFocusLimitViewRelative;
-			notifyListeners();
-		}
+		this.isFocusLimitViewRelative = isFocusLimitViewRelative;
 	}
 
 	/**
@@ -859,11 +802,7 @@ public class RenderSettings
 	 */
 	public synchronized void setEllipsoidFadeDepth( final double ellipsoidFadeDepth )
 	{
-		if ( this.ellipsoidFadeDepth != ellipsoidFadeDepth )
-		{
-			this.ellipsoidFadeDepth = ellipsoidFadeDepth;
-			notifyListeners();
-		}
+		this.ellipsoidFadeDepth = ellipsoidFadeDepth;
 	}
 
 	/**
@@ -890,11 +829,7 @@ public class RenderSettings
 	 */
 	public synchronized void setPointFadeDepth( final double pointFadeDepth )
 	{
-		if ( this.pointFadeDepth != pointFadeDepth )
-		{
-			this.pointFadeDepth = pointFadeDepth;
-			notifyListeners();
-		}
+		this.pointFadeDepth = pointFadeDepth;
 	}
 
 	/**
@@ -916,6 +851,137 @@ public class RenderSettings
 	public void setName( final String name )
 	{
 		this.name = name;
+	}
+
+
+	@Override
+	public RenderSettings edgeColorMode( final EdgeColorMode edgeColorMode )
+	{
+		this.edgeColorMode = edgeColorMode;
+		return this;
+	}
+
+	@Override
+	public RenderSettings vertexColorMode( final VertexColorMode vertexColorMode )
+	{
+		this.vertexColorMode = vertexColorMode;
+		return this;
+	}
+
+	@Override
+	public VertexColorMode getVertexColorMode()
+	{
+		return vertexColorMode;
+	}
+
+	@Override
+	public String getVertexFeatureKey()
+	{
+		return vertexFeatureKey;
+	}
+
+	@Override
+	public ColorMap getVertexColorMap()
+	{
+		return vertexColorMap;
+	}
+
+	@Override
+	public double getMinVertexColorRange()
+	{
+		return minVertexColorRange;
+	}
+
+	@Override
+	public double getMaxVertexColorRange()
+	{
+		return maxVertexColorRange;
+	}
+
+	@Override
+	public EdgeColorMode getEdgeColorMode()
+	{
+		return edgeColorMode;
+	}
+
+	@Override
+	public String getEdgeFeatureKey()
+	{
+		return edgeFeatureKey;
+	}
+
+	@Override
+	public ColorMap getEdgeColorMap()
+	{
+		return edgeColorMap;
+	}
+
+	@Override
+	public double getMinEdgeColorRange()
+	{
+		return minEdgeColorRange;
+	}
+
+	@Override
+	public double getMaxEdgeColorRange()
+	{
+		return maxEdgeColorRange;
+	}
+
+	@Override
+	public RenderSettings edgeColorMap( final ColorMap colorMap )
+	{
+		this.edgeColorMap = colorMap;
+		return this;
+	}
+
+	@Override
+	public RenderSettings vertexColorMap( final ColorMap colorMap )
+	{
+		this.vertexColorMap = colorMap;
+		return this;
+	}
+
+	@Override
+	public RenderSettings edgeColorFeatureKey( final String key )
+	{
+		this.edgeFeatureKey = key;
+		return this;
+	}
+
+	@Override
+	public RenderSettings vertexColorFeatureKey( final String key )
+	{
+		this.vertexFeatureKey = key;
+		return this;
+	}
+
+	@Override
+	public RenderSettings minEdgeColorRange( final double val )
+	{
+		this.minEdgeColorRange = val;
+		return this;
+	}
+
+	@Override
+	public RenderSettings maxEdgeColorRange( final double val )
+	{
+		this.maxEdgeColorRange = val;
+		return this;
+	}
+
+	@Override
+	public RenderSettings minVertexColorRange( final double val )
+	{
+		this.minVertexColorRange = val;
+		return this;
+	}
+
+	@Override
+	public RenderSettings maxVertexColorRange( final double val )
+	{
+		this.maxVertexColorRange = val;
+		return this;
 	}
 
 	/**
@@ -943,6 +1009,16 @@ public class RenderSettings
 	static
 	{
 		df = new RenderSettings();
+		df.vertexColorMode = VertexColorMode.FIXED ;
+		df.vertexFeatureKey = "";
+		df.vertexColorMap = ColorMap.PARULA;
+		df.minVertexColorRange = 0.;
+		df.maxVertexColorRange = 1.;
+		df.edgeColorMode = EdgeColorMode.FIXED;
+		df.edgeFeatureKey = "";
+		df.edgeColorMap = ColorMap.PARULA;
+		df.minEdgeColorRange = 0.;
+		df.maxEdgeColorRange = 1.;
 		df.useAntialiasing = DEFAULT_USE_ANTI_ALIASING;
 		df.useGradient = DEFAULT_USE_GRADIENT;
 		df.timeLimit = DEFAULT_LIMIT_TIME_RANGE;
@@ -1007,5 +1083,4 @@ public class RenderSettings
 	{
 		return df;
 	}
-
 }

@@ -30,14 +30,13 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.mastodon.revised.bdv.overlay.RenderSettings;
-import org.mastodon.revised.bdv.overlay.RenderSettings.UpdateListener;
 
 import bdv.tools.brightness.SliderPanel;
 import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.BoundedValue;
 import bdv.util.BoundedValueDouble;
 
-public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
+public class RenderSettingsEditorPanel extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 
@@ -116,6 +115,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setUseAntialiasing( antialiasingBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -164,6 +164,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 								final ColorIcon ci = new ColorIcon( c );
 								button.setIcon( ci );
 								colorSetter.setColor( c );
+								renderSettings.notifyListeners();
 							}
 						}
 					}, null );
@@ -212,6 +213,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawLinks( linksBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -231,6 +233,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			{
 				super.setCurrentValue( value );
 				renderSettings.setTimeLimit( getCurrentValue() );
+				renderSettings.notifyListeners();
 			}
 		};
 		timeLimitSlider = new SliderPanel( null, timeLimit, 1 );
@@ -258,6 +261,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setUseGradient( gradientBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -275,6 +279,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawLinkArrows( arrowHeadBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -311,6 +316,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpots( spotsBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -329,6 +335,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawEllipsoidSliceIntersection( intersectionBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -347,6 +354,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawEllipsoidSliceProjection( projectionBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -365,6 +373,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpotCenters( centersBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -383,6 +392,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpotCentersForEllipses( centersForEllipsesBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -405,6 +415,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpotLabels( drawSpotLabelsBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -445,6 +456,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			{
 				super.setCurrentValue( value );
 				renderSettings.setFocusLimit( getCurrentValue() );
+				renderSettings.notifyListeners();
 			}
 		};
 		focusLimitSlider = new SliderPanelDouble( null, focusLimit, 1 );
@@ -472,6 +484,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setFocusLimitViewRelative( focusLimitRelativeBox.isSelected() );
+				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -489,6 +502,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			{
 				super.setCurrentValue( value );
 				renderSettings.setEllipsoidFadeDepth( getCurrentValue() );
+				renderSettings.notifyListeners();
 			}
 		};
 		ellipsoidFadeDepthSlider = new SliderPanelDouble( null, ellipsoidFadeDepth, 0.05 );
@@ -515,6 +529,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			{
 				super.setCurrentValue( value );
 				renderSettings.setPointFadeDepth( getCurrentValue() );
+				renderSettings.notifyListeners();
 			}
 		};
 		pointFadeDepthSlider = new SliderPanelDouble( null, pointFadeDepth, 0.05 );
@@ -533,8 +548,6 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 		c.fill = GridBagConstraints.NONE;
 		add( new JLabel( "center point fade depth" ), c );
 
-
-		renderSettings.addUpdateListener( this );
 		update();
 	}
 
@@ -546,7 +559,7 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 
 			buttonList.get( 0 ).setIcon( new ColorIcon( renderSettings.getLinkColor1() ) );
 			buttonList.get( 1 ).setIcon( new ColorIcon( renderSettings.getLinkColor2() ) );
-			
+
 			linksBox.setSelected( renderSettings.getDrawLinks() );
 			timeLimit.setCurrentValue( renderSettings.getTimeLimit() );
 			gradientBox.setSelected( renderSettings.getUseGradient() );
@@ -565,15 +578,6 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 			ellipsoidFadeDepth.setCurrentValue( renderSettings.getEllipsoidFadeDepth() );
 			pointFadeDepth.setCurrentValue( renderSettings.getPointFadeDepth() );
 		}
-	}
-
-	/**
-	 * Updates the UI when the settings are changed.
-	 */
-	@Override
-	public void renderSettingsChanged()
-	{
-		update();
 	}
 
 	/*
@@ -595,11 +599,11 @@ public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 				}
 		} );
 	}
-	
+
 	/*
 	 * INNER CLASSES
 	 */
-	
+
 	/**
 	 * Adapted from http://stackoverflow.com/a/3072979/230513
 	 */
