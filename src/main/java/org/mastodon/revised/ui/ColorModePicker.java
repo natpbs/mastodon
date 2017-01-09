@@ -1,5 +1,7 @@
 package org.mastodon.revised.ui;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -104,7 +106,7 @@ public class ColorModePicker extends JPanel
 		 */
 
 		final GridBagConstraints c = new GridBagConstraints();
-		c.insets = new Insets( 2, 5, 2, 5 );
+		c.insets = new Insets( 0, 0, 0, 0 );
 		c.ipadx = 0;
 		c.ipady = 0;
 		c.gridy = 0;
@@ -196,6 +198,7 @@ public class ColorModePicker extends JPanel
 		c.gridwidth = 2;
 		colorMapPainterVertex = new ColorMapPainter( cmapVertex );
 		add( colorMapPainterVertex, c );
+		cmapVertex.addActionListener( ( e ) -> colorMapPainterVertex.repaint() );
 
 		c.gridx = 0;
 		c.weightx = 0.;
@@ -300,6 +303,7 @@ public class ColorModePicker extends JPanel
 		c.gridwidth = 2;
 		colorMapPainterEdge = new ColorMapPainter( cmapEdge );
 		add( colorMapPainterEdge, c );
+		cmapEdge.addActionListener( e -> colorMapPainterEdge.repaint() );
 
 		c.gridx = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -374,11 +378,12 @@ public class ColorModePicker extends JPanel
 				.minEdgeColorRange( ( double ) minEdge.getValue() )
 				.maxEdgeColorRange( ( double ) maxEdge.getValue() )
 				.notifyListeners();
+		fireActionListeners();
 	}
 
 	private void autoScaleVertexFeature()
 	{
-		colorVertexChoices.setEditable( false );
+		colorVertexChoices.setEnabled( false );
 		minVertex.setEnabled( false );
 		maxVertex.setEnabled( false );
 		try
@@ -402,7 +407,7 @@ public class ColorModePicker extends JPanel
 		finally
 		{
 			fireSettingsChanged();
-			colorVertexChoices.setEditable( true );
+			colorVertexChoices.setEnabled( true );
 			minVertex.setEnabled( true );
 			maxVertex.setEnabled( true );
 		}
@@ -410,7 +415,7 @@ public class ColorModePicker extends JPanel
 
 	private void autoScaleEdgeFeature()
 	{
-		colorEdgeChoices.setEditable( false );
+		colorEdgeChoices.setEnabled( false );
 		minEdge.setEnabled( false );
 		maxEdge.setEnabled( false );
 		try
@@ -434,7 +439,7 @@ public class ColorModePicker extends JPanel
 		finally
 		{
 			fireSettingsChanged();
-			colorEdgeChoices.setEditable( true );
+			colorEdgeChoices.setEnabled( true );
 			minEdge.setEnabled( true );
 			maxEdge.setEnabled( true );
 		}
@@ -519,6 +524,7 @@ public class ColorModePicker extends JPanel
 			}
 		}
 		comboBox.setSelectedItem( fkw );
+		comboBox.setEditable( false );
 
 		return comboBox;
 	}
@@ -601,6 +607,7 @@ public class ColorModePicker extends JPanel
 			}
 		}
 		comboBox.setSelectedItem( fkw );
+		comboBox.setEditable( false );
 
 		return comboBox;
 	}
@@ -696,5 +703,71 @@ public class ColorModePicker extends JPanel
 				c.setEnabled( enable );
 		}
 
+	}
+
+	@Override
+	public void setFont( final Font font )
+	{
+		super.setFont( font );
+		for ( final Component child : getComponents() )
+			changeFont( child, font );
+	}
+
+	private static final void changeFont( final Component component, final Font font )
+	{
+		component.setFont( font );
+		if ( component instanceof Container )
+			for ( final Component child : ( ( Container ) component ).getComponents() )
+				changeFont( child, font );
+	}
+
+	@Override
+	public void setEnabled( final boolean enabled )
+	{
+		super.setEnabled( enabled );
+		colorEdgeChoices.setEnabled( enabled );
+		colorVertexChoices.setEnabled( enabled );
+		// Don't enable for fixed colors.
+		final boolean vertexEnable = enabled && ( colorVertexChoices.getSelectedCategory() != VertexColorMode.FIXED );
+		colorMapPainterVertex.setEnabled( vertexEnable );
+		cmapVertex.setEnabled( vertexEnable );
+		minVertex.setEnabled( vertexEnable );
+		maxVertex.setEnabled( vertexEnable );
+		autoscaleVertex.setEnabled( vertexEnable );
+		final boolean edgeEnable = enabled && ( colorEdgeChoices.getSelectedCategory() != EdgeColorMode.FIXED );
+		colorMapPainterEdge.setEnabled( edgeEnable );
+		cmapEdge.setEnabled( edgeEnable );
+		minEdge.setEnabled( edgeEnable );
+		maxEdge.setEnabled( edgeEnable );
+		autoscaleEdge.setEnabled( edgeEnable );
+	}
+
+	/*
+	 * ACTION LISTENER.
+	 */
+
+	private final ArrayList< ActionListener > actionListeners = new ArrayList<>();
+
+	private void fireActionListeners()
+	{
+		final ActionEvent e = new ActionEvent( this, 0, "SettingsChanged" );
+		for ( final ActionListener l : actionListeners )
+			l.actionPerformed( e );
+	}
+
+
+	public synchronized boolean addActionListener( final ActionListener l )
+	{
+		if ( !actionListeners.contains( l ) )
+		{
+			actionListeners.add( l );
+			return true;
+		}
+		return false;
+	}
+
+	public synchronized boolean removeActionListener( final ActionListener l )
+	{
+		return actionListeners.remove( l );
 	}
 }
