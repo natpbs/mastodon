@@ -14,8 +14,8 @@ import org.mastodon.revised.io.yaml.AbstractWorkaroundConstruct;
 import org.mastodon.revised.io.yaml.WorkaroundConstructor;
 import org.mastodon.revised.io.yaml.WorkaroundRepresent;
 import org.mastodon.revised.io.yaml.WorkaroundRepresenter;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
+import org.mastodon.revised.ui.ColorMode.VertexColorMode;
 import org.mastodon.revised.ui.util.ColorMap;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -43,8 +43,8 @@ class TrackSchemeStyleIO
 		public TrackSchemeStyleRepresenter()
 		{
 			putRepresent( new RepresentColorMap( this ) );
-			putRepresent( new RepresentColorEdgeBy( this ) );
-			putRepresent( new RepresentColorVertexBy( this ) );
+			putRepresent( new RepresentEdgeColorMode( this ) );
+			putRepresent( new RepresentVertexColorMode( this ) );
 			putRepresent( new RepresentColor( this ) );
 			putRepresent( new RepresentBasicStroke( this ) );
 			putRepresent( new RepresentFont( this ) );
@@ -58,8 +58,8 @@ class TrackSchemeStyleIO
 		{
 			super( Object.class );
 			putConstruct( new ConstructColorMap( this ) );
-			putConstruct( new ConstructColorEdgeBy( this ) );
-			putConstruct( new ConstructColorVertexBy( this ) );
+			putConstruct( new ConstructEdgeColorMode( this ) );
+			putConstruct( new ConstructVertexColorMode( this ) );
 			putConstruct( new ConstructColor( this ) );
 			putConstruct( new ConstructBasicStroke( this ) );
 			putConstruct( new ConstructFont( this ) );
@@ -112,34 +112,34 @@ class TrackSchemeStyleIO
 		}
 	}
 
-	private static class RepresentColorEdgeBy extends WorkaroundRepresent
+	private static class RepresentEdgeColorMode extends WorkaroundRepresent
 	{
 
-		public RepresentColorEdgeBy( final WorkaroundRepresenter r )
+		public RepresentEdgeColorMode( final WorkaroundRepresenter r )
 		{
-			super( r, COLOREDGEBY_TAG, ColorEdgeBy.class );
+			super( r, COLOREDGEBY_TAG, EdgeColorMode.class );
 		}
 
 		@Override
 		public Node representData( final Object data )
 		{
-			final ColorEdgeBy c = ( ColorEdgeBy ) data;
+			final EdgeColorMode c = ( EdgeColorMode ) data;
 			return new ScalarNode( getTag(), c.name(), null, null, null );
 		}
 	}
 
-	private static class RepresentColorVertexBy extends WorkaroundRepresent
+	private static class RepresentVertexColorMode extends WorkaroundRepresent
 	{
 
-		public RepresentColorVertexBy( final WorkaroundRepresenter r )
+		public RepresentVertexColorMode( final WorkaroundRepresenter r )
 		{
-			super( r, COLORVERTEXBY_TAG, ColorVertexBy.class );
+			super( r, COLORVERTEXBY_TAG, VertexColorMode.class );
 		}
 
 		@Override
 		public Node representData( final Object data )
 		{
-			final ColorVertexBy c = ( ColorVertexBy ) data;
+			final VertexColorMode c = ( VertexColorMode ) data;
 			return new ScalarNode( getTag(), c.name(), null, null, null );
 		}
 	}
@@ -314,10 +314,10 @@ class TrackSchemeStyleIO
 
 	}
 
-	private static final class ConstructColorEdgeBy extends AbstractWorkaroundConstruct
+	private static final class ConstructEdgeColorMode extends AbstractWorkaroundConstruct
 	{
 
-		public ConstructColorEdgeBy( final WorkaroundConstructor c )
+		public ConstructEdgeColorMode( final WorkaroundConstructor c )
 		{
 			super( c, COLOREDGEBY_TAG );
 		}
@@ -328,7 +328,7 @@ class TrackSchemeStyleIO
 			try
 			{
 				final String cmName = ( ( ScalarNode ) node ).getValue();
-				return ColorEdgeBy.valueOf( cmName );
+				return EdgeColorMode.valueOf( cmName );
 			}
 			catch ( final Exception e )
 			{
@@ -339,10 +339,10 @@ class TrackSchemeStyleIO
 
 	}
 
-	private static final class ConstructColorVertexBy extends AbstractWorkaroundConstruct
+	private static final class ConstructVertexColorMode extends AbstractWorkaroundConstruct
 	{
 
-		public ConstructColorVertexBy( final WorkaroundConstructor c )
+		public ConstructVertexColorMode( final WorkaroundConstructor c )
 		{
 			super( c, COLORVERTEXBY_TAG );
 		}
@@ -353,7 +353,7 @@ class TrackSchemeStyleIO
 			try
 			{
 				final String cmName = ( ( ScalarNode ) node ).getValue();
-				return ColorVertexBy.valueOf( cmName );
+				return VertexColorMode.valueOf( cmName );
 			}
 			catch ( final Exception e )
 			{
@@ -447,7 +447,7 @@ class TrackSchemeStyleIO
 				final String name = ( String ) mapping.get( "name" );
 				final TrackSchemeStyle s = TrackSchemeStyle.defaultStyle().copy( name );
 
-				s.colorEdgeBy( ( ColorEdgeBy ) mapping.get( "colorEdgeBy" ) );
+				s.edgeColorMode( ( EdgeColorMode ) mapping.get( "colorEdgeBy" ) );
 				s.edgeColorFeatureKey( ( String ) mapping.get( "edgeColorFeatureKey" ) );
 				s.edgeColorMap( ( ColorMap ) mapping.get( "edgeColorMap" ) );
 				@SuppressWarnings( "unchecked" )
@@ -463,7 +463,7 @@ class TrackSchemeStyleIO
 					s.maxEdgeColorRange( edgeColorRange.get( 1 ) );
 				}
 
-				s.colorVertexBy( ( ColorVertexBy ) mapping.get( "colorVertexBy" ) );
+				s.vertexColorMode( ( VertexColorMode ) mapping.get( "colorVertexBy" ) );
 				s.vertexColorFeatureKey( ( String ) mapping.get( "vertexColorFeatureKey" ) );
 				s.vertexColorMap( ( ColorMap ) mapping.get( "vertexColorMap" ) );
 				@SuppressWarnings( "unchecked" )

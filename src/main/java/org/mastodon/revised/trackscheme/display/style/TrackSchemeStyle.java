@@ -7,23 +7,14 @@ import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.mastodon.revised.ui.ColorMode;
 import org.mastodon.revised.ui.util.ColorMap;
 
-public class TrackSchemeStyle
+public class TrackSchemeStyle implements ColorMode
 {
 	private static final Stroke DEFAULT_FOCUS_STROKE = new BasicStroke( 2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1f, new float[] { 8f, 3f }, 0 );
 
 	private static final Stroke DEFAULT_GHOST_STROKE = new BasicStroke( 1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] { 3.0f }, 0.0f );
-
-	public enum ColorEdgeBy
-	{
-		FIXED, EDGE, SOURCE_VERTEX, TARGET_VERTEX, BRANCH_EDGE, BRANCH_VERTEX;
-	}
-
-	public enum ColorVertexBy
-	{
-		FIXED, VERTEX, INCOMING_EDGE, OUTGOING_EDGE, BRANCH_EDGE, BRANCH_VERTEX;
-	}
 
 	public String name;
 
@@ -101,7 +92,7 @@ public class TrackSchemeStyle
 
 	public boolean paintHeaderShadow;
 
-	public ColorVertexBy colorVertexBy;
+	public VertexColorMode colorVertexBy;
 
 	/**
 	 * Might be a key to a vertex or an edge feature, depending on
@@ -115,7 +106,7 @@ public class TrackSchemeStyle
 
 	public double maxVertexColorRange;
 
-	public ColorEdgeBy colorEdgeBy;
+	public EdgeColorMode colorEdgeBy;
 
 	/**
 	 * Might be a key to a vertex or an edge feature, depending on
@@ -153,6 +144,70 @@ public class TrackSchemeStyle
 	}
 
 	/*
+	 * GETTERS for non public fields.
+	 */
+
+	@Override
+	public VertexColorMode getVertexColorMode()
+	{
+		return colorVertexBy;
+	}
+
+	@Override
+	public String getVertexFeatureKey()
+	{
+		return vertexColorFeatureKey;
+	}
+
+	@Override
+	public ColorMap getVertexColorMap()
+	{
+		return vertexColorMap;
+	}
+
+	@Override
+	public double getMinVertexColorRange()
+	{
+		return minVertexColorRange;
+	}
+
+	@Override
+	public double getMaxVertexColorRange()
+	{
+		return maxVertexColorRange;
+	}
+
+	@Override
+	public EdgeColorMode getEdgeColorMode()
+	{
+		return colorEdgeBy;
+	}
+
+	@Override
+	public String getEdgeFeatureKey()
+	{
+		return edgeColorFeatureKey;
+	}
+
+	@Override
+	public ColorMap getEdgeColorMap()
+	{
+		return edgeColorMap;
+	}
+
+	@Override
+	public double getMinEdgeColorRange()
+	{
+		return minEdgeColorRange;
+	}
+
+	@Override
+	public double getMaxEdgeColorRange()
+	{
+		return maxEdgeColorRange;
+	}
+
+	/*
 	 * SETTERS
 	 */
 
@@ -162,80 +217,80 @@ public class TrackSchemeStyle
 		return this;
 	}
 
-	public TrackSchemeStyle colorEdgeBy( final ColorEdgeBy ceb )
+	@Override
+	public TrackSchemeStyle edgeColorMode( final EdgeColorMode edgeColorMode )
 	{
-		colorEdgeBy = ceb;
-		notifyListeners();
+		colorEdgeBy = edgeColorMode;
 		return this;
 	}
 
-	public TrackSchemeStyle colorVertexBy( final ColorVertexBy cvb )
+	@Override
+	public TrackSchemeStyle vertexColorMode( final VertexColorMode vertexColorMode )
 	{
-		colorVertexBy = cvb;
-		notifyListeners();
+		colorVertexBy = vertexColorMode;
 		return this;
 	}
 
-	public TrackSchemeStyle edgeColorMap( final ColorMap cm )
+	@Override
+	public TrackSchemeStyle edgeColorMap( final ColorMap colorMap )
 	{
-		edgeColorMap = cm;
-		notifyListeners();
+		edgeColorMap = colorMap;
 		return this;
 	}
 
-	public TrackSchemeStyle vertexColorMap( final ColorMap cm )
+	@Override
+	public TrackSchemeStyle vertexColorMap( final ColorMap colorMap )
 	{
-		vertexColorMap = cm;
-		notifyListeners();
+		vertexColorMap = colorMap;
 		return this;
 	}
 
+	@Override
 	public TrackSchemeStyle edgeColorFeatureKey( final String key )
 	{
 		edgeColorFeatureKey = key;
-		notifyListeners();
 		return this;
 	}
 
+	@Override
 	public TrackSchemeStyle vertexColorFeatureKey( final String key )
 	{
 		vertexColorFeatureKey = key;
-		notifyListeners();
 		return this;
 	}
 
+	@Override
 	public TrackSchemeStyle minEdgeColorRange( final double val )
 	{
 		minEdgeColorRange = val;
-		notifyListeners();
 		return this;
 	}
 
+	@Override
 	public TrackSchemeStyle maxEdgeColorRange( final double val )
 	{
 		maxEdgeColorRange = val;
-		notifyListeners();
 		return this;
 	}
 
+	@Override
 	public TrackSchemeStyle minVertexColorRange( final double val )
 	{
 		minVertexColorRange = val;
-		notifyListeners();
 		return this;
 	}
 
+	@Override
 	public TrackSchemeStyle maxVertexColorRange( final double val )
 	{
 		maxVertexColorRange = val;
-		notifyListeners();
 		return this;
 	}
+
 	public TrackSchemeStyle edgeColor( final Color c )
 	{
 		edgeColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -243,7 +298,6 @@ public class TrackSchemeStyle
 	{
 		vertexFillColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -251,7 +305,6 @@ public class TrackSchemeStyle
 	{
 		vertexDrawColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -259,7 +312,6 @@ public class TrackSchemeStyle
 	{
 		selectedVertexFillColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -267,7 +319,6 @@ public class TrackSchemeStyle
 	{
 		selectedEdgeColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -275,7 +326,6 @@ public class TrackSchemeStyle
 	{
 		selectedVertexDrawColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -283,7 +333,6 @@ public class TrackSchemeStyle
 	{
 		simplifiedVertexFillColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -291,7 +340,6 @@ public class TrackSchemeStyle
 	{
 		selectedSimplifiedVertexFillColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
@@ -299,147 +347,126 @@ public class TrackSchemeStyle
 	{
 		backgroundColor = c;
 		updateGhostColors();
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle currentTimepointColor( final Color c )
 	{
 		currentTimepointColor = c;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle decorationColor( final Color c )
 	{
 		decorationColor = c;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle vertexRangeColor( final Color c )
 	{
 		vertexRangeColor = c;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle headerBackgroundColor( final Color c )
 	{
 		headerBackgroundColor = c;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle headerDecorationColor( final Color c )
 	{
 		headerDecorationColor = c;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle headerCurrentTimepointColor( final Color c )
 	{
 		headerCurrentTimepointColor = c;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle font( final Font f )
 	{
 		font = f;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle headerFont( final Font f )
 	{
 		headerFont = f;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle edgeStroke( final Stroke s )
 	{
 		edgeStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle edgeGhostStroke( final Stroke s )
 	{
 		edgeGhostStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle edgeHighlightStroke( final Stroke s )
 	{
 		edgeHighlightStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle vertexStroke( final Stroke s )
 	{
 		vertexStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle vertexGhostStroke( final Stroke s )
 	{
 		vertexGhostStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle vertexHighlightStroke( final Stroke s )
 	{
 		vertexHighlightStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle focusStroke( final Stroke s )
 	{
 		focusStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle decorationStroke( final Stroke s )
 	{
 		decorationStroke = s;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle highlightCurrentTimepoint( final boolean b )
 	{
 		highlightCurrentTimepoint = b;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle paintRows( final boolean b )
 	{
 		paintRows = b;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle paintColumns( final boolean b )
 	{
 		paintColumns = b;
-		notifyListeners();
 		return this;
 	}
 
 	public TrackSchemeStyle paintHeaderShadow( final boolean b )
 	{
 		paintHeaderShadow = b;
-		notifyListeners();
 		return this;
 	}
 
@@ -504,7 +531,7 @@ public class TrackSchemeStyle
 		this.paintRows = style.paintRows;
 		this.paintColumns = style.paintColumns;
 		this.paintHeaderShadow = style.paintHeaderShadow;
-		notifyListeners();
+// HEP!
 	}
 
 	public interface UpdateListener
@@ -514,7 +541,8 @@ public class TrackSchemeStyle
 
 	private final ArrayList< UpdateListener > updateListeners;
 
-	private void notifyListeners()
+	@Override
+	public void notifyListeners()
 	{
 		final ArrayList< UpdateListener > ul = new ArrayList<>( updateListeners );
 		for ( final UpdateListener l : ul )
@@ -567,7 +595,7 @@ public class TrackSchemeStyle
 	{
 		final Color fill = new Color( 128, 255, 128 );
 		df = new TrackSchemeStyle().name( "default" ).
-				colorEdgeBy( ColorEdgeBy.FIXED ).
+				vertexColorMode( VertexColorMode.FIXED ).
 				edgeColorFeatureKey( "" ).
 				vertexColorFeatureKey( "" ).
 				edgeColorMap( ColorMap.JET ).
@@ -576,7 +604,7 @@ public class TrackSchemeStyle
 				maxEdgeColorRange( 1. ).
 				minVertexColorRange( 0. ).
 				maxVertexColorRange( 1. ).
-				colorVertexBy( ColorVertexBy.FIXED ).
+				edgeColorMode( EdgeColorMode.FIXED ).
 				backgroundColor( Color.LIGHT_GRAY ).
 				currentTimepointColor( new Color( 217, 217, 217 ) ).
 				vertexFillColor( Color.WHITE ).
@@ -627,8 +655,8 @@ public class TrackSchemeStyle
 		final Color selfill = new Color( 255, 128, 128 );
 		final Color currenttp = new Color( 38, 175, 185 );
 		modern = new TrackSchemeStyle().name( "modern" ).
-				colorEdgeBy( ColorEdgeBy.FIXED ).
-				colorVertexBy( ColorVertexBy.FIXED ).
+				edgeColorMode(  EdgeColorMode.FIXED ).
+				vertexColorMode( VertexColorMode.FIXED ).
 				edgeColorFeatureKey( "" ).
 				vertexColorFeatureKey( "" ).
 				edgeColorMap( ColorMap.JET ).
@@ -688,8 +716,8 @@ public class TrackSchemeStyle
 		final Color seldraw = new Color( 230, 245, 255 );
 		final Color seledge = new Color( 91, 137, 158 );
 		hmdyk = new TrackSchemeStyle().name( "lorry" ).
-				colorEdgeBy( ColorEdgeBy.FIXED ).
-				colorVertexBy( ColorVertexBy.FIXED ).
+				edgeColorMode( EdgeColorMode.FIXED ).
+				vertexColorMode( VertexColorMode.FIXED ).
 				edgeColorFeatureKey( "" ).
 				vertexColorFeatureKey( "" ).
 				edgeColorMap( ColorMap.JET ).
@@ -737,5 +765,6 @@ public class TrackSchemeStyle
 		defaults.add( hmdyk );
 		defaults.add( modern );
 	}
+
 
 }

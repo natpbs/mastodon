@@ -13,8 +13,8 @@ import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
 import org.mastodon.revised.trackscheme.util.GeometryUtils;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 
@@ -52,7 +52,7 @@ public class BranchGraphTrackSchemeOverlay extends DefaultTrackSchemeOverlay
 		final boolean selected = edge.isSelected();
 		final boolean ghost = vs.isGhost() && vt.isGhost();
 
-		final Color edgeColor = ( style.colorEdgeBy == ColorEdgeBy.FIXED )
+		final Color edgeColor = ( style.colorEdgeBy == EdgeColorMode.FIXED )
 				? style.edgeColor : edge.getColor();
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
 				edgeColor, style.selectedEdgeColor,

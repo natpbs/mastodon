@@ -5,16 +5,16 @@ import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
+import org.mastodon.revised.ui.ColorMode.VertexColorMode;
 
 /**
  * A color generator for a branch graph based on a {@link TrackSchemeStyle} with
  * settings made for a graph.
  * <p>
  * This color generator simply catches style settings for
- * {@link ColorVertexBy#BRANCH_VERTEX} and {@link ColorEdgeBy#BRANCH_EDGE} and
- * generates color for the branch vertices and edges assuming they are plain
+ * {@link VertexColorMode#BRANCH_VERTEX} and {@link EdgeColorMode#BRANCH_EDGE}
+ * and generates color for the branch vertices and edges assuming they are plain
  * vertices and edges in the branch graph.
  * 
  * @author Jean-Yves Tinevez.

@@ -23,9 +23,9 @@ import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.AbstractTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.trackscheme.util.GeometryUtils;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
+import org.mastodon.revised.ui.ColorMode.VertexColorMode;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 
@@ -360,7 +360,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		final boolean selected = edge.isSelected();
 		final boolean ghost = vs.isGhost() && vt.isGhost();
 
-		final Color edgeColor = ( style.colorEdgeBy == ColorEdgeBy.FIXED )
+		final Color edgeColor = ( style.colorEdgeBy == EdgeColorMode.FIXED )
 				? style.edgeColor : edge.getColor();
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
 				edgeColor, style.selectedEdgeColor,
@@ -393,7 +393,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		if ( highlighted || focused )
 			spotradius *= 1.5;
 
-		final Color vertexFillColor = ( style.colorVertexBy == ColorVertexBy.FIXED )
+		final Color vertexFillColor = ( style.colorVertexBy == VertexColorMode.FIXED )
 				? style.simplifiedVertexFillColor : vertex.getColor();
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
 				disappear ? style.selectedSimplifiedVertexFillColor : vertexFillColor,
@@ -469,7 +469,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			spotdiameter *= ( 1 + ratio );
 		final double spotradius = spotdiameter / 2;
 
-		final Color vertexFillColor = ( style.colorVertexBy == ColorVertexBy.FIXED )
+		final Color vertexFillColor = ( style.colorVertexBy == VertexColorMode.FIXED )
 				? style.vertexFillColor : vertex.getColor();
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
 				vertexFillColor, style.selectedVertexFillColor,

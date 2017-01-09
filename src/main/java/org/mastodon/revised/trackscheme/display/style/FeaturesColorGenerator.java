@@ -7,9 +7,9 @@ import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorEdgeBy;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.ColorVertexBy;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
+import org.mastodon.revised.ui.ColorMode.VertexColorMode;
 import org.mastodon.revised.ui.EdgeColorGenerator;
 import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.util.ColorMap;
@@ -21,10 +21,10 @@ import org.mastodon.revised.ui.util.ColorMap;
  * This color generator can deal with vertex and edge features and attribute
  * them to vertices and edges. Interestingly, it can color a vertex using an
  * edge feature, and vice-versa, abiding to the different modes of
- * {@link ColorVertexBy} and {@link ColorEdgeBy}. This color generator does not
- * deal with the {@link ColorVertexBy#BRANCH_VERTEX},
- * {@link ColorVertexBy#BRANCH_EDGE}, {@link ColorEdgeBy#BRANCH_VERTEX} and
- * {@link ColorEdgeBy#BRANCH_EDGE} cases.
+ * {@link VertexColorMode} and {@link EdgeColorMode}. This color generator does
+ * not deal with the {@link VertexColorMode#BRANCH_VERTEX},
+ * {@link VertexColorMode#BRANCH_EDGE}, {@link EdgeColorMode#BRANCH_VERTEX} and
+ * {@link EdgeColorMode#BRANCH_EDGE} cases.
  *
  * @param <V>
  *            the type of vertices to color.
