@@ -75,6 +75,16 @@ public class RenderSettings implements ColorMode
 		spotHighlightStroke = settings.spotHighlightStroke;
 		linkStroke = settings.linkStroke;
 		linkHighlightStroke = settings.linkHighlightStroke;
+		vertexColorMode = settings.vertexColorMode;
+		vertexFeatureKey = settings.vertexFeatureKey;
+		vertexColorMap = settings.vertexColorMap;
+		minVertexColorRange = settings.minVertexColorRange;
+		maxVertexColorRange = settings.maxVertexColorRange;
+		edgeColorMode = settings.edgeColorMode;
+		edgeFeatureKey = settings.edgeFeatureKey;
+		edgeColorMap = settings.edgeColorMap;
+		minEdgeColorRange = settings.minEdgeColorRange;
+		maxEdgeColorRange = settings.maxEdgeColorRange;
 		notifyListeners();
 	}
 
