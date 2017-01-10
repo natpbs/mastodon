@@ -18,7 +18,7 @@ import org.yaml.snakeyaml.Yaml;
  * <p>
  * Has serialization / deserialization facilities and can return models based on
  * the collection it manages.
- * 
+ *
  * @author Jean-Yves Tinevez
  *
  */
@@ -82,7 +82,7 @@ public class TrackSchemeStyleManager
 
 	/**
 	 * Exposes the collection of styles managed.
-	 * 
+	 *
 	 * @return the collection of styles.
 	 */
 	public Vector< TrackSchemeStyle > getStyles()
@@ -100,7 +100,8 @@ public class TrackSchemeStyleManager
 			for ( final Object obj : objs )
 			{
 				final TrackSchemeStyle ts = ( TrackSchemeStyle ) obj;
-				tss.add( ts );
+				if ( null != ts )
+					tss.add( ts );
 			}
 
 		}
