@@ -13,6 +13,8 @@ import javax.swing.JPanel;
 import javax.swing.MutableComboBoxModel;
 
 import org.mastodon.revised.bdv.overlay.RenderSettings;
+import org.mastodon.revised.model.feature.FeatureKeys;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 
 /**
  * @author Jean=Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
@@ -29,13 +31,17 @@ public class RenderSettingsChooser
 
 	private final RenderSettingsManager renderSettingsManager;
 
-	public RenderSettingsChooser( final JFrame owner, final RenderSettingsManager renderSettingsManager )
+	public RenderSettingsChooser( final JFrame owner, final RenderSettingsManager renderSettingsManager,
+			final FeatureKeys graphFeatureKeys, final FeatureRangeCalculator graphFeatureRangeCalculator,
+			final FeatureKeys branchGraphFeatureKeys, final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 		this.renderSettingsManager = renderSettingsManager;
 		// Give the choose its own render settings instance.
 		this.targetSettings = RenderSettings.defaultStyle().copy( RenderSettings.defaultStyle().getName() );
 		this.model = new DefaultComboBoxModel<>( renderSettingsManager.getRenderSettings() );
-		panel = new RenderSettingsPanel( owner, model, targetSettings );
+		panel = new RenderSettingsPanel( owner, model, targetSettings,
+				graphFeatureKeys, graphFeatureRangeCalculator,
+				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 		panel.buttonDeleteStyle.addActionListener( new ActionListener()
 		{
 			@Override

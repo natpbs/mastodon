@@ -23,6 +23,8 @@ import javax.swing.border.EmptyBorder;
 
 import org.mastodon.revised.bdv.overlay.RenderSettings;
 import org.mastodon.revised.bdv.overlay.RenderSettings.UpdateListener;
+import org.mastodon.revised.model.feature.FeatureKeys;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 
 /**
  * An editor and manager for BDV RenderSettings.
@@ -46,14 +48,18 @@ class RenderSettingsPanel extends JPanel
 
 	JComboBox< RenderSettings > comboBoxStyles;
 
-	public RenderSettingsPanel( final Frame owner, final MutableComboBoxModel< RenderSettings > model, final RenderSettings targetSettings )
+	public RenderSettingsPanel( final Frame owner, final MutableComboBoxModel< RenderSettings > model, final RenderSettings targetSettings,
+			final FeatureKeys graphFeatureKeys, final FeatureRangeCalculator graphFeatureRangeCalculator,
+			final FeatureKeys branchGraphFeatureKeys, final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 
 		final JPanel contentPanel = new JPanel();
 		contentPanel.setBorder( null );
 		final JPanel panelChooseStyle = new JPanel();
 		final JLabel jlabelTitle = new JLabel();
-		final RenderSettingsEditorPanel renderSettingsPanel = new RenderSettingsEditorPanel( targetSettings );
+		final RenderSettingsEditorPanel renderSettingsPanel = new RenderSettingsEditorPanel( targetSettings,
+				graphFeatureKeys, graphFeatureRangeCalculator,
+				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 
 		this.comboBoxStyles = new JComboBox<>( model );
 		// Update common render settings when a settings is chosen in the menu.

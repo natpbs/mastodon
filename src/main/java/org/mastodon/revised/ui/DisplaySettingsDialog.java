@@ -31,7 +31,10 @@ public class DisplaySettingsDialog extends JDialog
 		setLayout( new BorderLayout() );
 
 		// BDV display settings.
-		final RenderSettingsChooser bdvDisplaySettingsChooser = new RenderSettingsChooser( owner, renderSettingsManager );
+		final RenderSettingsChooser bdvDisplaySettingsChooser =
+				new RenderSettingsChooser( owner, renderSettingsManager,
+						graphFeatureKeys, graphFeatureRangeCalculator,
+						branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 
 		// TrackScheme display settings.
 		final TrackSchemeStyleChooser trackSchemeStyleChooser =

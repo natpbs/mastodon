@@ -30,6 +30,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.mastodon.revised.bdv.overlay.RenderSettings;
+import org.mastodon.revised.model.feature.FeatureKeys;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
+import org.mastodon.revised.ui.ColorMode.VertexColorMode;
+import org.mastodon.revised.ui.ColorModePicker;
 
 import bdv.tools.brightness.SliderPanel;
 import bdv.tools.brightness.SliderPanelDouble;
@@ -84,7 +89,9 @@ public class RenderSettingsEditorPanel extends JPanel
 
 	private final ArrayList< JButton > buttonList;
 
-	public RenderSettingsEditorPanel( final RenderSettings renderSettings )
+	public RenderSettingsEditorPanel( final RenderSettings renderSettings,
+			final FeatureKeys featureKeys, final FeatureRangeCalculator featureRangeCalculator,
+			final FeatureKeys branchGraphFeatureKeys, final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 		super( new GridBagLayout() );
 
@@ -96,8 +103,29 @@ public class RenderSettingsEditorPanel extends JPanel
 		c.gridwidth = 2;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.LINE_START;
-
 		c.fill = GridBagConstraints.HORIZONTAL;
+
+		// Color mode.
+		final JLabel title0 = new JLabel( "Vertex and edge color mode" );
+		title0.setFont( getFont().deriveFont( Font.BOLD ) );
+		title0.setHorizontalAlignment( SwingConstants.CENTER );
+		title0.setBorder( BorderFactory.createMatteBorder( 0, 0, 1, 0, Color.BLACK ) );
+		add( title0, c );
+
+		c.gridy++;
+		c.insets = new Insets( 5, 0, 0, 0 );
+		final ColorModePicker colorModePicker = new ColorModePicker( renderSettings,
+				featureKeys, featureRangeCalculator,
+				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
+		add( colorModePicker, c );
+
+		// Color and look.
+
+		c.gridy++;
+		c.insets = new Insets( 0, 0, 0, 0 );
+		add( Box.createVerticalStrut( 15 ), c );
+
+		c.gridy++;
 		final JLabel title1 = new JLabel( "Colors and look" );
 		title1.setFont( getFont().deriveFont( Font.BOLD ) );
 		title1.setHorizontalAlignment( SwingConstants.CENTER );
@@ -135,6 +163,7 @@ public class RenderSettingsEditorPanel extends JPanel
 
 		final List< ColorSetter > styleColors = styleColors( renderSettings );
 		buttonList = new ArrayList<>( styleColors.size() );
+		final List< JLabel > labelList = new ArrayList<>( styleColors.size() );
 
 		final JColorChooser colorChooser = new JColorChooser();
 
@@ -144,8 +173,11 @@ public class RenderSettingsEditorPanel extends JPanel
 			c.gridx = 0;
 			final JButton button = new JButton( new ColorIcon( colorSetter.getColor() ) );
 			buttonList.add( button );
+			button.setOpaque( false );
+			button.setContentAreaFilled( false );
+			button.setBorderPainted( false );
 			button.setMargin( new Insets( 0, 0, 0, 0 ) );
-			button.setBorder( new EmptyBorder( 2, 0, 2, 6 ) );
+			button.setBorder( new EmptyBorder( 2, 2, 2, 2 ) );
 			button.setHorizontalAlignment( SwingConstants.LEFT );
 			button.addActionListener( new ActionListener()
 			{
@@ -176,7 +208,9 @@ public class RenderSettingsEditorPanel extends JPanel
 
 			c.gridx = 1;
 			c.anchor = GridBagConstraints.LINE_START;
-			add( new JLabel( colorSetter.getLabel() ), c );
+			final JLabel l = new JLabel( colorSetter.getLabel() );
+			labelList.add( l );
+			add( l, c );
 
 			c.gridy++;
 
@@ -548,6 +582,21 @@ public class RenderSettingsEditorPanel extends JPanel
 		c.fill = GridBagConstraints.NONE;
 		add( new JLabel( "center point fade depth" ), c );
 
+		final ActionListener colorButtonMuter = new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				final boolean muteVertexStuff = ( renderSettings.getVertexColorMode() == VertexColorMode.FIXED );
+				final boolean muteEdgeStuff = ( renderSettings.getEdgeColorMode() == EdgeColorMode.FIXED );
+				buttonList.get( 0 ).setEnabled( muteEdgeStuff || muteVertexStuff );
+				buttonList.get( 1 ).setEnabled( muteEdgeStuff );
+				labelList.get( 0 ).setEnabled( muteEdgeStuff || muteVertexStuff );
+				labelList.get( 1 ).setEnabled( muteEdgeStuff );
+			}
+		};
+		colorModePicker.addActionListener( colorButtonMuter );
+
 		update();
 	}
 
@@ -555,6 +604,7 @@ public class RenderSettingsEditorPanel extends JPanel
 	{
 		synchronized ( renderSettings )
 		{
+
 			antialiasingBox.setSelected( renderSettings.getUseAntialiasing() );
 
 			buttonList.get( 0 ).setIcon( new ColorIcon( renderSettings.getLinkColor1() ) );
@@ -624,10 +674,7 @@ public class RenderSettingsEditorPanel extends JPanel
 			final Graphics2D g2d = ( Graphics2D ) g;
 			g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
 			g2d.setColor( color );
-			final RoundRectangle2D shape = new RoundRectangle2D.Float( x, y, size, size, 5, 5 );
-			g2d.fill( shape );
-			g2d.setColor( Color.BLACK );
-			g2d.draw( shape );
+			g2d.fill( new RoundRectangle2D.Float( x, y, size, size, 5, 5 ) );
 		}
 
 		@Override
