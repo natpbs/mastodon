@@ -14,6 +14,9 @@ import org.mastodon.revised.io.yaml.AbstractWorkaroundConstruct;
 import org.mastodon.revised.io.yaml.WorkaroundConstructor;
 import org.mastodon.revised.io.yaml.WorkaroundRepresent;
 import org.mastodon.revised.io.yaml.WorkaroundRepresenter;
+import org.mastodon.revised.ui.ColorModeIO;
+import org.mastodon.revised.ui.ColorModeIO.ColorModeConstructor;
+import org.mastodon.revised.ui.ColorModeIO.ColorModeRepresenter;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -27,7 +30,7 @@ public class RenderSettingsIO
 {
 	public static final Tag COLOR_TAG = new Tag( "!color" );
 
-	static class RenderSettingsRepresenter extends WorkaroundRepresenter
+	static class RenderSettingsRepresenter extends ColorModeRepresenter
 	{
 		public RenderSettingsRepresenter()
 		{
@@ -37,11 +40,11 @@ public class RenderSettingsIO
 		}
 	}
 
-	static class RenderSettingsConstructor extends WorkaroundConstructor
+	static class RenderSettingsConstructor extends ColorModeConstructor
 	{
 		public RenderSettingsConstructor()
 		{
-			super( Object.class );
+			super();
 			putConstruct( new ConstructColor( this ) );
 			putConstruct( new ConstructBasicStroke( this ) );
 			putConstruct( new ConstructStyle( this ) );
@@ -190,6 +193,10 @@ public class RenderSettingsIO
 			final Map< String, Object > mapping = new LinkedHashMap< >();
 
 			mapping.put( "name", s.getName() );
+
+			// Color mode
+			ColorModeIO.representData( mapping, s );
+
 			mapping.put( "antialiasing", s.getUseAntialiasing() );
 			mapping.put( "color1", s.getLinkColor1() );
 			mapping.put( "color2", s.getLinkColor2() );
@@ -235,6 +242,10 @@ public class RenderSettingsIO
 				final RenderSettings s = RenderSettings.defaultStyle().copy( name );
 
 				s.setName( ( String ) mapping.get( "name") );
+
+				// Color mode
+				ColorModeIO.construct( mapping, s );
+
 				s.setUseAntialiasing( ( boolean ) mapping.get( "antialiasing" ) );
 				s.setLinkColor1( ( Color ) mapping.get( "color1" ) );
 				s.setLinkColor2( ( Color ) mapping.get( "color2" ) );
