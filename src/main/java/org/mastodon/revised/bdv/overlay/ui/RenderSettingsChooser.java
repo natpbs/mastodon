@@ -25,7 +25,6 @@ public class RenderSettingsChooser
 
 	private final RenderSettingsPanel panel;
 
-	private final RenderSettings targetSettings;
 
 	private final MutableComboBoxModel< RenderSettings > model;
 
@@ -37,9 +36,8 @@ public class RenderSettingsChooser
 	{
 		this.renderSettingsManager = renderSettingsManager;
 		// Give the choose its own render settings instance.
-		this.targetSettings = RenderSettings.defaultStyle().copy( RenderSettings.defaultStyle().getName() );
 		this.model = new DefaultComboBoxModel<>( renderSettingsManager.getRenderSettings() );
-		panel = new RenderSettingsPanel( owner, model, targetSettings,
+		panel = new RenderSettingsPanel( owner, model,
 				graphFeatureKeys, graphFeatureRangeCalculator,
 				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 		panel.buttonDeleteStyle.addActionListener( new ActionListener()
@@ -128,10 +126,5 @@ public class RenderSettingsChooser
 	public JPanel getPanel()
 	{
 		return panel;
-	}
-
-	public RenderSettings getRenderSettings()
-	{
-		return targetSettings;
 	}
 }

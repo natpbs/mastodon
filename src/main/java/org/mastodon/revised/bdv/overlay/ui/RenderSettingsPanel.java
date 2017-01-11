@@ -48,7 +48,7 @@ class RenderSettingsPanel extends JPanel
 
 	JComboBox< RenderSettings > comboBoxStyles;
 
-	public RenderSettingsPanel( final Frame owner, final MutableComboBoxModel< RenderSettings > model, final RenderSettings targetSettings,
+	public RenderSettingsPanel( final Frame owner, final MutableComboBoxModel< RenderSettings > model,
 			final FeatureKeys graphFeatureKeys, final FeatureRangeCalculator graphFeatureRangeCalculator,
 			final FeatureKeys branchGraphFeatureKeys, final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
@@ -57,6 +57,7 @@ class RenderSettingsPanel extends JPanel
 		contentPanel.setBorder( null );
 		final JPanel panelChooseStyle = new JPanel();
 		final JLabel jlabelTitle = new JLabel();
+		final RenderSettings targetSettings = RenderSettings.defaultStyle().copy( "target" );
 		final RenderSettingsEditorPanel renderSettingsPanel = new RenderSettingsEditorPanel( targetSettings,
 				graphFeatureKeys, graphFeatureRangeCalculator,
 				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
@@ -69,8 +70,10 @@ class RenderSettingsPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				final RenderSettings rs = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
-				targetSettings.set( rs );
 				enableComponents( renderSettingsPanel, !RenderSettings.defaults.contains( rs ) );
+				// Copy settings selected in the list to the one edited in the
+				// editor.
+				targetSettings.set( rs );
 			}
 		} );
 		if ( model.getSize() > 0 )
@@ -79,10 +82,10 @@ class RenderSettingsPanel extends JPanel
 		// Update menu settings when the common render settings is changed.
 		targetSettings.addUpdateListener( new UpdateListener()
 		{
-
 			@Override
 			public void renderSettingsChanged()
 			{
+				// Copy edited settings to the one in the list, used elsewhere.
 				comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ).set( targetSettings );
 			}
 		} );

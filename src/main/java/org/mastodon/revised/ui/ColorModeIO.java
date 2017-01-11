@@ -55,8 +55,7 @@ public class ColorModeIO
 
 	public static void construct( final Map< Object, Object > mapping, final ColorMode colorMode )
 	{
-		colorMode.edgeColorMode( ( EdgeColorMode ) mapping.get( EDGE_COLOR_MODE_KEY ) );
-		colorMode.edgeColorFeatureKey( ( String ) mapping.get( EDGE_COLOR_FEATURE_KEY ) );
+		colorMode.edgeColorMode( ( EdgeColorMode ) mapping.get( EDGE_COLOR_MODE_KEY ), ( String ) mapping.get( EDGE_COLOR_FEATURE_KEY ) );
 		colorMode.edgeColorMap( ( ColorMap ) mapping.get( EDGE_COLORMAP_KEY ) );
 		@SuppressWarnings( "unchecked" )
 		final List< Double > edgeColorRange = ( List< Double > ) mapping.get( EDGE_COLOR_RANGE_KEY );
@@ -71,8 +70,7 @@ public class ColorModeIO
 			colorMode.maxEdgeColorRange( edgeColorRange.get( 1 ) );
 		}
 
-		colorMode.vertexColorMode( ( VertexColorMode ) mapping.get( VERTEX_COLOR_MODE_KEY ) );
-		colorMode.vertexColorFeatureKey( ( String ) mapping.get( VERTEX_COLOR_FEATURE_KEY ) );
+		colorMode.vertexColorMode( ( VertexColorMode ) mapping.get( VERTEX_COLOR_MODE_KEY ), ( String ) mapping.get( VERTEX_COLOR_FEATURE_KEY ) );
 		colorMode.vertexColorMap( ( ColorMap ) mapping.get( VERTEX_COLORMAP_KEY ) );
 		@SuppressWarnings( "unchecked" )
 		final List< Double > vertexColorRange = ( List< Double > ) mapping.get( VERTEX_COLOR_RANGE_KEY );

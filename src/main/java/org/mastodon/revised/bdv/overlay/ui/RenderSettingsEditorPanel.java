@@ -30,6 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import org.mastodon.revised.bdv.overlay.RenderSettings;
+import org.mastodon.revised.bdv.overlay.RenderSettings.UpdateListener;
 import org.mastodon.revised.model.feature.FeatureKeys;
 import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
@@ -41,7 +42,7 @@ import bdv.tools.brightness.SliderPanelDouble;
 import bdv.util.BoundedValue;
 import bdv.util.BoundedValueDouble;
 
-public class RenderSettingsEditorPanel extends JPanel
+public class RenderSettingsEditorPanel extends JPanel implements UpdateListener
 {
 	private static final long serialVersionUID = 1L;
 
@@ -87,15 +88,20 @@ public class RenderSettingsEditorPanel extends JPanel
 
 	private final SliderPanelDouble pointFadeDepthSlider;
 
-	private final ArrayList< JButton > buttonList;
+	private final List< JButton > buttonList;
+
+	private final List< JLabel > labelList;
+
+	private final ColorModePicker colorModePicker;
+
 
 	public RenderSettingsEditorPanel( final RenderSettings renderSettings,
 			final FeatureKeys featureKeys, final FeatureRangeCalculator featureRangeCalculator,
 			final FeatureKeys branchGraphFeatureKeys, final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
 		super( new GridBagLayout() );
-
 		this.renderSettings = renderSettings;
+		renderSettings.addUpdateListener( this );
 
 		final GridBagConstraints c = new GridBagConstraints();
 		c.insets = new Insets( 0, 5, 0, 5 );
@@ -114,9 +120,10 @@ public class RenderSettingsEditorPanel extends JPanel
 
 		c.gridy++;
 		c.insets = new Insets( 5, 0, 0, 0 );
-		final ColorModePicker colorModePicker = new ColorModePicker( renderSettings,
+		this.colorModePicker = new ColorModePicker( renderSettings,
 				featureKeys, featureRangeCalculator,
 				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
+		colorModePicker.setFont( colorModePicker.getFont().deriveFont( 11f ) );
 		add( colorModePicker, c );
 
 		// Color and look.
@@ -143,7 +150,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setUseAntialiasing( antialiasingBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -163,7 +169,7 @@ public class RenderSettingsEditorPanel extends JPanel
 
 		final List< ColorSetter > styleColors = styleColors( renderSettings );
 		buttonList = new ArrayList<>( styleColors.size() );
-		final List< JLabel > labelList = new ArrayList<>( styleColors.size() );
+		labelList = new ArrayList<>( styleColors.size() );
 
 		final JColorChooser colorChooser = new JColorChooser();
 
@@ -196,7 +202,6 @@ public class RenderSettingsEditorPanel extends JPanel
 								final ColorIcon ci = new ColorIcon( c );
 								button.setIcon( ci );
 								colorSetter.setColor( c );
-								renderSettings.notifyListeners();
 							}
 						}
 					}, null );
@@ -247,7 +252,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawLinks( linksBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -267,7 +271,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			{
 				super.setCurrentValue( value );
 				renderSettings.setTimeLimit( getCurrentValue() );
-				renderSettings.notifyListeners();
 			}
 		};
 		timeLimitSlider = new SliderPanel( null, timeLimit, 1 );
@@ -295,7 +298,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setUseGradient( gradientBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -313,7 +315,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawLinkArrows( arrowHeadBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -350,7 +351,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpots( spotsBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -369,7 +369,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawEllipsoidSliceIntersection( intersectionBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -388,7 +387,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawEllipsoidSliceProjection( projectionBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -407,7 +405,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpotCenters( centersBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -426,7 +423,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpotCentersForEllipses( centersForEllipsesBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -449,7 +445,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setDrawSpotLabels( drawSpotLabelsBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -490,7 +485,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			{
 				super.setCurrentValue( value );
 				renderSettings.setFocusLimit( getCurrentValue() );
-				renderSettings.notifyListeners();
 			}
 		};
 		focusLimitSlider = new SliderPanelDouble( null, focusLimit, 1 );
@@ -518,7 +512,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			public void actionPerformed( final ActionEvent e )
 			{
 				renderSettings.setFocusLimitViewRelative( focusLimitRelativeBox.isSelected() );
-				renderSettings.notifyListeners();
 			}
 		} );
 		c.anchor = GridBagConstraints.LINE_END;
@@ -536,7 +529,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			{
 				super.setCurrentValue( value );
 				renderSettings.setEllipsoidFadeDepth( getCurrentValue() );
-				renderSettings.notifyListeners();
 			}
 		};
 		ellipsoidFadeDepthSlider = new SliderPanelDouble( null, ellipsoidFadeDepth, 0.05 );
@@ -563,7 +555,6 @@ public class RenderSettingsEditorPanel extends JPanel
 			{
 				super.setCurrentValue( value );
 				renderSettings.setPointFadeDepth( getCurrentValue() );
-				renderSettings.notifyListeners();
 			}
 		};
 		pointFadeDepthSlider = new SliderPanelDouble( null, pointFadeDepth, 0.05 );
@@ -582,25 +573,10 @@ public class RenderSettingsEditorPanel extends JPanel
 		c.fill = GridBagConstraints.NONE;
 		add( new JLabel( "center point fade depth" ), c );
 
-		final ActionListener colorButtonMuter = new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				final boolean muteVertexStuff = ( renderSettings.getVertexColorMode() == VertexColorMode.FIXED );
-				final boolean muteEdgeStuff = ( renderSettings.getEdgeColorMode() == EdgeColorMode.FIXED );
-				buttonList.get( 0 ).setEnabled( muteEdgeStuff || muteVertexStuff );
-				buttonList.get( 1 ).setEnabled( muteEdgeStuff );
-				labelList.get( 0 ).setEnabled( muteEdgeStuff || muteVertexStuff );
-				labelList.get( 1 ).setEnabled( muteEdgeStuff );
-			}
-		};
-		colorModePicker.addActionListener( colorButtonMuter );
-
 		update();
 	}
 
-	protected void update()
+	private void update()
 	{
 		synchronized ( renderSettings )
 		{
@@ -627,6 +603,7 @@ public class RenderSettingsEditorPanel extends JPanel
 
 			ellipsoidFadeDepth.setCurrentValue( renderSettings.getEllipsoidFadeDepth() );
 			pointFadeDepth.setCurrentValue( renderSettings.getPointFadeDepth() );
+			colorModePicker.update();
 		}
 	}
 
@@ -718,5 +695,18 @@ public class RenderSettingsEditorPanel extends JPanel
 		public abstract Color getColor();
 
 		public abstract void setColor( Color c );
+	}
+
+	@Override
+	public void renderSettingsChanged()
+	{
+		update();
+
+		final boolean muteVertexStuff = ( renderSettings.getVertexColorMode() == VertexColorMode.FIXED );
+		final boolean muteEdgeStuff = ( renderSettings.getEdgeColorMode() == EdgeColorMode.FIXED );
+		buttonList.get( 0 ).setEnabled( muteEdgeStuff || muteVertexStuff );
+		buttonList.get( 1 ).setEnabled( muteEdgeStuff );
+		labelList.get( 0 ).setEnabled( muteEdgeStuff || muteVertexStuff );
+		labelList.get( 1 ).setEnabled( muteEdgeStuff );
 	}
 }

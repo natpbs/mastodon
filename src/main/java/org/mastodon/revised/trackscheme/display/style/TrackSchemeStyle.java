@@ -218,16 +218,18 @@ public class TrackSchemeStyle implements ColorMode
 	}
 
 	@Override
-	public TrackSchemeStyle edgeColorMode( final EdgeColorMode edgeColorMode )
+	public TrackSchemeStyle edgeColorMode( final EdgeColorMode edgeColorMode, final String featureKey )
 	{
 		colorEdgeBy = edgeColorMode;
+		edgeColorFeatureKey = featureKey;
 		return this;
 	}
 
 	@Override
-	public TrackSchemeStyle vertexColorMode( final VertexColorMode vertexColorMode )
+	public TrackSchemeStyle vertexColorMode( final VertexColorMode vertexColorMode, final String featureKey )
 	{
 		colorVertexBy = vertexColorMode;
+		vertexColorFeatureKey = featureKey;
 		return this;
 	}
 
@@ -242,20 +244,6 @@ public class TrackSchemeStyle implements ColorMode
 	public TrackSchemeStyle vertexColorMap( final ColorMap colorMap )
 	{
 		vertexColorMap = colorMap;
-		return this;
-	}
-
-	@Override
-	public TrackSchemeStyle edgeColorFeatureKey( final String key )
-	{
-		edgeColorFeatureKey = key;
-		return this;
-	}
-
-	@Override
-	public TrackSchemeStyle vertexColorFeatureKey( final String key )
-	{
-		vertexColorFeatureKey = key;
 		return this;
 	}
 
@@ -541,7 +529,6 @@ public class TrackSchemeStyle implements ColorMode
 
 	private final ArrayList< UpdateListener > updateListeners;
 
-	@Override
 	public void notifyListeners()
 	{
 		final ArrayList< UpdateListener > ul = new ArrayList<>( updateListeners );
@@ -595,16 +582,14 @@ public class TrackSchemeStyle implements ColorMode
 	{
 		final Color fill = new Color( 128, 255, 128 );
 		df = new TrackSchemeStyle().name( "Default" ).
-				vertexColorMode( VertexColorMode.FIXED ).
-				edgeColorFeatureKey( "" ).
-				vertexColorFeatureKey( "" ).
+				vertexColorMode( VertexColorMode.FIXED, "" ).
 				edgeColorMap( ColorMap.JET ).
 				vertexColorMap( ColorMap.JET ).
 				minEdgeColorRange( 0. ).
 				maxEdgeColorRange( 1. ).
 				minVertexColorRange( 0. ).
 				maxVertexColorRange( 1. ).
-				edgeColorMode( EdgeColorMode.FIXED ).
+				edgeColorMode( EdgeColorMode.FIXED, "" ).
 				backgroundColor( Color.LIGHT_GRAY ).
 				currentTimepointColor( new Color( 217, 217, 217 ) ).
 				vertexFillColor( Color.WHITE ).
@@ -655,10 +640,8 @@ public class TrackSchemeStyle implements ColorMode
 		final Color selfill = new Color( 255, 128, 128 );
 		final Color currenttp = new Color( 38, 175, 185 );
 		modern = new TrackSchemeStyle().name( "Modern" ).
-				edgeColorMode(  EdgeColorMode.FIXED ).
-				vertexColorMode( VertexColorMode.FIXED ).
-				edgeColorFeatureKey( "" ).
-				vertexColorFeatureKey( "" ).
+				edgeColorMode(  EdgeColorMode.FIXED, "" ).
+				vertexColorMode( VertexColorMode.FIXED, "" ).
 				edgeColorMap( ColorMap.JET ).
 				vertexColorMap( ColorMap.JET ).
 				minEdgeColorRange( 0. ).
@@ -716,10 +699,8 @@ public class TrackSchemeStyle implements ColorMode
 		final Color seldraw = new Color( 230, 245, 255 );
 		final Color seledge = new Color( 91, 137, 158 );
 		hmdyk = new TrackSchemeStyle().name( "Lorry" ).
-				edgeColorMode( EdgeColorMode.FIXED ).
-				vertexColorMode( VertexColorMode.FIXED ).
-				edgeColorFeatureKey( "" ).
-				vertexColorFeatureKey( "" ).
+				edgeColorMode( EdgeColorMode.FIXED, "" ).
+				vertexColorMode( VertexColorMode.FIXED, "" ).
 				edgeColorMap( ColorMap.JET ).
 				vertexColorMap( ColorMap.JET ).
 				minEdgeColorRange( 0. ).

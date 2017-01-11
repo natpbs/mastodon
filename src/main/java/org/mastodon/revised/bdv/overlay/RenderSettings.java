@@ -88,8 +88,7 @@ public class RenderSettings implements ColorMode
 		notifyListeners();
 	}
 
-	@Override
-	public void notifyListeners()
+	private void notifyListeners()
 	{
 		for ( final UpdateListener l : updateListeners )
 			l.renderSettingsChanged();
@@ -305,7 +304,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setUseAntialiasing( final boolean useAntialiasing )
 	{
-		this.useAntialiasing = useAntialiasing;
+		if ( this.useAntialiasing != useAntialiasing )
+		{
+			this.useAntialiasing = useAntialiasing;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -331,7 +334,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setUseGradient( final boolean useGradient )
 	{
-		this.useGradient = useGradient;
+		if ( this.useGradient != useGradient )
+		{
+			this.useGradient = useGradient;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -354,7 +361,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setTimeLimit( final int timeLimit )
 	{
-		this.timeLimit = timeLimit;
+		if ( this.timeLimit != timeLimit )
+		{
+			this.timeLimit = timeLimit;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -377,7 +388,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setDrawLinks( final boolean drawLinks )
 	{
-		this.drawLinks = drawLinks;
+		if ( this.drawLinks != drawLinks )
+		{
+			this.drawLinks = drawLinks;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -398,7 +413,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setDrawLinkArrows( final boolean drawLinkArrows )
 	{
-		this.drawLinkArrows = drawLinkArrows;
+		if ( this.drawLinkArrows != drawLinkArrows )
+		{
+			this.drawLinkArrows = drawLinkArrows;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -421,7 +440,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setLinkColor1( final Color color1 )
 	{
-		this.color1 = color1;
+		if ( this.color1 != color1 )
+		{
+			this.color1 = color1;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -444,7 +467,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setLinkColor2( final Color color2 )
 	{
-		this.color2 = color2;
+		if ( this.color2 != color2 )
+		{
+			this.color2 = color2;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -465,7 +492,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setLinkStroke( final Stroke linkStroke )
 	{
-		this.linkStroke = linkStroke;
+		if ( this.linkStroke != linkStroke )
+		{
+			this.linkStroke = linkStroke;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -486,7 +517,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setLinkHighlightStroke( final Stroke linkHighlightStroke )
 	{
-		this.linkHighlightStroke = linkHighlightStroke;
+		if ( this.linkHighlightStroke != linkHighlightStroke )
+		{
+			this.linkHighlightStroke = linkHighlightStroke;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -527,7 +562,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setDrawSpots( final boolean drawSpots )
 	{
-		this.drawSpots = drawSpots;
+		if ( this.drawSpots != drawSpots )
+		{
+			this.drawSpots = drawSpots;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -552,7 +591,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setDrawEllipsoidSliceProjection( final boolean drawEllipsoidSliceProjection )
 	{
-		this.drawEllipsoidSliceProjection = drawEllipsoidSliceProjection;
+		if ( this.drawEllipsoidSliceProjection != drawEllipsoidSliceProjection )
+		{
+			this.drawEllipsoidSliceProjection = drawEllipsoidSliceProjection;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -577,7 +620,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setDrawEllipsoidSliceIntersection( final boolean drawEllipsoidSliceIntersection )
 	{
-		this.drawEllipsoidSliceIntersection = drawEllipsoidSliceIntersection;
+		if ( this.drawEllipsoidSliceIntersection != drawEllipsoidSliceIntersection )
+		{
+			this.drawEllipsoidSliceIntersection = drawEllipsoidSliceIntersection;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -606,7 +653,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setDrawSpotCenters( final boolean drawPoints )
 	{
-		this.drawPoints = drawPoints;
+		if ( this.drawPoints != drawPoints )
+		{
+			this.drawPoints = drawPoints;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -631,7 +682,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setDrawSpotCentersForEllipses( final boolean drawPointsForEllipses )
 	{
-		this.drawPointsForEllipses = drawPointsForEllipses;
+		if ( this.drawPointsForEllipses != drawPointsForEllipses )
+		{
+			this.drawPointsForEllipses = drawPointsForEllipses;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -652,7 +707,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public void setDrawSpotLabels( final boolean drawSpotLabels )
 	{
-		this.drawSpotLabels = drawSpotLabels;
+		if ( this.drawSpotLabels != drawSpotLabels )
+		{
+			this.drawSpotLabels = drawSpotLabels;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -673,7 +732,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setSpotStroke( final Stroke spotStroke )
 	{
-		this.spotStroke = spotStroke;
+		if ( this.spotStroke != spotStroke )
+		{
+			this.spotStroke = spotStroke;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -694,7 +757,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setSpotFocusStroke( final Stroke spotFocusStroke )
 	{
-		this.spotFocusStroke = spotFocusStroke;
+		if ( this.spotFocusStroke != spotFocusStroke )
+		{
+			this.spotFocusStroke = spotFocusStroke;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -715,7 +782,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setSpotHighlightStroke( final Stroke spotHighlightStroke )
 	{
-		this.spotHighlightStroke = spotHighlightStroke;
+		if ( this.spotHighlightStroke != spotHighlightStroke )
+		{
+			this.spotHighlightStroke = spotHighlightStroke;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -753,7 +824,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setFocusLimit( final double focusLimit )
 	{
-		this.focusLimit = focusLimit;
+		if ( this.focusLimit != focusLimit )
+		{
+			this.focusLimit = focusLimit;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -785,7 +860,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setFocusLimitViewRelative( final boolean isFocusLimitViewRelative )
 	{
-		this.isFocusLimitViewRelative = isFocusLimitViewRelative;
+		if ( this.isFocusLimitViewRelative != isFocusLimitViewRelative )
+		{
+			this.isFocusLimitViewRelative = isFocusLimitViewRelative;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -812,7 +891,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setEllipsoidFadeDepth( final double ellipsoidFadeDepth )
 	{
-		this.ellipsoidFadeDepth = ellipsoidFadeDepth;
+		if ( this.ellipsoidFadeDepth != ellipsoidFadeDepth )
+		{
+			this.ellipsoidFadeDepth = ellipsoidFadeDepth;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -839,7 +922,11 @@ public class RenderSettings implements ColorMode
 	 */
 	public synchronized void setPointFadeDepth( final double pointFadeDepth )
 	{
-		this.pointFadeDepth = pointFadeDepth;
+		if ( this.pointFadeDepth != pointFadeDepth )
+		{
+			this.pointFadeDepth = pointFadeDepth;
+			notifyListeners();
+		}
 	}
 
 	/**
@@ -860,23 +947,14 @@ public class RenderSettings implements ColorMode
 	 */
 	public void setName( final String name )
 	{
-		this.name = name;
+		if ( this.name != name )
+		{
+			this.name = name;
+			notifyListeners();
+		}
 	}
 
 
-	@Override
-	public RenderSettings edgeColorMode( final EdgeColorMode edgeColorMode )
-	{
-		this.edgeColorMode = edgeColorMode;
-		return this;
-	}
-
-	@Override
-	public RenderSettings vertexColorMode( final VertexColorMode vertexColorMode )
-	{
-		this.vertexColorMode = vertexColorMode;
-		return this;
-	}
 
 	@Override
 	public VertexColorMode getVertexColorMode()
@@ -941,56 +1019,66 @@ public class RenderSettings implements ColorMode
 	@Override
 	public RenderSettings edgeColorMap( final ColorMap colorMap )
 	{
-		this.edgeColorMap = colorMap;
+		if ( this.edgeColorMap != colorMap )
+		{
+			this.edgeColorMap = colorMap;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public RenderSettings vertexColorMap( final ColorMap colorMap )
 	{
-		this.vertexColorMap = colorMap;
-		return this;
-	}
-
-	@Override
-	public RenderSettings edgeColorFeatureKey( final String key )
-	{
-		this.edgeFeatureKey = key;
-		return this;
-	}
-
-	@Override
-	public RenderSettings vertexColorFeatureKey( final String key )
-	{
-		this.vertexFeatureKey = key;
+		if ( this.vertexColorMap != colorMap )
+		{
+			this.vertexColorMap = colorMap;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public RenderSettings minEdgeColorRange( final double val )
 	{
-		this.minEdgeColorRange = val;
+		if ( this.minEdgeColorRange != val )
+		{
+			this.minEdgeColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public RenderSettings maxEdgeColorRange( final double val )
 	{
-		this.maxEdgeColorRange = val;
+		if ( this.maxEdgeColorRange != val )
+		{
+			this.maxEdgeColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public RenderSettings minVertexColorRange( final double val )
 	{
-		this.minVertexColorRange = val;
+		if ( this.minVertexColorRange != val )
+		{
+			this.minVertexColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public RenderSettings maxVertexColorRange( final double val )
 	{
-		this.maxVertexColorRange = val;
+		if ( this.maxVertexColorRange != val )
+		{
+			this.maxVertexColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
@@ -1092,5 +1180,29 @@ public class RenderSettings implements ColorMode
 	public static RenderSettings defaultStyle()
 	{
 		return df;
+	}
+
+	@Override
+	public ColorMode edgeColorMode( final EdgeColorMode edgeColorMode, final String featureKey )
+	{
+		if ( this.edgeColorMode != edgeColorMode || this.edgeFeatureKey != featureKey )
+		{
+			this.edgeColorMode = edgeColorMode;
+			this.edgeFeatureKey = featureKey;
+			notifyListeners();
+		}
+		return this;
+	}
+
+	@Override
+	public ColorMode vertexColorMode( final VertexColorMode vertexColorMode, final String featureKey )
+	{
+		if ( this.vertexColorMode != vertexColorMode || this.vertexFeatureKey != featureKey )
+		{
+			this.vertexColorMode = vertexColorMode;
+			this.vertexFeatureKey = featureKey;
+			notifyListeners();
+		}
+		return this;
 	}
 }

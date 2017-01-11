@@ -43,17 +43,13 @@ public interface ColorMode
 	 * Setters.
 	 */
 
-	public ColorMode edgeColorMode( final EdgeColorMode edgeColorMode );
+	public ColorMode edgeColorMode( final EdgeColorMode edgeColorMode, final String featureKey );
 
-	public ColorMode vertexColorMode( final VertexColorMode vertexColorMode );
+	public ColorMode vertexColorMode( final VertexColorMode vertexColorMode, final String featureKey );
 
 	public ColorMode edgeColorMap( final ColorMap colorMap );
 
 	public ColorMode vertexColorMap( final ColorMap colorMap );
-
-	public ColorMode edgeColorFeatureKey( final String key );
-
-	public ColorMode vertexColorFeatureKey( final String key );
 
 	public ColorMode minEdgeColorRange( final double val );
 
@@ -67,6 +63,6 @@ public interface ColorMode
 	 * Listeners.
 	 */
 
-	public void notifyListeners();
+//	public void notifyListeners();
 
 }

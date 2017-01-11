@@ -28,6 +28,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.mastodon.revised.model.feature.FeatureKeys;
 import org.mastodon.revised.model.feature.FeatureRangeCalculator;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
 import org.mastodon.revised.ui.ColorMode.VertexColorMode;
 import org.mastodon.revised.ui.ColorModePicker;
@@ -180,10 +181,10 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 			c.gridy++;
 		}
 
-		final ActionListener colorButtonMuter = new ActionListener()
+		final UpdateListener colorButtonMuter = new UpdateListener()
 		{
 			@Override
-			public void actionPerformed( final ActionEvent e )
+			public void trackSchemeStyleChanged()
 			{
 				final boolean muteVertexStuff = ( style.colorVertexBy == VertexColorMode.FIXED );
 				for ( final JButton jb : vertexColorButtonToMute )
@@ -195,7 +196,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 			}
 		};
-		colorModeUI.addActionListener( colorButtonMuter );
+		style.addUpdateListener( colorButtonMuter );
 	}
 
 	@Override
