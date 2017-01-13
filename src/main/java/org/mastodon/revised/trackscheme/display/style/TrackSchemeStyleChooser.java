@@ -111,6 +111,7 @@ public class TrackSchemeStyleChooser
 				"Style name",
 				JOptionPane.PLAIN_MESSAGE, null, null, current.getName() );
 		current.name( newName );
+		panel.repaint();
 	}
 
 	private void newStyle()
