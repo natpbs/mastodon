@@ -117,22 +117,22 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		final double minY = screenTransform.getMinY();
 		final double maxY = screenTransform.getMaxY();
 
-		g2.setColor( style.backgroundColor );
+		g2.setColor( style.getBackgroundColor() );
 		g2.fillRect( 0, 0, width, height );
 
-		if ( style.highlightCurrentTimepoint )
+		if ( style.isHighlightCurrentTimepoint() )
 		{
 			final double t = getCurrentTimepoint();
 			final int y = ( int ) Math.round( yScale * ( t - minY - 0.5 ) ) + headerHeight;
 			final int h = Math.max( 1, ( int ) Math.round( yScale ) );
-			g2.setColor( style.currentTimepointColor );
+			g2.setColor( style.getCurrentTimepointColor() );
 			g2.fillRect( 0, y, width, h );
 		}
 
-		if ( style.paintRows )
+		if ( style.isPaintRows() )
 		{
-			g2.setColor( style.decorationColor );
-			g2.setStroke( style.decorationStroke );
+			g2.setColor( style.getDecorationColor() );
+			g2.setStroke( style.getDecorationStroke() );
 
 			final int stepT = 1 + MIN_TIMELINE_SPACING / ( int ) ( 1 + yScale );
 
@@ -152,10 +152,10 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			g2.drawLine( 0, yline, width, yline );
 		}
 
-		if ( style.paintColumns )
+		if ( style.isPaintColumns() )
 		{
-			g2.setColor( style.decorationColor );
-			g2.setStroke( style.decorationStroke );
+			g2.setColor( style.getDecorationColor() );
+			g2.setStroke( style.getDecorationStroke() );
 
 			for ( final ScreenColumn column : screenEntities.getColumns() )
 			{
@@ -179,10 +179,10 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 		if ( isHeaderVisibleX )
 		{
-			g2.setColor( style.headerBackgroundColor );
+			g2.setColor( style.getHeaderBackgroundColor() );
 			g2.fillRect( 0, headerHeight, headerWidth, height - headerHeight );
 
-			if ( style.paintHeaderShadow )
+			if ( style.isPaintHeaderShadow() )
 			{
 				for ( int i = 0; i < shadowColors.length; ++i )
 				{
@@ -191,18 +191,18 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 				}
 			}
 
-			if ( style.highlightCurrentTimepoint )
+			if ( style.isHighlightCurrentTimepoint() )
 			{
 				final double t = getCurrentTimepoint();
 				final int y = ( int ) Math.round( yScale * ( t - minY - 0.5 ) ) + headerHeight;
 				final int h = Math.max( 1, ( int ) Math.round( yScale ) );
-				g2.setColor( style.headerCurrentTimepointColor );
+				g2.setColor( style.getHeaderCurrentTimepointColor() );
 				g2.fillRect( 0, y, headerWidth, h );
 			}
 
-			g2.setColor( style.headerDecorationColor );
-			final FontMetrics fm = g2.getFontMetrics( style.headerFont );
-			g2.setFont( style.headerFont );
+			g2.setColor( style.getHeaderDecorationColor() );
+			final FontMetrics fm = g2.getFontMetrics( style.getHeaderFont() );
+			g2.setFont( style.getHeaderFont() );
 
 			final int fontHeight = fm.getHeight();
 			final int fontInc = fontHeight / 2;
@@ -213,7 +213,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			int tend = Math.min( getMaxTimepoint(), 1 + ( int ) maxY );
 			tend = ( 1 + tend / stepT ) * stepT;
 
-			g2.setStroke( style.decorationStroke );
+			g2.setStroke( style.getDecorationStroke() );
 			for ( int t = tstart; t <= tend; t = t + stepT )
 			{
 				final int yline = ( int ) ( ( t - minY - 0.5 ) * yScale ) + headerHeight;
@@ -228,10 +228,10 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 		if ( isHeaderVisibleY )
 		{
-			g2.setColor( style.headerBackgroundColor );
+			g2.setColor( style.getHeaderBackgroundColor() );
 			g2.fillRect( headerWidth, 0, width - headerWidth, headerHeight );
 
-			if ( style.paintHeaderShadow )
+			if ( style.isPaintHeaderShadow() )
 			{
 				for ( int i = 0; i < shadowColors.length; ++i )
 				{
@@ -240,11 +240,11 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 				}
 			}
 
-			g2.setColor( style.headerDecorationColor );
-			final FontMetrics fm = g2.getFontMetrics( style.headerFont );
-			g2.setFont( style.headerFont );
+			g2.setColor( style.getHeaderDecorationColor() );
+			final FontMetrics fm = g2.getFontMetrics( style.getHeaderFont() );
+			g2.setFont( style.getHeaderFont() );
 
-			g2.setStroke( style.decorationStroke );
+			g2.setStroke( style.getDecorationStroke() );
 			for ( final ScreenColumn column : screenEntities.getColumns() )
 			{
 				g2.drawLine( column.xLeft, 0, column.xLeft, headerHeight );
@@ -266,7 +266,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 		if ( isHeaderVisibleX && isHeaderVisibleY )
 		{
-			g2.setColor( style.headerBackgroundColor );
+			g2.setColor( style.getHeaderBackgroundColor() );
 			g2.fillRect( 0, 0, headerWidth, headerHeight );
 		}
 	}
@@ -274,7 +274,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 	@Override
 	protected void beforeDrawVertex( final Graphics2D g2 )
 	{
-		g2.setStroke( style.vertexStroke );
+		g2.setStroke( style.getVertexStroke() );
 	}
 
 	@Override
@@ -322,7 +322,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 	@Override
 	protected void beforeDrawVertexRange( final Graphics2D g2 )
 	{
-		g2.setColor( style.vertexRangeColor );
+		g2.setColor( style.getVertexRangeColor() );
 	}
 
 	@Override
@@ -338,7 +338,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 	@Override
 	public void beforeDrawEdge( final Graphics2D g2 )
 	{
-		g2.setStroke( style.edgeStroke );
+		g2.setStroke( style.getEdgeStroke() );
 	}
 
 	@Override
@@ -360,19 +360,19 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		final boolean selected = edge.isSelected();
 		final boolean ghost = vs.isGhost() && vt.isGhost();
 
-		final Color edgeColor = ( style.colorEdgeBy == EdgeColorMode.FIXED )
-				? style.edgeColor : edge.getColor();
+		final Color edgeColor = ( style.getEdgeColorMode() == EdgeColorMode.FIXED )
+				? style.getEdgeColor() : edge.getColor();
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
-				edgeColor, style.selectedEdgeColor,
-				style.ghostEdgeColor, style.ghostSelectedEdgeColor );
+				edgeColor, style.getSelectedEdgeColor(),
+				style.getGhostEdgeColor(), style.getGhostSelectedEdgeColor() );
 		g2.setColor( drawColor );
 		if ( highlighted )
-			g2.setStroke( style.edgeHighlightStroke );
+			g2.setStroke( style.getEdgeHighlightStroke() );
 		else if ( ghost )
-			g2.setStroke( style.edgeGhostStroke );
+			g2.setStroke( style.getEdgeGhostStroke() );
 		g2.drawLine( ( int ) vs.getX(), ( int ) vs.getY(), ( int ) vt.getX(), ( int ) vt.getY() );
 		if ( highlighted || ghost )
-			g2.setStroke( style.edgeStroke );
+			g2.setStroke( style.getEdgeStroke() );
 	}
 
 	protected void drawVertexSimplified( final Graphics2D g2, final ScreenVertex vertex )
@@ -393,13 +393,13 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 		if ( highlighted || focused )
 			spotradius *= 1.5;
 
-		final Color vertexFillColor = ( style.colorVertexBy == VertexColorMode.FIXED )
-				? style.simplifiedVertexFillColor : vertex.getColor();
+		final Color vertexFillColor = ( style.getVertexColorMode() == VertexColorMode.FIXED )
+				? style.getSimplifiedVertexFillColor() : vertex.getColor();
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
-				disappear ? style.selectedSimplifiedVertexFillColor : vertexFillColor,
-				style.selectedSimplifiedVertexFillColor,
-				disappear ? style.ghostSelectedSimplifiedVertexFillColor :  style.ghostSimplifiedVertexFillColor,
-				style.ghostSelectedSimplifiedVertexFillColor );
+				disappear ? style.getSelectedSimplifiedVertexFillColor() : vertexFillColor,
+				style.getSelectedSimplifiedVertexFillColor(),
+				disappear ? style.getGhostSelectedSimplifiedVertexFillColor() : style.getGhostSimplifiedVertexFillColor(),
+				style.getGhostSelectedSimplifiedVertexFillColor() );
 
 		final double x = vertex.getX();
 		final double y = vertex.getY();
@@ -432,10 +432,10 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 				spotradius *= ( 1 + 3 * ratio );
 
 			final Color fillColor = getColor( selected, ghost, transition, ratio,
-					disappear ? style.selectedSimplifiedVertexFillColor : style.simplifiedVertexFillColor,
-					style.selectedSimplifiedVertexFillColor,
-					disappear ? style.ghostSelectedSimplifiedVertexFillColor : style.ghostSimplifiedVertexFillColor,
-					style.ghostSelectedSimplifiedVertexFillColor );
+					disappear ? style.getSelectedSimplifiedVertexFillColor() : style.getSimplifiedVertexFillColor(),
+					style.getSelectedSimplifiedVertexFillColor(),
+					disappear ? style.getGhostSelectedSimplifiedVertexFillColor() : style.getGhostSimplifiedVertexFillColor(),
+					style.getGhostSelectedSimplifiedVertexFillColor() );
 
 			final double x = vertex.getX();
 			final double y = vertex.getY();
@@ -469,14 +469,14 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			spotdiameter *= ( 1 + ratio );
 		final double spotradius = spotdiameter / 2;
 
-		final Color vertexFillColor = ( style.colorVertexBy == VertexColorMode.FIXED )
-				? style.vertexFillColor : vertex.getColor();
+		final Color vertexFillColor = ( style.getVertexColorMode() == VertexColorMode.FIXED )
+				? style.getVertexFillColor() : vertex.getColor();
 		final Color fillColor = getColor( selected, ghost, transition, ratio,
-				vertexFillColor, style.selectedVertexFillColor,
-				style.ghostVertexFillColor, style.ghostSelectedVertexFillColor );
+				vertexFillColor, style.getSelectedVertexFillColor(),
+				style.getGhostVertexFillColor(), style.getGhostSelectedVertexFillColor() );
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
-				style.vertexDrawColor, style.selectedVertexDrawColor,
-				style.ghostVertexDrawColor, style.ghostSelectedVertexDrawColor );
+				style.getVertexDrawColor(), style.getSelectedVertexDrawColor(),
+				style.getGhostVertexDrawColor(), style.getGhostSelectedVertexDrawColor() );
 
 		final double x = vertex.getX();
 		final double y = vertex.getY();
@@ -488,15 +488,15 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 
 		g2.setColor( drawColor );
 		if ( highlighted )
-			g2.setStroke( style.vertexHighlightStroke );
+			g2.setStroke( style.getVertexHighlightStroke() );
 		else if ( focused )
 			// An animation might be better for the focus, but for now this is it.
-			g2.setStroke( style.focusStroke );
+			g2.setStroke( style.getFocusStroke() );
 		else if ( ghost )
-			g2.setStroke( style.vertexGhostStroke );
+			g2.setStroke( style.getVertexGhostStroke() );
 		g2.drawOval( ox, oy, sd, sd );
 		if ( highlighted || focused || ghost )
-			g2.setStroke( style.vertexStroke );
+			g2.setStroke( style.getVertexStroke() );
 
 		final int maxLabelLength = ( int ) ( spotdiameter / avgLabelLetterWidth );
 		if ( maxLabelLength > 2 && !disappear )
@@ -508,7 +508,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 			if ( ! label.isEmpty() )
 			{
 				final FontRenderContext frc = g2.getFontRenderContext();
-				final TextLayout layout = new TextLayout( label, style.font, frc );
+				final TextLayout layout = new TextLayout( label, style.getFont(), frc );
 				final Rectangle2D bounds = layout.getBounds();
 				final float tx = ( float ) ( x - bounds.getCenterX() );
 				final float ty = ( float ) ( y - bounds.getCenterY() );
@@ -552,7 +552,7 @@ public class DefaultTrackSchemeOverlay extends AbstractTrackSchemeOverlay
 				a = ( int ) ( a * ( 1 - ratio ) );
 			final Color color = new Color( r, g, b, a );
 			return isGhost
-					? TrackSchemeStyle.mixGhostColor( color, style.backgroundColor )
+					? TrackSchemeStyle.mixGhostColor( color, style.getBackgroundColor() )
 					: color;
 		}
 	}

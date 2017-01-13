@@ -61,38 +61,38 @@ public class FeaturesColorGeneratorBranchFeatures<
 	public void trackSchemeStyleChanged()
 	{
 		super.trackSchemeStyleChanged();
-		switch ( style.colorVertexBy )
+		switch ( style.getVertexColorMode() )
 		{
 		case BRANCH_VERTEX:
 		{
-			final FeatureProjection< BV > vfp = branchFeatures.getVertexProjection( style.vertexColorFeatureKey );
-			vertexColorGenerator = new BranchVertexVertexColorGenerator( vfp, style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
+			final FeatureProjection< BV > vfp = branchFeatures.getVertexProjection( style.getVertexFeatureKey() );
+			vertexColorGenerator = new BranchVertexVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
 			break;
 		}
 		case BRANCH_EDGE:
 		{
-			final FeatureProjection< BE > vfp = branchFeatures.getEdgeProjection( style.vertexColorFeatureKey );
-			vertexColorGenerator = new BranchEdgeVertexColorGenerator( vfp, style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
+			final FeatureProjection< BE > vfp = branchFeatures.getEdgeProjection( style.getVertexFeatureKey() );
+			vertexColorGenerator = new BranchEdgeVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
 			break;
 		}
 		default:
 			break;
 		}
 
-		switch ( style.colorEdgeBy )
+		switch ( style.getEdgeColorMode() )
 		{
 		default:
 			break;
 		case BRANCH_EDGE:
 		{
-			final FeatureProjection< BE > efp = branchFeatures.getEdgeProjection( style.edgeColorFeatureKey );
-			edgeColorGenerator = new BranchEdgeEdgeColorGenerator( efp, style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
+			final FeatureProjection< BE > efp = branchFeatures.getEdgeProjection( style.getEdgeFeatureKey() );
+			edgeColorGenerator = new BranchEdgeEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
 			break;
 		}
 		case BRANCH_VERTEX:
 		{
-			final FeatureProjection< BV > efp = branchFeatures.getVertexProjection( style.edgeColorFeatureKey );
-			edgeColorGenerator = new BranchVertexEdgeColorGenerator( efp, style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
+			final FeatureProjection< BV > efp = branchFeatures.getVertexProjection( style.getEdgeFeatureKey() );
+			edgeColorGenerator = new BranchVertexEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
 			break;
 		}
 		}

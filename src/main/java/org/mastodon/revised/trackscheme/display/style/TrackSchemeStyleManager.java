@@ -47,7 +47,7 @@ public class TrackSchemeStyleManager
 		if ( null == current )
 			current = TrackSchemeStyle.defaultStyle();
 
-		final String name = current.name;
+		final String name = current.getName();
 		final Pattern pattern = Pattern.compile( "(.+) \\((\\d+)\\)$" );
 		final Matcher matcher = pattern.matcher( name );
 		int n;
@@ -69,7 +69,7 @@ public class TrackSchemeStyleManager
 			newName = prefix + " (" + ( ++n ) + ")";
 			for ( int j = 0; j < tss.size(); j++ )
 			{
-				if ( tss.get( j ).name.equals( newName ) )
+				if ( tss.get( j ).getName().equals( newName ) )
 					continue INCREMENT;
 			}
 			break;

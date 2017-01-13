@@ -16,8 +16,8 @@ public class DefaultColorGenerator implements VertexColorGenerator< TrackSchemeV
 
 	public DefaultColorGenerator()
 	{
-		vertexColor = TrackSchemeStyle.defaultStyle().vertexFillColor;
-		edgeColor = TrackSchemeStyle.defaultStyle().edgeColor;
+		vertexColor = TrackSchemeStyle.defaultStyle().getVertexFillColor();
+		edgeColor = TrackSchemeStyle.defaultStyle().getEdgeColor();
 	}
 
 	@Override

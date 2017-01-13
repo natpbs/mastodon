@@ -23,11 +23,11 @@ public class TrackSchemeStyleAction extends AbstractNamedAction
 
 	private final DefaultTrackSchemeOverlay overlay;
 
-	private final FeaturesColorGenerator colorGenerator;
+	private final FeaturesColorGenerator< ?, ? > colorGenerator;
 
-	public TrackSchemeStyleAction( final TrackSchemeStyle style, final DefaultTrackSchemeOverlay overlay, final UpdateListener panelRepainter, final FeaturesColorGenerator colorGenerator )
+	public TrackSchemeStyleAction( final TrackSchemeStyle style, final DefaultTrackSchemeOverlay overlay, final UpdateListener panelRepainter, final FeaturesColorGenerator< ?, ? > colorGenerator )
 	{
-		super( style.name );
+		super( style.getName() );
 		this.style = style;
 		this.overlay = overlay;
 		this.panelRepainter = panelRepainter;

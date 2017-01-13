@@ -1187,7 +1187,7 @@ public class WindowManager
 					{
 						// Forbid styles that do not work for branch graph.
 						final TrackSchemeStyle style = overlay.getStyle();
-						switch ( style.colorVertexBy )
+						switch ( style.getVertexColorMode() )
 						{
 						case BRANCH_EDGE:
 						case BRANCH_VERTEX:
@@ -1198,7 +1198,7 @@ public class WindowManager
 							colorGenerator.setStyle( TrackSchemeStyle.defaultStyle() );
 							break;
 						}
-						switch ( style.colorEdgeBy )
+						switch ( style.getEdgeColorMode() )
 						{
 						case BRANCH_VERTEX:
 						case BRANCH_EDGE:
@@ -1228,7 +1228,7 @@ public class WindowManager
 						// Branch graph cannot get styles not set to a branch feature.
 						if (isBranchGraph )
 						{
-							switch(style.colorVertexBy)
+							switch ( style.getVertexColorMode() )
 							{
 							case BRANCH_EDGE:
 							case BRANCH_VERTEX:
@@ -1237,7 +1237,7 @@ public class WindowManager
 							default:
 								continue;
 							}
-							switch ( style.colorEdgeBy )
+							switch ( style.getEdgeColorMode() )
 							{
 							case FIXED:
 							case BRANCH_EDGE:

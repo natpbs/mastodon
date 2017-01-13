@@ -52,16 +52,16 @@ public class BranchGraphTrackSchemeOverlay extends DefaultTrackSchemeOverlay
 		final boolean selected = edge.isSelected();
 		final boolean ghost = vs.isGhost() && vt.isGhost();
 
-		final Color edgeColor = ( style.colorEdgeBy == EdgeColorMode.FIXED )
-				? style.edgeColor : edge.getColor();
+		final Color edgeColor = ( style.getEdgeColorMode() == EdgeColorMode.FIXED )
+				? style.getEdgeColor() : edge.getColor();
 		final Color drawColor = getColor( selected, ghost, transition, ratio,
-				edgeColor, style.selectedEdgeColor,
-				style.ghostEdgeColor, style.ghostSelectedEdgeColor );
+				edgeColor, style.getSelectedEdgeColor(),
+				style.getGhostEdgeColor(), style.getGhostSelectedEdgeColor() );
 		g2.setColor( drawColor );
 		if ( highlighted )
-			g2.setStroke( style.edgeHighlightStroke );
+			g2.setStroke( style.getEdgeHighlightStroke() );
 		else if ( ghost )
-			g2.setStroke( style.edgeGhostStroke );
+			g2.setStroke( style.getEdgeGhostStroke() );
 
 		final int sx = ( int ) vs.getX();
 		final int sy = ( int ) vs.getY();
@@ -71,7 +71,7 @@ public class BranchGraphTrackSchemeOverlay extends DefaultTrackSchemeOverlay
 		g2.drawLine( tx, sy, tx, ty );
 
 		if ( highlighted || ghost )
-			g2.setStroke( style.edgeStroke );
+			g2.setStroke( style.getEdgeStroke() );
 	}
 
 	@Override

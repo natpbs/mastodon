@@ -15,7 +15,7 @@ import org.mastodon.revised.model.feature.FeatureKeys;
 import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 
 /**
- * @author Jean=Yves Tinevez
+ * @author Jean-Yves Tinevez
  */
 public class TrackSchemeStyleChooser
 {
@@ -89,8 +89,6 @@ public class TrackSchemeStyleChooser
 				final boolean enabled = !TrackSchemeStyle.defaults.contains( model.getSelectedItem() );
 				panel.buttonDeleteStyle.setEnabled( enabled );
 				panel.buttonSetStyleName.setEnabled( enabled );
-				panel.buttonEditStyle.setEnabled( enabled );
-
 			}
 		} );
 		panel.comboBoxStyles.setSelectedIndex( 0 );
@@ -111,8 +109,8 @@ public class TrackSchemeStyleChooser
 				panel,
 				"Enter the style name:",
 				"Style name",
-				JOptionPane.PLAIN_MESSAGE, null, null, current.name );
-		current.name = newName;
+				JOptionPane.PLAIN_MESSAGE, null, null, current.getName() );
+		current.name( newName );
 	}
 
 	private void newStyle()

@@ -16,109 +16,109 @@ public class TrackSchemeStyle implements ColorMode
 
 	private static final Stroke DEFAULT_GHOST_STROKE = new BasicStroke( 1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] { 3.0f }, 0.0f );
 
-	public String name;
+	private String name;
 
-	public Color edgeColor;
+	private Color edgeColor;
 
-	public Color vertexFillColor;
+	private Color vertexFillColor;
 
-	public Color vertexDrawColor;
+	private Color vertexDrawColor;
 
-	public Color selectedVertexFillColor;
+	private Color selectedVertexFillColor;
 
-	public Color selectedEdgeColor;
+	private Color selectedEdgeColor;
 
-	public Color selectedVertexDrawColor;
+	private Color selectedVertexDrawColor;
 
-	public Color simplifiedVertexFillColor;
+	private Color simplifiedVertexFillColor;
 
-	public Color selectedSimplifiedVertexFillColor;
+	private Color selectedSimplifiedVertexFillColor;
 
-	public Color ghostEdgeColor;
+	private Color ghostEdgeColor;
 
-	public Color ghostVertexFillColor;
+	private Color ghostVertexFillColor;
 
-	public Color ghostVertexDrawColor;
+	private Color ghostVertexDrawColor;
 
-	public Color ghostSelectedVertexFillColor;
+	private Color ghostSelectedVertexFillColor;
 
-	public Color ghostSelectedEdgeColor;
+	private Color ghostSelectedEdgeColor;
 
-	public Color ghostSelectedVertexDrawColor;
+	private Color ghostSelectedVertexDrawColor;
 
-	public Color ghostSimplifiedVertexFillColor;
+	private Color ghostSimplifiedVertexFillColor;
 
-	public Color ghostSelectedSimplifiedVertexFillColor;
+	private Color ghostSelectedSimplifiedVertexFillColor;
 
-	public Color backgroundColor;
+	private Color backgroundColor;
 
-	public Color currentTimepointColor;
+	private Color currentTimepointColor;
 
-	public Color decorationColor;
+	private Color decorationColor;
 
-	public Color vertexRangeColor;
+	private Color vertexRangeColor;
 
-	public Color headerBackgroundColor;
+	private Color headerBackgroundColor;
 
-	public Color headerDecorationColor;
+	private Color headerDecorationColor;
 
-	public Color headerCurrentTimepointColor;
+	private Color headerCurrentTimepointColor;
 
-	public Font font;
+	private Font font;
 
-	public Font headerFont;
+	private Font headerFont;
 
-	public Stroke edgeStroke;
+	private Stroke edgeStroke;
 
-	public Stroke edgeGhostStroke;
+	private Stroke edgeGhostStroke;
 
-	public Stroke edgeHighlightStroke;
+	private Stroke edgeHighlightStroke;
 
-	public Stroke vertexStroke;
+	private Stroke vertexStroke;
 
-	public Stroke vertexGhostStroke;
+	private Stroke vertexGhostStroke;
 
-	public Stroke vertexHighlightStroke;
+	private Stroke vertexHighlightStroke;
 
-	public Stroke focusStroke;
+	private Stroke focusStroke;
 
-	public Stroke decorationStroke;
+	private Stroke decorationStroke;
 
-	public boolean highlightCurrentTimepoint;
+	private boolean highlightCurrentTimepoint;
 
-	public boolean paintRows;
+	private boolean paintRows;
 
-	public boolean paintColumns;
+	private boolean paintColumns;
 
-	public boolean paintHeaderShadow;
+	private boolean paintHeaderShadow;
 
-	public VertexColorMode colorVertexBy;
+	private VertexColorMode colorVertexBy;
 
 	/**
 	 * Might be a key to a vertex or an edge feature, depending on
 	 * {@link #colorVertexBy}.
 	 */
-	public String vertexColorFeatureKey;
+	private String vertexColorFeatureKey;
 
-	public ColorMap vertexColorMap;
+	private ColorMap vertexColorMap;
 
-	public double minVertexColorRange;
+	private double minVertexColorRange;
 
-	public double maxVertexColorRange;
+	private double maxVertexColorRange;
 
-	public EdgeColorMode colorEdgeBy;
+	private EdgeColorMode colorEdgeBy;
 
 	/**
 	 * Might be a key to a vertex or an edge feature, depending on
 	 * {@link #colorEdgeBy}.
 	 */
-	public String edgeColorFeatureKey;
+	private String edgeColorFeatureKey;
 
-	public ColorMap edgeColorMap;
+	private ColorMap edgeColorMap;
 
-	public double minEdgeColorRange;
+	private double minEdgeColorRange;
 
-	public double maxEdgeColorRange;
+	private double maxEdgeColorRange;
 
 	public static Color mixGhostColor( final Color color, final Color backgroundColor )
 	{
@@ -146,6 +146,11 @@ public class TrackSchemeStyle implements ColorMode
 	/*
 	 * GETTERS for non public fields.
 	 */
+
+	public String getName()
+	{
+		return name;
+	}
 
 	@Override
 	public VertexColorMode getVertexColorMode()
@@ -207,254 +212,591 @@ public class TrackSchemeStyle implements ColorMode
 		return maxEdgeColorRange;
 	}
 
+	public Color getBackgroundColor()
+	{
+		return backgroundColor;
+	}
+
+	public Color getCurrentTimepointColor()
+	{
+		return currentTimepointColor;
+	}
+
+	public Color getDecorationColor()
+	{
+		return decorationColor;
+	}
+
+	public Stroke getDecorationStroke()
+	{
+		return decorationStroke;
+	}
+
+	public Color getEdgeColor()
+	{
+		return edgeColor;
+	}
+
+	public Stroke getEdgeGhostStroke()
+	{
+		return edgeGhostStroke;
+	}
+
+	public Stroke getEdgeHighlightStroke()
+	{
+		return edgeHighlightStroke;
+	}
+
+	public Stroke getEdgeStroke()
+	{
+		return edgeStroke;
+	}
+
+	public Stroke getFocusStroke()
+	{
+		return focusStroke;
+	}
+
+	public Font getFont()
+	{
+		return font;
+	}
+
+	public Color getGhostEdgeColor()
+	{
+		return ghostEdgeColor;
+	}
+
+	public Color getGhostSelectedEdgeColor()
+	{
+		return ghostSelectedEdgeColor;
+	}
+
+	public Color getGhostSelectedSimplifiedVertexFillColor()
+	{
+		return ghostSelectedSimplifiedVertexFillColor;
+	}
+
+	public Color getGhostSelectedVertexDrawColor()
+	{
+		return ghostSelectedVertexDrawColor;
+	}
+
+	public Color getGhostSelectedVertexFillColor()
+	{
+		return ghostSelectedVertexFillColor;
+	}
+
+	public Color getGhostSimplifiedVertexFillColor()
+	{
+		return ghostSimplifiedVertexFillColor;
+	}
+
+	public Color getGhostVertexDrawColor()
+	{
+		return ghostVertexDrawColor;
+	}
+
+	public Color getGhostVertexFillColor()
+	{
+		return ghostVertexFillColor;
+	}
+
+	public Color getHeaderBackgroundColor()
+	{
+		return headerBackgroundColor;
+	}
+
+	public Color getHeaderCurrentTimepointColor()
+	{
+		return headerCurrentTimepointColor;
+	}
+
+	public Color getHeaderDecorationColor()
+	{
+		return headerDecorationColor;
+	}
+
+	public Font getHeaderFont()
+	{
+		return headerFont;
+	}
+
+	public Color getSelectedEdgeColor()
+	{
+		return selectedEdgeColor;
+	}
+
+	public Color getSelectedSimplifiedVertexFillColor()
+	{
+		return selectedSimplifiedVertexFillColor;
+	}
+
+	public Color getSelectedVertexDrawColor()
+	{
+		return selectedVertexDrawColor;
+	}
+
+	public Color getSelectedVertexFillColor()
+	{
+		return selectedVertexFillColor;
+	}
+
+	public Color getVertexDrawColor()
+	{
+		return vertexDrawColor;
+	}
+
+	public Color getVertexFillColor()
+	{
+		return vertexFillColor;
+	}
+
+	public Color getSimplifiedVertexFillColor()
+	{
+		return simplifiedVertexFillColor;
+	}
+
+	public Stroke getVertexGhostStroke()
+	{
+		return vertexGhostStroke;
+	}
+
+	public Stroke getVertexHighlightStroke()
+	{
+		return vertexHighlightStroke;
+	}
+
+	public Color getVertexRangeColor()
+	{
+		return vertexRangeColor;
+	}
+
+	public Stroke getVertexStroke()
+	{
+		return vertexStroke;
+	}
+
+	public boolean isPaintColumns()
+	{
+		return paintColumns;
+	}
+
+	public boolean isHighlightCurrentTimepoint()
+	{
+		return highlightCurrentTimepoint;
+	}
+
+	public boolean isPaintHeaderShadow()
+	{
+		return paintHeaderShadow;
+	}
+
+	public boolean isPaintRows()
+	{
+		return paintRows;
+	}
+
 	/*
 	 * SETTERS
 	 */
 
-	public TrackSchemeStyle name( final String n )
+	public TrackSchemeStyle name( final String name )
 	{
-		name = n;
+		if ( this.name != name )
+		{
+			this.name = name;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle edgeColorMode( final EdgeColorMode edgeColorMode, final String featureKey )
 	{
-		colorEdgeBy = edgeColorMode;
-		edgeColorFeatureKey = featureKey;
+		if ( this.colorEdgeBy != edgeColorMode || this.edgeColorFeatureKey != featureKey )
+		{
+			this.colorEdgeBy = edgeColorMode;
+			this.edgeColorFeatureKey = featureKey;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle vertexColorMode( final VertexColorMode vertexColorMode, final String featureKey )
 	{
-		colorVertexBy = vertexColorMode;
-		vertexColorFeatureKey = featureKey;
+		if ( this.colorVertexBy != vertexColorMode || this.vertexColorFeatureKey != featureKey )
+		{
+			this.colorVertexBy = vertexColorMode;
+			this.vertexColorFeatureKey = featureKey;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle edgeColorMap( final ColorMap colorMap )
 	{
-		edgeColorMap = colorMap;
+		if ( this.edgeColorMap != colorMap )
+		{
+			this.edgeColorMap = colorMap;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle vertexColorMap( final ColorMap colorMap )
 	{
-		vertexColorMap = colorMap;
+		if ( this.vertexColorMap != colorMap )
+		{
+			this.vertexColorMap = colorMap;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle minEdgeColorRange( final double val )
 	{
-		minEdgeColorRange = val;
+		if ( this.minEdgeColorRange != val )
+		{
+			this.minEdgeColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle maxEdgeColorRange( final double val )
 	{
-		maxEdgeColorRange = val;
+		if ( this.maxEdgeColorRange != val )
+		{
+			this.maxEdgeColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle minVertexColorRange( final double val )
 	{
-		minVertexColorRange = val;
+		if ( this.minVertexColorRange != val )
+		{
+			this.minVertexColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	@Override
 	public TrackSchemeStyle maxVertexColorRange( final double val )
 	{
-		maxVertexColorRange = val;
+		if ( this.maxVertexColorRange != val )
+		{
+			this.maxVertexColorRange = val;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle edgeColor( final Color c )
+	public TrackSchemeStyle edgeColor( final Color color )
 	{
-		edgeColor = c;
-		updateGhostColors();
+		if ( !this.edgeColor.equals( color ) )
+		{
+			this.edgeColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle vertexFillColor( final Color c )
+	public TrackSchemeStyle vertexFillColor( final Color color )
 	{
-		vertexFillColor = c;
-		updateGhostColors();
+		if ( !this.vertexFillColor.equals( color ) )
+		{
+			this.vertexFillColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle vertexDrawColor( final Color c )
+	public TrackSchemeStyle vertexDrawColor( final Color color )
 	{
-		vertexDrawColor = c;
-		updateGhostColors();
+		if ( !this.vertexDrawColor.equals( color ) )
+		{
+			this.vertexDrawColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle selectedVertexFillColor( final Color c )
+	public TrackSchemeStyle selectedVertexFillColor( final Color color )
 	{
-		selectedVertexFillColor = c;
-		updateGhostColors();
+		if ( !this.selectedVertexFillColor.equals( color ) )
+		{
+			this.selectedVertexFillColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle selectedEdgeColor( final Color c )
+	public TrackSchemeStyle selectedEdgeColor( final Color color )
 	{
-		selectedEdgeColor = c;
-		updateGhostColors();
+		if ( !this.selectedEdgeColor.equals( color ) )
+		{
+			this.selectedEdgeColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle selectedVertexDrawColor( final Color c )
+	public TrackSchemeStyle selectedVertexDrawColor( final Color color )
 	{
-		selectedVertexDrawColor = c;
-		updateGhostColors();
+		if ( !this.selectedVertexDrawColor.equals( color ) )
+		{
+			this.selectedVertexDrawColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle simplifiedVertexFillColor( final Color c )
+	public TrackSchemeStyle simplifiedVertexFillColor( final Color color )
 	{
-		simplifiedVertexFillColor = c;
-		updateGhostColors();
+		if ( !this.simplifiedVertexFillColor.equals( color ) )
+		{
+			this.simplifiedVertexFillColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle selectedSimplifiedVertexFillColor( final Color c )
+	public TrackSchemeStyle selectedSimplifiedVertexFillColor( final Color color )
 	{
-		selectedSimplifiedVertexFillColor = c;
-		updateGhostColors();
+		if ( !this.selectedSimplifiedVertexFillColor.equals( color ) )
+		{
+			this.selectedSimplifiedVertexFillColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle backgroundColor( final Color c )
+	public TrackSchemeStyle backgroundColor( final Color color )
 	{
-		backgroundColor = c;
-		updateGhostColors();
+		if ( !this.backgroundColor.equals( color ) )
+		{
+			this.backgroundColor = color;
+			updateGhostColors();
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle currentTimepointColor( final Color c )
+	public TrackSchemeStyle currentTimepointColor( final Color color )
 	{
-		currentTimepointColor = c;
+		if ( !this.currentTimepointColor.equals( color ) )
+		{
+			this.currentTimepointColor = color;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle decorationColor( final Color c )
+	public TrackSchemeStyle decorationColor( final Color color )
 	{
-		decorationColor = c;
+		if ( !this.decorationColor.equals( color ) )
+		{
+			this.decorationColor = color;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle vertexRangeColor( final Color c )
+	public TrackSchemeStyle vertexRangeColor( final Color color )
 	{
-		vertexRangeColor = c;
+		if ( !this.vertexRangeColor.equals( color ) )
+		{
+			this.vertexRangeColor = color;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle headerBackgroundColor( final Color c )
+	public TrackSchemeStyle headerBackgroundColor( final Color color )
 	{
-		headerBackgroundColor = c;
+		if ( !this.headerBackgroundColor.equals( color ) )
+		{
+			this.headerBackgroundColor = color;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle headerDecorationColor( final Color c )
+	public TrackSchemeStyle headerDecorationColor( final Color color )
 	{
-		headerDecorationColor = c;
+		if ( !this.headerDecorationColor.equals( color ) )
+		{
+			this.headerDecorationColor = color;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle headerCurrentTimepointColor( final Color c )
+	public TrackSchemeStyle headerCurrentTimepointColor( final Color color )
 	{
-		headerCurrentTimepointColor = c;
+		if ( !this.headerCurrentTimepointColor.equals( color ) )
+		{
+			this.headerCurrentTimepointColor = color;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle font( final Font f )
+	public TrackSchemeStyle font( final Font font )
 	{
-		font = f;
+		if ( !this.font.equals( font ) )
+		{
+			this.font = font;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle headerFont( final Font f )
+	public TrackSchemeStyle headerFont( final Font font )
 	{
-		headerFont = f;
+		if ( !this.headerFont.equals( font ) )
+		{
+			this.headerFont = font;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle edgeStroke( final Stroke s )
+	public TrackSchemeStyle edgeStroke( final Stroke stroke )
 	{
-		edgeStroke = s;
+		if ( !this.edgeStroke.equals( stroke ) )
+		{
+			this.edgeStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle edgeGhostStroke( final Stroke s )
+	public TrackSchemeStyle edgeGhostStroke( final Stroke stroke )
 	{
-		edgeGhostStroke = s;
+		if ( !this.edgeGhostStroke.equals( stroke ) )
+		{
+			this.edgeGhostStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle edgeHighlightStroke( final Stroke s )
+	public TrackSchemeStyle edgeHighlightStroke( final Stroke stroke )
 	{
-		edgeHighlightStroke = s;
+		if ( !this.edgeHighlightStroke.equals( stroke ) )
+		{
+			this.edgeHighlightStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle vertexStroke( final Stroke s )
+	public TrackSchemeStyle vertexStroke( final Stroke stroke )
 	{
-		vertexStroke = s;
+		if ( !this.vertexStroke.equals( stroke ) )
+		{
+			this.vertexStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle vertexGhostStroke( final Stroke s )
+	public TrackSchemeStyle vertexGhostStroke( final Stroke stroke )
 	{
-		vertexGhostStroke = s;
+		if ( !this.vertexGhostStroke.equals( stroke ) )
+		{
+			this.vertexGhostStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle vertexHighlightStroke( final Stroke s )
+	public TrackSchemeStyle vertexHighlightStroke( final Stroke stroke )
 	{
-		vertexHighlightStroke = s;
+		if ( !this.vertexHighlightStroke.equals( stroke ) )
+		{
+			this.vertexHighlightStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle focusStroke( final Stroke s )
+	public TrackSchemeStyle focusStroke( final Stroke stroke )
 	{
-		focusStroke = s;
+		if ( !this.focusStroke.equals( stroke ) )
+		{
+			this.focusStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
-	public TrackSchemeStyle decorationStroke( final Stroke s )
+	public TrackSchemeStyle decorationStroke( final Stroke stroke )
 	{
-		decorationStroke = s;
+		if ( !this.decorationStroke.equals( stroke ) )
+		{
+			this.decorationStroke = stroke;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	public TrackSchemeStyle highlightCurrentTimepoint( final boolean b )
 	{
-		highlightCurrentTimepoint = b;
+		if ( this.highlightCurrentTimepoint != b )
+		{
+			this.highlightCurrentTimepoint = b;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	public TrackSchemeStyle paintRows( final boolean b )
 	{
-		paintRows = b;
+		if ( this.paintRows != b )
+		{
+			this.paintRows = b;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	public TrackSchemeStyle paintColumns( final boolean b )
 	{
-		paintColumns = b;
+		if ( this.paintColumns != b )
+		{
+			this.paintColumns = b;
+			notifyListeners();
+		}
 		return this;
 	}
 
 	public TrackSchemeStyle paintHeaderShadow( final boolean b )
 	{
-		paintHeaderShadow = b;
+		if ( this.paintHeaderShadow != b )
+		{
+			this.paintHeaderShadow = b;
+			notifyListeners();
+		}
 		return this;
 	}
 
@@ -519,7 +861,7 @@ public class TrackSchemeStyle implements ColorMode
 		this.paintRows = style.paintRows;
 		this.paintColumns = style.paintColumns;
 		this.paintHeaderShadow = style.paintHeaderShadow;
-// HEP!
+		notifyListeners();
 	}
 
 	public interface UpdateListener
@@ -529,7 +871,7 @@ public class TrackSchemeStyle implements ColorMode
 
 	private final ArrayList< UpdateListener > updateListeners;
 
-	public void notifyListeners()
+	private void notifyListeners()
 	{
 		final ArrayList< UpdateListener > ul = new ArrayList<>( updateListeners );
 		for ( final UpdateListener l : ul )
@@ -581,44 +923,47 @@ public class TrackSchemeStyle implements ColorMode
 	static
 	{
 		final Color fill = new Color( 128, 255, 128 );
-		df = new TrackSchemeStyle().name( "Default" ).
-				vertexColorMode( VertexColorMode.FIXED, "" ).
-				edgeColorMap( ColorMap.JET ).
-				vertexColorMap( ColorMap.JET ).
-				minEdgeColorRange( 0. ).
-				maxEdgeColorRange( 1. ).
-				minVertexColorRange( 0. ).
-				maxVertexColorRange( 1. ).
-				edgeColorMode( EdgeColorMode.FIXED, "" ).
-				backgroundColor( Color.LIGHT_GRAY ).
-				currentTimepointColor( new Color( 217, 217, 217 ) ).
-				vertexFillColor( Color.WHITE ).
-				selectedVertexFillColor( fill ).
-				simplifiedVertexFillColor( Color.BLACK ).
-				selectedSimplifiedVertexFillColor( new Color( 0, 128, 0 ) ).
-				vertexDrawColor( Color.BLACK ).
-				selectedVertexDrawColor( Color.BLACK ).
-				edgeColor( Color.BLACK ).
-				selectedEdgeColor( fill.darker() ).
-				decorationColor( Color.YELLOW.darker().darker() ).
-				vertexRangeColor( new Color( 128, 128, 128 ) ).
-				headerBackgroundColor( new Color( 217, 217, 217 ) ). // new Color( 238, 238, 238 ) ).
-				headerDecorationColor( Color.DARK_GRAY ).
-				headerCurrentTimepointColor( Color.WHITE ).
-				font( new Font( "SansSerif", Font.PLAIN, 9 ) ).
-				headerFont( new Font( "SansSerif", Font.PLAIN, 9 ) ).
-				edgeStroke( new BasicStroke() ).
-				edgeGhostStroke( DEFAULT_GHOST_STROKE ).
-				edgeHighlightStroke( new BasicStroke( 2f ) ).
-				vertexStroke( new BasicStroke() ).
-				vertexGhostStroke( DEFAULT_GHOST_STROKE ).
-				vertexHighlightStroke( new BasicStroke( 3f ) ).
-				focusStroke( DEFAULT_FOCUS_STROKE ).
-				decorationStroke( new BasicStroke() ).
-				highlightCurrentTimepoint( true ).
-				paintRows( true ).
-				paintColumns( true ).
-				paintHeaderShadow( true );
+		df = new TrackSchemeStyle();
+		df.name = "Default";
+		df.colorVertexBy = VertexColorMode.FIXED;
+		df.vertexColorFeatureKey = "";
+		df.edgeColorMap = ColorMap.JET ;
+		df.vertexColorMap = ColorMap.JET ;
+		df.minEdgeColorRange = 0. ;
+		df.maxEdgeColorRange = 1. ;
+		df.minVertexColorRange = 0. ;
+		df.maxVertexColorRange = 1. ;
+		df.colorEdgeBy = EdgeColorMode.FIXED;
+		df.edgeColorFeatureKey="" ;
+		df.backgroundColor = Color.LIGHT_GRAY ;
+		df.currentTimepointColor = new Color( 217, 217, 217 );
+		df.vertexFillColor = Color.WHITE ;
+		df.selectedVertexFillColor = fill ;
+		df.simplifiedVertexFillColor = Color.BLACK ;
+		df.selectedSimplifiedVertexFillColor = new Color( 0, 128, 0 );
+		df.vertexDrawColor = Color.BLACK ;
+		df.selectedVertexDrawColor = Color.BLACK ;
+		df.edgeColor = Color.BLACK ;
+		df.selectedEdgeColor = fill.darker() ;
+		df.decorationColor = Color.YELLOW.darker().darker() ;
+		df.vertexRangeColor = new Color( 128, 128, 128 );
+		df.headerBackgroundColor = new Color( 217, 217, 217 );
+		df.headerDecorationColor = Color.DARK_GRAY ;
+		df.headerCurrentTimepointColor = Color.WHITE ;
+		df.font = new Font( "SansSerif", Font.PLAIN, 9 );
+		df.headerFont = new Font( "SansSerif", Font.PLAIN, 9 );
+		df.edgeStroke = new BasicStroke() ;
+		df.edgeGhostStroke = DEFAULT_GHOST_STROKE ;
+		df.edgeHighlightStroke = new BasicStroke( 2f );
+		df.vertexStroke = new BasicStroke() ;
+		df.vertexGhostStroke = DEFAULT_GHOST_STROKE ;
+		df.vertexHighlightStroke = new BasicStroke( 3f );
+		df.focusStroke = DEFAULT_FOCUS_STROKE ;
+		df.decorationStroke = new BasicStroke() ;
+		df.highlightCurrentTimepoint = true ;
+		df.paintRows = true ;
+		df.paintColumns = true ;
+		df.paintHeaderShadow = true ;
 	}
 
 	/**
@@ -639,44 +984,47 @@ public class TrackSchemeStyle implements ColorMode
 		final Color fill = new Color( 64, 106, 102 );
 		final Color selfill = new Color( 255, 128, 128 );
 		final Color currenttp = new Color( 38, 175, 185 );
-		modern = new TrackSchemeStyle().name( "Modern" ).
-				edgeColorMode(  EdgeColorMode.FIXED, "" ).
-				vertexColorMode( VertexColorMode.FIXED, "" ).
-				edgeColorMap( ColorMap.JET ).
-				vertexColorMap( ColorMap.JET ).
-				minEdgeColorRange( 0. ).
-				maxEdgeColorRange( 1. ).
-				minVertexColorRange( 0. ).
-				maxVertexColorRange( 1. ).
-				backgroundColor( bg ).
-				currentTimepointColor( currenttp ).
-				vertexFillColor( fill ).
-				selectedVertexFillColor( selfill ).
-				simplifiedVertexFillColor( fill ).
-				selectedSimplifiedVertexFillColor( selfill ).
-				vertexDrawColor( Color.WHITE ).
-				selectedVertexDrawColor( Color.BLACK ).
-				edgeColor( Color.WHITE ).
-				selectedEdgeColor( selfill.darker() ).
-				decorationColor( bg.darker() ).
-				vertexRangeColor( Color.WHITE ).
-				headerBackgroundColor( bg.brighter() ).
-				headerDecorationColor( bg ).
-				headerCurrentTimepointColor( bg.darker() ).
-				font( new Font( "Calibri", Font.PLAIN, 12 ) ).
-				headerFont( new Font( "Calibri", Font.PLAIN, 12 ) ).
-				edgeStroke( new BasicStroke() ).
-				edgeGhostStroke( DEFAULT_GHOST_STROKE ).
-				edgeHighlightStroke( new BasicStroke( 2f ) ).
-				vertexStroke( new BasicStroke() ).
-				vertexGhostStroke( DEFAULT_GHOST_STROKE ).
-				vertexHighlightStroke( new BasicStroke( 3f ) ).
-				focusStroke( DEFAULT_FOCUS_STROKE ).
-				decorationStroke( new BasicStroke() ).
-				highlightCurrentTimepoint( true ).
-				paintRows( true ).
-				paintColumns( true ).
-				paintHeaderShadow( true );
+		modern = new TrackSchemeStyle();
+		modern.name ="Modern";
+		modern.colorEdgeBy = EdgeColorMode.FIXED;
+		modern.edgeColorFeatureKey = "" ;
+		modern.colorVertexBy = VertexColorMode.FIXED;
+		modern.vertexColorFeatureKey = "" ;
+		modern.edgeColorMap = ColorMap.JET ;
+		modern.vertexColorMap = ColorMap.JET ;
+		modern.minEdgeColorRange = 0. ;
+		modern.maxEdgeColorRange = 1. ;
+		modern.minVertexColorRange = 0. ;
+		modern.maxVertexColorRange = 1. ;
+		modern.backgroundColor = bg ;
+		modern.currentTimepointColor = currenttp ;
+		modern.vertexFillColor = fill ;
+		modern.selectedVertexFillColor = selfill ;
+		modern.simplifiedVertexFillColor = fill ;
+		modern.selectedSimplifiedVertexFillColor = selfill ;
+		modern.vertexDrawColor = Color.WHITE ;
+		modern.selectedVertexDrawColor = Color.BLACK ;
+		modern.edgeColor = Color.WHITE ;
+		modern.selectedEdgeColor = selfill.darker() ;
+		modern.decorationColor = bg.darker() ;
+		modern.vertexRangeColor = Color.WHITE ;
+		modern.headerBackgroundColor = bg.brighter() ;
+		modern.headerDecorationColor = bg ;
+		modern.headerCurrentTimepointColor = bg.darker() ;
+		modern.font = new Font( "Calibri", Font.PLAIN, 12 );
+		modern.headerFont = new Font( "Calibri", Font.PLAIN, 12 );
+		modern.edgeStroke = new BasicStroke() ;
+		modern.edgeGhostStroke = DEFAULT_GHOST_STROKE ;
+		modern.edgeHighlightStroke = new BasicStroke( 2f );
+		modern.vertexStroke = new BasicStroke() ;
+		modern.vertexGhostStroke = DEFAULT_GHOST_STROKE ;
+		modern.vertexHighlightStroke = new BasicStroke( 3f );
+		modern.focusStroke = DEFAULT_FOCUS_STROKE ;
+		modern.decorationStroke = new BasicStroke() ;
+		modern.highlightCurrentTimepoint = true ;
+		modern.paintRows = true ;
+		modern.paintColumns = true ;
+		modern.paintHeaderShadow = true ;
 	}
 
 	/**
@@ -698,44 +1046,47 @@ public class TrackSchemeStyle implements ColorMode
 		final Color selfill = new Color( 53, 107, 154 );
 		final Color seldraw = new Color( 230, 245, 255 );
 		final Color seledge = new Color( 91, 137, 158 );
-		hmdyk = new TrackSchemeStyle().name( "Lorry" ).
-				edgeColorMode( EdgeColorMode.FIXED, "" ).
-				vertexColorMode( VertexColorMode.FIXED, "" ).
-				edgeColorMap( ColorMap.JET ).
-				vertexColorMap( ColorMap.JET ).
-				minEdgeColorRange( 0. ).
-				maxEdgeColorRange( 1. ).
-				minVertexColorRange( 0. ).
-				maxVertexColorRange( 1. ).
-				backgroundColor( bg ).
-				currentTimepointColor( bg.brighter() ).
-				vertexFillColor( fill ).
-				selectedVertexFillColor( selfill ).
-				simplifiedVertexFillColor( Color.DARK_GRAY ).
-				selectedSimplifiedVertexFillColor( selfill ).
-				vertexDrawColor( Color.DARK_GRAY ).
-				selectedVertexDrawColor( seldraw ).
-				edgeColor( Color.DARK_GRAY ).
-				selectedEdgeColor( seledge ).
-				decorationColor( bg.darker() ).
-				vertexRangeColor( Color.DARK_GRAY ).
-				headerBackgroundColor( bg.brighter() ).
-				headerDecorationColor( bg ).
-				headerCurrentTimepointColor( bg.darker() ).
-				font( new Font( "Calibri", Font.PLAIN, 12 ) ).
-				headerFont( new Font( "Calibri", Font.PLAIN, 12 ) ).
-				edgeStroke( new BasicStroke() ).
-				edgeGhostStroke( DEFAULT_GHOST_STROKE ).
-				edgeHighlightStroke( new BasicStroke( 2f ) ).
-				vertexStroke( new BasicStroke() ).
-				vertexGhostStroke( DEFAULT_GHOST_STROKE ).
-				vertexHighlightStroke( new BasicStroke( 3f ) ).
-				focusStroke( DEFAULT_FOCUS_STROKE ).
-				decorationStroke( new BasicStroke() ).
-				highlightCurrentTimepoint( true ).
-				paintRows( true ).
-				paintColumns( true ).
-				paintHeaderShadow( true );
+		hmdyk = new TrackSchemeStyle();
+		hmdyk.name( "Lorry" );
+		hmdyk.colorEdgeBy = EdgeColorMode.FIXED;
+		hmdyk.edgeColorFeatureKey = "" ;
+		hmdyk.colorVertexBy= VertexColorMode.FIXED;
+		hmdyk.vertexColorFeatureKey =  "" ;
+		hmdyk.edgeColorMap = ColorMap.JET ;
+		hmdyk.vertexColorMap = ColorMap.JET ;
+		hmdyk.minEdgeColorRange = 0. ;
+		hmdyk.maxEdgeColorRange = 1. ;
+		hmdyk.minVertexColorRange = 0. ;
+		hmdyk.maxVertexColorRange = 1. ;
+		hmdyk.backgroundColor = bg ;
+		hmdyk.currentTimepointColor = bg.brighter() ;
+		hmdyk.vertexFillColor = fill ;
+		hmdyk.selectedVertexFillColor = selfill ;
+		hmdyk.simplifiedVertexFillColor = Color.DARK_GRAY ;
+		hmdyk.selectedSimplifiedVertexFillColor = selfill ;
+		hmdyk.vertexDrawColor = Color.DARK_GRAY ;
+		hmdyk.selectedVertexDrawColor = seldraw ;
+		hmdyk.edgeColor = Color.DARK_GRAY ;
+		hmdyk.selectedEdgeColor = seledge ;
+		hmdyk.decorationColor = bg.darker() ;
+		hmdyk.vertexRangeColor = Color.DARK_GRAY ;
+		hmdyk.headerBackgroundColor = bg.brighter() ;
+		hmdyk.headerDecorationColor = bg ;
+		hmdyk.headerCurrentTimepointColor = bg.darker() ;
+		hmdyk.font = new Font( "Calibri", Font.PLAIN, 12 );
+		hmdyk.headerFont = new Font( "Calibri", Font.PLAIN, 12 );
+		hmdyk.edgeStroke = new BasicStroke() ;
+		hmdyk.edgeGhostStroke = DEFAULT_GHOST_STROKE ;
+		hmdyk.edgeHighlightStroke = new BasicStroke( 2f );
+		hmdyk.vertexStroke = new BasicStroke() ;
+		hmdyk.vertexGhostStroke = DEFAULT_GHOST_STROKE ;
+		hmdyk.vertexHighlightStroke = new BasicStroke( 3f );
+		hmdyk.focusStroke = DEFAULT_FOCUS_STROKE ;
+		hmdyk.decorationStroke = new BasicStroke() ;
+		hmdyk.highlightCurrentTimepoint = true ;
+		hmdyk.paintRows = true ;
+		hmdyk.paintColumns = true ;
+		hmdyk.paintHeaderShadow = true ;
 	}
 
 	public static Collection< TrackSchemeStyle > defaults;
@@ -746,6 +1097,5 @@ public class TrackSchemeStyle implements ColorMode
 		defaults.add( hmdyk );
 		defaults.add( modern );
 	}
-
 
 }

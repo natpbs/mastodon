@@ -64,31 +64,13 @@ class TrackSchemeStyleChooserPanel extends JPanel
 
 	JButton buttonDeleteStyle;
 
-	JButton buttonEditStyle;
-
 	JButton buttonNewStyle;
 
 	JButton buttonSetStyleName;
 
-	JButton okButton;
-
 	JButton saveButton;
 
-	TrackSchemePanel panelPreview;
-
 	JComboBox< TrackSchemeStyle > comboBoxStyles;
-
-	private final JPanel contentPanel;
-
-	private final FeatureKeys featureKeys;
-
-	private final FeatureRangeCalculator featureRangeCalculator;
-
-	private final FeatureKeys branchGraphFeatureKeys;
-
-	private final FeatureRangeCalculator branchGraphFeatureRangeCalculator;
-
-	private final DummyLayoutColorGenerator colorGenerator;
 
 	public TrackSchemeStyleChooserPanel(
 			final Frame owner,
@@ -98,11 +80,6 @@ class TrackSchemeStyleChooserPanel extends JPanel
 			final FeatureKeys branchGraphFeatureKeys,
 			final FeatureRangeCalculator branchGraphFeatureRangeCalculator )
 	{
-		this.featureKeys = featureKeys;
-		this.featureRangeCalculator = featureRangeCalculator;
-		this.branchGraphFeatureKeys = branchGraphFeatureKeys;
-		this.branchGraphFeatureRangeCalculator = branchGraphFeatureRangeCalculator;
-
 		final Examples ex = DummyGraph.Examples.CELEGANS;
 		final DummyGraph example = ex.getGraph();
 		final GraphIdBimap< DummyVertex, DummyEdge > idmap = example.getIdBimap();
@@ -114,167 +91,124 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final FocusModel< TrackSchemeVertex, TrackSchemeEdge > focus = new FocusAdapter<>( new FocusModelImp<>( idmap ), vertexMap, edgeMap );
 		final Selection< TrackSchemeVertex, TrackSchemeEdge > selection = new SelectionAdapter<>( ex.getSelection(), vertexMap, edgeMap );
 		final NavigationHandler< TrackSchemeVertex, TrackSchemeEdge > navigation = new NavigationHandlerAdapter<>( new NavigationHandlerImp<>( new GroupManager().createGroupHandle() ), vertexMap, edgeMap );
-		colorGenerator = new DummyLayoutColorGenerator( graph, model );
+
+		final TrackSchemeStyle editedStyle = TrackSchemeStyle.defaultStyle().copy( "Edited" );
+
+		final DummyLayoutColorGenerator colorGenerator = new DummyLayoutColorGenerator( graph );
 		final TrackSchemeOptions options = TrackSchemeOptions.options().
 				vertexColorGenerator( colorGenerator ).
 				edgeColorGenerator( colorGenerator );
-		panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, options );
+
+		final TrackSchemePanel panelPreview = new TrackSchemePanel( graph, highlight, focus, selection, navigation, options );
+		final AbstractTrackSchemeOverlay graphOverlay = panelPreview.getGraphOverlay();
+		if ( graphOverlay instanceof DefaultTrackSchemeOverlay )
+		{
+			final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) graphOverlay;
+			dtso.setStyle( editedStyle );
+		}
 		panelPreview.setTimepointRange( 0, 7 );
 		panelPreview.timePointChanged( 2 );
 		panelPreview.graphChanged();
 
+		setLayout( new BorderLayout() );
 		final JPanel dialogPane = new JPanel();
-		this.contentPanel = new JPanel();
+		dialogPane.setBorder( new EmptyBorder( 12, 12, 12, 12 ) );
+		dialogPane.setLayout( new BorderLayout() );
+
+		final JPanel contentPanel = new JPanel();
+		contentPanel.setLayout( new BorderLayout() );
+
 		final JPanel panelChooseStyle = new JPanel();
+		panelChooseStyle.setLayout( new GridLayout( 3, 0, 0, 10 ) );
+
 		final JLabel jlabelTitle = new JLabel();
+		jlabelTitle.setText( "TrackScheme display styles." );
+		jlabelTitle.setHorizontalAlignment( SwingConstants.CENTER );
+		jlabelTitle.setFont( dialogPane.getFont().deriveFont( Font.BOLD ) );
+		panelChooseStyle.add( jlabelTitle );
+
+		// Combo box panel
+		final JPanel comboBoxPanel = new JPanel();
+		final BorderLayout layout = new BorderLayout();
+		comboBoxPanel.setLayout( layout );
+		comboBoxPanel.add( new JLabel( "Style: " ), BorderLayout.WEST );
 		this.comboBoxStyles = new JComboBox<>( model );
+		comboBoxPanel.add( comboBoxStyles, BorderLayout.CENTER );
+		panelChooseStyle.add( comboBoxPanel );
 
 		final JPanel panelStyleButtons = new JPanel();
-		buttonDeleteStyle = new JButton();
+		panelStyleButtons.setLayout( new BoxLayout( panelStyleButtons, BoxLayout.LINE_AXIS ) );
+		this.buttonDeleteStyle = new JButton();
+		buttonDeleteStyle.setText( "Delete" );
+		panelStyleButtons.add( buttonDeleteStyle );
+
 		final JPanel hSpacer1 = new JPanel( null );
-		buttonEditStyle = new JButton();
-		buttonNewStyle = new JButton();
-		buttonSetStyleName = new JButton();
+		panelStyleButtons.add( hSpacer1 );
+
+		this.buttonNewStyle = new JButton();
+		buttonNewStyle.setText( "New" );
+		panelStyleButtons.add( buttonNewStyle );
+
+		this.buttonSetStyleName = new JButton();
+		buttonSetStyleName.setText( "Set name" );
+		panelStyleButtons.add( buttonSetStyleName );
+		panelChooseStyle.add( panelStyleButtons );
+		contentPanel.add( panelChooseStyle, BorderLayout.NORTH );
+
+		final TrackSchemeStyleEditorPanel editorPanel = new TrackSchemeStyleEditorPanel(
+				editedStyle,
+				featureKeys, featureRangeCalculator,
+				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
+		contentPanel.add( editorPanel, BorderLayout.SOUTH );
+
+		panelPreview.setPreferredSize( new Dimension( 300, 250 ) );
+		contentPanel.add( panelPreview, BorderLayout.CENTER );
+
 		final JPanel buttonBar = new JPanel();
-		okButton = new JButton();
-		saveButton = new JButton();
+		buttonBar.setBorder( new EmptyBorder( 12, 0, 0, 0 ) );
+		final GridBagLayout buttonBarLayout = new GridBagLayout();
+		buttonBarLayout.columnWidths = new int[] { 80, 164, 80 };
+		buttonBarLayout.columnWeights = new double[] { 0.0, 1.0, 0.0 };
+		buttonBar.setLayout( buttonBarLayout );
 
-		// ======== this ========
-		setLayout( new BorderLayout() );
-
-		// ======== dialogPane ========
-		{
-			dialogPane.setBorder( new EmptyBorder( 12, 12, 12, 12 ) );
-			dialogPane.setLayout( new BorderLayout() );
-
-			// ======== contentPanel ========
-			{
-				contentPanel.setLayout( new BorderLayout() );
-
-				// ======== panelChooseStyle ========
-				{
-					panelChooseStyle.setLayout( new GridLayout( 3, 0, 0, 10 ) );
-
-					jlabelTitle.setText( "TrackScheme display styles." );
-					jlabelTitle.setHorizontalAlignment( SwingConstants.CENTER );
-					jlabelTitle.setFont( dialogPane.getFont().deriveFont( Font.BOLD ) );
-					panelChooseStyle.add( jlabelTitle );
-
-					// Combo box panel
-					final JPanel comboBoxPanel = new JPanel();
-					{
-						final BorderLayout layout = new BorderLayout();
-						comboBoxPanel.setLayout( layout );
-						comboBoxPanel.add( new JLabel( "Style: " ), BorderLayout.WEST );
-						comboBoxPanel.add( comboBoxStyles, BorderLayout.CENTER );
-					}
-					panelChooseStyle.add( comboBoxPanel );
-
-					// ======== panelStyleButtons ========
-					{
-						panelStyleButtons.setLayout( new BoxLayout( panelStyleButtons, BoxLayout.LINE_AXIS ) );
-
-						// ---- buttonDeleteStyle ----
-						buttonDeleteStyle.setText( "Delete" );
-						panelStyleButtons.add( buttonDeleteStyle );
-						panelStyleButtons.add( hSpacer1 );
-
-						// ---- buttonNewStyle ----
-						buttonNewStyle.setText( "New" );
-						panelStyleButtons.add( buttonNewStyle );
-
-						// ---- buttonSetStyleName ----
-						buttonSetStyleName.setText( "Set name" );
-						panelStyleButtons.add( buttonSetStyleName );
-
-						// ---- buttonEditStyle ----
-						buttonEditStyle.setText( "Edit" );
-//						panelStyleButtons.add( buttonEditStyle );
-
-					}
-					panelChooseStyle.add( panelStyleButtons );
-				}
-				contentPanel.add( panelChooseStyle, BorderLayout.NORTH );
-
-				// ======== style preview ========
-				panelPreview.setPreferredSize( new Dimension( 300, 250 ) );
-				contentPanel.add( panelPreview, BorderLayout.CENTER );
-			}
-			dialogPane.add( contentPanel, BorderLayout.CENTER );
-
-			// ======== buttonBar ========
-			{
-				buttonBar.setBorder( new EmptyBorder( 12, 0, 0, 0 ) );
-				buttonBar.setLayout( new GridBagLayout() );
-				( ( GridBagLayout ) buttonBar.getLayout() ).columnWidths = new int[] { 80, 164, 80 };
-				( ( GridBagLayout ) buttonBar.getLayout() ).columnWeights = new double[] { 0.0, 1.0, 0.0 };
-
-				// ---- okButton ----
-				okButton.setText( "OK" );
-//				buttonBar.add( okButton, new GridBagConstraints( 2, 0, 1, 1, 0.0, 0.0,
-//						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-//						new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-
-				// ---- saveButton -----
-				saveButton.setText( "Save styles" );
-				buttonBar.add( saveButton, new GridBagConstraints( 0, 0, 1, 1, 0.0, 0.0,
-						GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-						new Insets( 0, 0, 0, 0 ), 0, 0 ) );
-			}
-			dialogPane.add( buttonBar, BorderLayout.SOUTH );
-		}
+		this.saveButton = new JButton();
+		saveButton.setText( "Save styles" );
+		buttonBar.add( saveButton, new GridBagConstraints( 0, 0, 1, 1, 0.0, 0.0,
+				GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+				new Insets( 0, 0, 0, 0 ), 0, 0 ) );
+		dialogPane.add( buttonBar, BorderLayout.SOUTH );
 		add( dialogPane, BorderLayout.CENTER );
+		dialogPane.add( contentPanel, BorderLayout.CENTER );
 
-		// Style editor.
-		final StyleComboBoxListener styleComboBoxListener = new StyleComboBoxListener();
-
-		comboBoxStyles.addActionListener( styleComboBoxListener );
-		comboBoxStyles.setSelectedIndex( 0 );
-
-	}
-
-	private class StyleComboBoxListener implements ActionListener, UpdateListener
-	{
-		private TrackSchemeStyleEditorPanel editorPanel;
-
-		public StyleComboBoxListener()
+		/*
+		 * Listeners.
+		 */
+		
+		editedStyle.addUpdateListener( new UpdateListener()
 		{
-		}
-
-		@Override
-		public void trackSchemeStyleChanged()
-		{
-			colorGenerator.trackSchemeStyleChanged();
-			panelPreview.graphChanged();
-		}
-
-		@Override
-		public void actionPerformed( final ActionEvent e )
-		{
-			final AbstractTrackSchemeOverlay overlay = panelPreview.getGraphOverlay();
-			if ( overlay instanceof DefaultTrackSchemeOverlay )
+			@Override
+			public void trackSchemeStyleChanged()
 			{
-				final DefaultTrackSchemeOverlay dtso = ( DefaultTrackSchemeOverlay ) overlay;
-				final TrackSchemeStyle style = comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() );
-				dtso.getStyle().removeUpdateListener( this );
-				dtso.setStyle( style );
+				colorGenerator.edgeColorMap = editedStyle.getEdgeColorMap();
+				colorGenerator.vertexColorMap = editedStyle.getVertexColorMap();
+				panelPreview.graphChanged();
 
-				if ( null != editorPanel )
-					contentPanel.remove( editorPanel );
-
-				editorPanel = new TrackSchemeStyleEditorPanel(
-						comboBoxStyles.getItemAt( comboBoxStyles.getSelectedIndex() ),
-						featureKeys, featureRangeCalculator,
-						branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
-				contentPanel.add( editorPanel, BorderLayout.SOUTH );
-
-				style.addUpdateListener( this );
-
-				editorPanel.setEnabled( !TrackSchemeStyle.defaults.contains( style ) );
-
+				final TrackSchemeStyle selectedStyle = ( TrackSchemeStyle ) comboBoxStyles.getSelectedItem();
+				selectedStyle.set( editedStyle );
 			}
-			revalidate();
-			panelPreview.repaint();
-		}
+		} );
+
+		comboBoxStyles.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				final TrackSchemeStyle selectedStyle = ( TrackSchemeStyle ) comboBoxStyles.getSelectedItem();
+				editedStyle.set( selectedStyle );
+
+				editorPanel.setEnabled( !TrackSchemeStyle.defaults.contains( selectedStyle ) );
+			}
+		} );
 	}
+
 }

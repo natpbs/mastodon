@@ -39,26 +39,26 @@ public class BranchGraphFeaturesColorGenerator< BV extends Vertex< BE >, BE exte
 	public void trackSchemeStyleChanged()
 	{
 		super.trackSchemeStyleChanged();
-		switch ( style.colorVertexBy )
+		switch ( style.getVertexColorMode() )
 		{
 		case BRANCH_VERTEX:
 		{
-			final FeatureProjection< BV > vfp = branchFeatures.getVertexProjection( style.vertexColorFeatureKey );
-			vertexColorGenerator = new ThisVertexColorGenerator( vfp, style.vertexColorMap, style.minVertexColorRange, style.maxVertexColorRange );
+			final FeatureProjection< BV > vfp = branchFeatures.getVertexProjection( style.getVertexFeatureKey() );
+			vertexColorGenerator = new ThisVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
 			break;
 		}
 		default:
 			break;
 		}
 
-		switch ( style.colorEdgeBy )
+		switch ( style.getEdgeColorMode() )
 		{
 		default:
 			break;
 		case BRANCH_EDGE:
 		{
-			final FeatureProjection< BE > efp = branchFeatures.getEdgeProjection( style.edgeColorFeatureKey );
-			edgeColorGenerator = new ThisEdgeColorGenerator( efp, style.edgeColorMap, style.minEdgeColorRange, style.maxEdgeColorRange );
+			final FeatureProjection< BE > efp = branchFeatures.getEdgeProjection( style.getEdgeFeatureKey() );
+			edgeColorGenerator = new ThisEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
 			break;
 		}
 		}
