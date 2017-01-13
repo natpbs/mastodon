@@ -186,7 +186,7 @@ public class FeaturesColorGenerator< V extends Vertex< E >, E extends Edge< V > 
 		}
 	}
 
-	private class IncomingEdgeVertexColorGenerator implements VertexColorGenerator< V >
+	protected class IncomingEdgeVertexColorGenerator implements VertexColorGenerator< V >
 	{
 
 		private final ColorMap colorMap;
@@ -314,7 +314,7 @@ public class FeaturesColorGenerator< V extends Vertex< E >, E extends Edge< V > 
 		}
 	}
 
-	private class SourceVertexEdgeColorGenerator implements EdgeColorGenerator< E >
+	protected class SourceVertexEdgeColorGenerator implements EdgeColorGenerator< E >
 	{
 		private final ColorMap colorMap;
 
