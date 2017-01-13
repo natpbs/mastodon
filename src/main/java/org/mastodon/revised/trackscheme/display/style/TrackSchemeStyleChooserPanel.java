@@ -183,7 +183,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		/*
 		 * Listeners.
 		 */
-		
+
 		editedStyle.addUpdateListener( new UpdateListener()
 		{
 			@Override
@@ -207,6 +207,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 				editedStyle.set( selectedStyle );
 
 				editorPanel.setEnabled( !TrackSchemeStyle.defaults.contains( selectedStyle ) );
+				editorPanel.update();
 			}
 		} );
 	}

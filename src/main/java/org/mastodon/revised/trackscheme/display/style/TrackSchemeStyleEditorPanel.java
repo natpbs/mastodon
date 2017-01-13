@@ -13,7 +13,9 @@ import java.awt.event.ActionListener;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.Icon;
@@ -33,7 +35,7 @@ import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
 import org.mastodon.revised.ui.ColorMode.VertexColorMode;
 import org.mastodon.revised.ui.ColorModePicker;
 
-public class TrackSchemeStyleEditorPanel extends JPanel
+public class TrackSchemeStyleEditorPanel extends JPanel implements UpdateListener
 {
 	private static final long serialVersionUID = 1L;
 
@@ -45,6 +47,12 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 	final TrackSchemeStyle style;
 
+	private final ColorModePicker colorModeUI;
+
+	private final Map< JButton, ColorSetter > colorSetters;
+
+	private final Map< JCheckBox, BooleanSetter > checkBoxes;
+
 	public TrackSchemeStyleEditorPanel(
 			final TrackSchemeStyle style, final FeatureKeys featureKeys,
 			final FeatureRangeCalculator featureRangeCalculator,
@@ -53,6 +61,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 	{
 		super( new GridBagLayout() );
 		this.style = style;
+		style.addUpdateListener( this );
 		colorChooser = new JColorChooser();
 
 		final GridBagConstraints c = new GridBagConstraints();
@@ -66,7 +75,9 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		 * Vertices and edges color modes.
 		 */
 
-		final ColorModePicker colorModeUI = new ColorModePicker( style, featureKeys, featureRangeCalculator, branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
+		this.colorModeUI = new ColorModePicker( style,
+				featureKeys, featureRangeCalculator,
+				branchGraphFeatureKeys, branchGraphFeatureRangeCalculator );
 		colorModeUI.setFont( getFont().deriveFont( 11f ) );
 		c.gridwidth = 5;
 		add( colorModeUI, c );
@@ -80,6 +91,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 
 		this.edgeColorButtonToMute = new ArrayList<>();
 		this.vertexColorButtonToMute = new ArrayList<>();
+		this.colorSetters = new HashMap<>();
 
 		c.gridx = 0;
 		c.gridheight = 1;
@@ -92,6 +104,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		for ( final ColorSetter colorSetter : styleColors )
 		{
 			final JButton button = new JButton( colorSetter.getLabel(), new ColorIcon( colorSetter.getColor() ) );
+			colorSetters.put( button, colorSetter );
 			button.setOpaque( false );
 			button.setContentAreaFilled( false );
 			button.setBorderPainted( false );
@@ -154,6 +167,7 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 		c.gridy++;
 
 		// On 2 columns
+		this.checkBoxes = new HashMap<>();
 		final int startLine = c.gridy;
 		boolean firstCol = true;
 		for ( int i = 0; i < styleBooleans.size(); i++ )
@@ -166,27 +180,32 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 			}
 			final BooleanSetter booleanSetter = styleBooleans.get( i );
 			final JCheckBox checkbox = new JCheckBox( booleanSetter.getLabel(), booleanSetter.get() );
+			checkBoxes.put( checkbox, booleanSetter );
 			checkbox.addActionListener( ( e ) -> booleanSetter.set( checkbox.isSelected() ) );
 			add( checkbox, c );
 			c.gridy++;
 		}
+	}
 
-		final UpdateListener colorButtonMuter = new UpdateListener()
-		{
-			@Override
-			public void trackSchemeStyleChanged()
-			{
-				final boolean muteVertexStuff = ( style.getVertexColorMode() == VertexColorMode.FIXED );
-				for ( final JButton jb : vertexColorButtonToMute )
-					jb.setEnabled( muteVertexStuff );
+	@Override
+	public void trackSchemeStyleChanged()
+	{
+		final boolean muteVertexStuff = ( style.getVertexColorMode() == VertexColorMode.FIXED );
+		for ( final JButton jb : vertexColorButtonToMute )
+			jb.setEnabled( muteVertexStuff );
 
-				final boolean muteEdgeStuff = ( style.getEdgeColorMode() == EdgeColorMode.FIXED );
-				for ( final JButton jb : edgeColorButtonToMute )
-					jb.setEnabled( muteEdgeStuff );
+		final boolean muteEdgeStuff = ( style.getEdgeColorMode() == EdgeColorMode.FIXED );
+		for ( final JButton jb : edgeColorButtonToMute )
+			jb.setEnabled( muteEdgeStuff );
+	}
 
-			}
-		};
-		style.addUpdateListener( colorButtonMuter );
+	void update()
+	{
+		colorModeUI.update();
+		for ( final JButton button : colorSetters.keySet() )
+			button.setIcon( new ColorIcon( colorSetters.get( button ).getColor() ) );
+		for ( final JCheckBox cb : checkBoxes.keySet() )
+			cb.setSelected( checkBoxes.get( cb ).get() );
 	}
 
 	@Override
@@ -393,5 +412,4 @@ public class TrackSchemeStyleEditorPanel extends JPanel
 			return size;
 		}
 	}
-
 }
