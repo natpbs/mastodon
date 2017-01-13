@@ -1,4 +1,4 @@
-package org.mastodon.revised.trackscheme.display.style;
+package org.mastodon.revised.ui;
 
 import java.awt.Color;
 
@@ -10,8 +10,6 @@ import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
 import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
 import org.mastodon.revised.ui.ColorMode.VertexColorMode;
-import org.mastodon.revised.ui.EdgeColorGenerator;
-import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.util.ColorMap;
 
 /**
@@ -54,45 +52,44 @@ public class FeaturesColorGeneratorBranchFeatures<
 		super( graph, features );
 		this.branchGraph = branchGraph;
 		this.branchFeatures = branchFeatures;
-		trackSchemeStyleChanged();
 	}
 
 	@Override
-	public void trackSchemeStyleChanged()
+	public void colorModeChanged()
 	{
-		super.trackSchemeStyleChanged();
-		switch ( style.getVertexColorMode() )
+		super.colorModeChanged();
+		switch ( colorMode.getVertexColorMode() )
 		{
 		case BRANCH_VERTEX:
 		{
-			final FeatureProjection< BV > vfp = branchFeatures.getVertexProjection( style.getVertexFeatureKey() );
-			vertexColorGenerator = new BranchVertexVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
+			final FeatureProjection< BV > vfp = branchFeatures.getVertexProjection( colorMode.getVertexFeatureKey() );
+			vertexColorGenerator = new BranchVertexVertexColorGenerator( vfp, colorMode.getVertexColorMap(), colorMode.getMinVertexColorRange(), colorMode.getMaxVertexColorRange() );
 			break;
 		}
 		case BRANCH_EDGE:
 		{
-			final FeatureProjection< BE > vfp = branchFeatures.getEdgeProjection( style.getVertexFeatureKey() );
-			vertexColorGenerator = new BranchEdgeVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
+			final FeatureProjection< BE > vfp = branchFeatures.getEdgeProjection( colorMode.getVertexFeatureKey() );
+			vertexColorGenerator = new BranchEdgeVertexColorGenerator( vfp, colorMode.getVertexColorMap(), colorMode.getMinVertexColorRange(), colorMode.getMaxVertexColorRange() );
 			break;
 		}
 		default:
 			break;
 		}
 
-		switch ( style.getEdgeColorMode() )
+		switch ( colorMode.getEdgeColorMode() )
 		{
 		default:
 			break;
 		case BRANCH_EDGE:
 		{
-			final FeatureProjection< BE > efp = branchFeatures.getEdgeProjection( style.getEdgeFeatureKey() );
-			edgeColorGenerator = new BranchEdgeEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
+			final FeatureProjection< BE > efp = branchFeatures.getEdgeProjection( colorMode.getEdgeFeatureKey() );
+			edgeColorGenerator = new BranchEdgeEdgeColorGenerator( efp, colorMode.getEdgeColorMap(), colorMode.getMinEdgeColorRange(), colorMode.getMaxEdgeColorRange() );
 			break;
 		}
 		case BRANCH_VERTEX:
 		{
-			final FeatureProjection< BV > efp = branchFeatures.getVertexProjection( style.getEdgeFeatureKey() );
-			edgeColorGenerator = new BranchVertexEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
+			final FeatureProjection< BV > efp = branchFeatures.getVertexProjection( colorMode.getEdgeFeatureKey() );
+			edgeColorGenerator = new BranchVertexEdgeColorGenerator( efp, colorMode.getEdgeColorMap(), colorMode.getMinEdgeColorRange(), colorMode.getMaxEdgeColorRange() );
 			break;
 		}
 		}

@@ -1,4 +1,4 @@
-package org.mastodon.revised.trackscheme.display.style;
+package org.mastodon.revised.ui;
 
 import java.awt.Color;
 
@@ -7,16 +7,13 @@ import org.mastodon.graph.ReadOnlyGraph;
 import org.mastodon.graph.Vertex;
 import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.feature.FeatureProjection;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
 import org.mastodon.revised.ui.ColorMode.VertexColorMode;
-import org.mastodon.revised.ui.EdgeColorGenerator;
-import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.util.ColorMap;
 
 /**
  * Color generator for vertices and edges from a feature model, following hints
- * from a {@link TrackSchemeStyle}.
+ * from a {@link ColorMode}.
  * <p>
  * This color generator can deal with vertex and edge features and attribute
  * them to vertices and edges. Interestingly, it can color a vertex using an
@@ -33,12 +30,12 @@ import org.mastodon.revised.ui.util.ColorMap;
  * @author Jean-Yves Tinevez
  */
 public class FeaturesColorGenerator< V extends Vertex< E >, E extends Edge< V > >
-		implements UpdateListener, VertexColorGenerator< V >, EdgeColorGenerator< E >
+		implements VertexColorGenerator< V >, EdgeColorGenerator< E >
 {
 
 	protected final ReadOnlyGraph< V, E > graph;
 
-	protected TrackSchemeStyle style = TrackSchemeStyle.defaultStyle();
+	protected ColorMode colorMode;
 
 	protected VertexColorGenerator< V > vertexColorGenerator;
 
@@ -46,78 +43,70 @@ public class FeaturesColorGenerator< V extends Vertex< E >, E extends Edge< V > 
 
 	private final FeatureModel< V, E > features;
 
+	private static final Color DEFAULT_EDGE_COLOR = Color.BLACK;
+
+	private static final Color DEFAULT_VERTEX_COLOR = Color.BLACK;
+
 	public FeaturesColorGenerator(
 			final ReadOnlyGraph< V, E > graph,
 			final FeatureModel< V, E > features )
 	{
 		this.graph = graph;
 		this.features = features;
-		trackSchemeStyleChanged();
 	}
 
-	public void setStyle( final TrackSchemeStyle s )
+	public void colorModeChanged()
 	{
-		if ( null != style )
-			style.removeUpdateListener( this );
-
-		this.style = s;
-		s.addUpdateListener( this );
-		trackSchemeStyleChanged();
-	}
-
-	@Override
-	public void trackSchemeStyleChanged()
-	{
-		switch ( style.getVertexColorMode() )
+		switch ( colorMode.getVertexColorMode() )
 		{
 		case FIXED:
 		default:
-			vertexColorGenerator = new FixedVertexColorGenerator( style.getVertexFillColor() );
+			vertexColorGenerator = new FixedVertexColorGenerator( DEFAULT_VERTEX_COLOR );
 			break;
 		case INCOMING_EDGE:
 		{
-			final FeatureProjection< E > vfp = features.getEdgeProjection( style.getVertexFeatureKey() );
-			vertexColorGenerator = new IncomingEdgeVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
+			final FeatureProjection< E > vfp = features.getEdgeProjection( colorMode.getVertexFeatureKey() );
+			vertexColorGenerator = new IncomingEdgeVertexColorGenerator( vfp, colorMode.getVertexColorMap(), colorMode.getMinVertexColorRange(), colorMode.getMaxVertexColorRange() );
 			break;
 		}
 		case OUTGOING_EDGE:
 		{
-			final FeatureProjection< E > vfp = features.getEdgeProjection( style.getVertexFeatureKey() );
-			vertexColorGenerator = new OutgoingEdgeVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
+			final FeatureProjection< E > vfp = features.getEdgeProjection( colorMode.getVertexFeatureKey() );
+			vertexColorGenerator = new OutgoingEdgeVertexColorGenerator( vfp, colorMode.getVertexColorMap(), colorMode.getMinVertexColorRange(), colorMode.getMaxVertexColorRange() );
 			break;
 		}
 		case VERTEX:
 		{
-			final FeatureProjection< V > vfp = features.getVertexProjection( style.getVertexFeatureKey() );
-			vertexColorGenerator = new ThisVertexColorGenerator( vfp, style.getVertexColorMap(), style.getMinVertexColorRange(), style.getMaxVertexColorRange() );
+			final FeatureProjection< V > vfp = features.getVertexProjection( colorMode.getVertexFeatureKey() );
+			vertexColorGenerator = new ThisVertexColorGenerator( vfp, colorMode.getVertexColorMap(), colorMode.getMinVertexColorRange(), colorMode.getMaxVertexColorRange() );
 			break;
 		}
 		}
 
-		switch ( style.getEdgeColorMode() )
+		switch ( colorMode.getEdgeColorMode() )
 		{
 		case FIXED:
 		default:
 		{
-			edgeColorGenerator = new FixedEdgeColorGenerator( style.getEdgeColor() );
+			edgeColorGenerator = new FixedEdgeColorGenerator( DEFAULT_EDGE_COLOR );
 			break;
 		}
 		case EDGE:
 		{
-			final FeatureProjection< E > efp = features.getEdgeProjection( style.getEdgeFeatureKey() );
-			edgeColorGenerator = new ThisEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
+			final FeatureProjection< E > efp = features.getEdgeProjection( colorMode.getEdgeFeatureKey() );
+			edgeColorGenerator = new ThisEdgeColorGenerator( efp, colorMode.getEdgeColorMap(), colorMode.getMinEdgeColorRange(), colorMode.getMaxEdgeColorRange() );
 			break;
 		}
 		case SOURCE_VERTEX:
 		{
-			final FeatureProjection< V > efp = features.getVertexProjection( style.getEdgeFeatureKey() );
-			edgeColorGenerator = new SourceVertexEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
+			final FeatureProjection< V > efp = features.getVertexProjection( colorMode.getEdgeFeatureKey() );
+			edgeColorGenerator = new SourceVertexEdgeColorGenerator( efp, colorMode.getEdgeColorMap(), colorMode.getMinEdgeColorRange(), colorMode.getMaxEdgeColorRange() );
 			break;
 		}
 		case TARGET_VERTEX:
 		{
-			final FeatureProjection< V > efp = features.getVertexProjection( style.getEdgeFeatureKey() );
-			edgeColorGenerator = new TargetVertexEdgeColorGenerator( efp, style.getEdgeColorMap(), style.getMinEdgeColorRange(), style.getMaxEdgeColorRange() );
+			final FeatureProjection< V > efp = features.getVertexProjection( colorMode.getEdgeFeatureKey() );
+			edgeColorGenerator = new TargetVertexEdgeColorGenerator( efp, colorMode.getEdgeColorMap(), colorMode.getMinEdgeColorRange(), colorMode.getMaxEdgeColorRange() );
 			break;
 		}
 		}
@@ -133,6 +122,12 @@ public class FeaturesColorGenerator< V extends Vertex< E >, E extends Edge< V > 
 	public Color color( final V vertex )
 	{
 		return vertexColorGenerator.color( vertex );
+	}
+
+	public void setColorMode( final ColorMode colorMode )
+	{
+		this.colorMode = colorMode;
+		colorModeChanged();
 	}
 
 	/*

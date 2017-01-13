@@ -3,9 +3,9 @@ package org.mastodon.revised.trackscheme.action;
 import java.awt.event.ActionEvent;
 
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.FeaturesColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
+import org.mastodon.revised.ui.FeaturesColorGenerator;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 /**
@@ -37,14 +37,12 @@ public class TrackSchemeStyleAction extends AbstractNamedAction
 	@Override
 	public void actionPerformed( final ActionEvent e )
 	{
-		colorGenerator.setStyle( style );
-
+		colorGenerator.setColorMode( style );
+		// FIXME
 		final TrackSchemeStyle oldStyle = overlay.getStyle();
 		oldStyle.removeUpdateListener( panelRepainter );
-		oldStyle.removeUpdateListener( colorGenerator );
 
 		style.addUpdateListener( panelRepainter );
-		style.addUpdateListener( colorGenerator );
 		overlay.setStyle( style );
 
 		panelRepainter.trackSchemeStyleChanged();

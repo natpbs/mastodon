@@ -15,6 +15,7 @@ import org.mastodon.collection.RefCollections;
 import org.mastodon.collection.RefList;
 import org.mastodon.kdtree.ClipConvexPolytope;
 import org.mastodon.revised.bdv.overlay.util.GeometryUtils;
+import org.mastodon.revised.ui.FeaturesColorGenerator;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 import org.mastodon.revised.ui.selection.Selection;
@@ -82,16 +83,20 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 
 	protected final Selection< V, E > selection;
 
+	private final FeaturesColorGenerator< V, E > colorGenerator;
+
 	public OverlayGraphRenderer(
 			final OverlayGraph< V, E > graph,
 			final HighlightModel< V, E > highlight,
 			final FocusModel< V, E > focus,
-			final Selection< V, E > selection )
+			final Selection< V, E > selection,
+			final FeaturesColorGenerator< V, E > colorGenerator )
 	{
 		this.graph = graph;
 		this.highlight = highlight;
 		this.focus = focus;
 		this.selection = selection;
+		this.colorGenerator = colorGenerator;
 		index = graph.getIndex();
 		renderTransform = new AffineTransform3D();
 		setRenderSettings( RenderSettings.defaultStyle() );

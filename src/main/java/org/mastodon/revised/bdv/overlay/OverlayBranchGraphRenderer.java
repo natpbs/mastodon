@@ -23,9 +23,9 @@ import net.imglib2.algorithm.kdtree.ConvexPolytope;
 import net.imglib2.realtransform.AffineTransform3D;
 
 public class OverlayBranchGraphRenderer<
-	BV extends OverlayVertex< BV,BE >, 
+	BV extends OverlayVertex< BV,BE >,
 	BE extends OverlayEdge< BE, BV >,
-	V extends OverlayVertex< V,E >, 
+	V extends OverlayVertex< V,E >,
 	E extends OverlayEdge< E, V > >
 		extends OverlayGraphRenderer< BV, BE >
 {
@@ -37,11 +37,11 @@ public class OverlayBranchGraphRenderer<
 	public OverlayBranchGraphRenderer(
 			final OverlayBranchGraph< BV, BE, V, E > branchGraph,
 			final OverlayGraph< V, E > graph,
-			final HighlightModel< BV, BE > highlight2,
-			final FocusModel< BV, BE > focus2,
-			final Selection< BV, BE > selection2 )
+			final HighlightModel< BV, BE > highlight,
+			final FocusModel< BV, BE > focus,
+			final Selection< BV, BE > selection )
 	{
-		super( branchGraph, highlight2, focus2, selection2 );
+		super( branchGraph, highlight, focus, selection, null ); // TODO
 		this.branchGraph = branchGraph;
 		this.wrappedGraph = graph;
 	}

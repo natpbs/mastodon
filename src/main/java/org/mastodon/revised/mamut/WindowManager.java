@@ -84,16 +84,16 @@ import org.mastodon.revised.trackscheme.action.TrackSchemeStyleAction;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
-import org.mastodon.revised.trackscheme.display.style.BranchGraphFeaturesColorGenerator;
 import org.mastodon.revised.trackscheme.display.style.BranchGraphTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.FeaturesColorGenerator;
-import org.mastodon.revised.trackscheme.display.style.FeaturesColorGeneratorBranchFeatures;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateListener;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
 import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
 import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
+import org.mastodon.revised.ui.BranchGraphFeaturesColorGenerator;
+import org.mastodon.revised.ui.FeaturesColorGenerator;
+import org.mastodon.revised.ui.FeaturesColorGeneratorBranchFeatures;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
 import org.mastodon.revised.ui.grouping.GroupHandle;
@@ -451,12 +451,29 @@ public class WindowManager
 //		if ( !bdv.tryLoadSettings( bdvFile ) ) // TODO
 //			InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewer(), bdv.getSetupAssignments() );
 
+		/*
+		 * Features for the BDV.
+		 */
+		final FeatureModel< Spot, Link > featureModel = model.getGraphFeatureModel();
+		final FeatureModel< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > bdvFeatures =
+				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
+
+		/*
+		 * Color generator for BDV.
+		 */
+
+		final BranchGraph< BranchVertex, BranchEdge, OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > bdvBranchGraph =
+				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
+		final FeaturesColorGenerator< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > colorGenerator =
+				new FeaturesColorGeneratorBranchFeatures<>( overlayGraph, bdvFeatures, bdvBranchGraph, model.getBranchGraphFeatureModel() );
+
 		viewer.setTimepoint( currentTimepoint );
 		final OverlayGraphRenderer< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > tracksOverlay = new OverlayGraphRenderer<>(
 				overlayGraph,
 				overlayHighlight,
 				overlayFocus,
-				overlaySelection );
+				overlaySelection,
+				colorGenerator );
 		viewer.getDisplay().addOverlayRenderer( tracksOverlay );
 		viewer.addRenderTransformListener( tracksOverlay );
 		viewer.addTimePointListener( tracksOverlay );
@@ -914,6 +931,7 @@ public class WindowManager
 				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
 		final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
 				new FeaturesColorGeneratorBranchFeatures<>( trackSchemeGraph, trackSchemeFeatures, trackSchemeBranchGraph, model.getBranchGraphFeatureModel() );
+		colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
 
 		final TrackSchemeOptions options  = TrackSchemeOptions.options().
 			inputTriggerConfig( keyconf ).
@@ -1094,6 +1112,7 @@ public class WindowManager
 				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
 		final BranchGraphFeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
 				new BranchGraphFeaturesColorGenerator<>( trackSchemeGraph, trackSchemeFeatures );
+		colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
 
 		/*
 		 * TrackScheme options.
@@ -1160,6 +1179,9 @@ public class WindowManager
 		return renderSettingsManager;
 	}
 
+	/*
+	 * FIXME Stop this monstruosity.
+	 */
 	private void installTrackSchemeMenu(
 			final TrackSchemeFrame frame,
 			final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator,
@@ -1195,7 +1217,7 @@ public class WindowManager
 							break;
 						default:
 							overlay.setStyle( TrackSchemeStyle.defaultStyle() );
-							colorGenerator.setStyle( TrackSchemeStyle.defaultStyle() );
+							colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
 							break;
 						}
 						switch ( style.getEdgeColorMode() )
@@ -1206,7 +1228,7 @@ public class WindowManager
 							break;
 						default:
 							overlay.setStyle( TrackSchemeStyle.defaultStyle() );
-							colorGenerator.setStyle( TrackSchemeStyle.defaultStyle() );
+							colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
 							break;
 						}
 					}
