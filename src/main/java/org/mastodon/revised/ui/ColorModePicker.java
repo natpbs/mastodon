@@ -231,7 +231,7 @@ public class ColorModePicker extends JPanel
 				final FeatureKeyWrapper selected = colorVertexChoices.getSelectedItem();
 				if ( fkw != selected )
 					current.vertexColorMode( ( VertexColorMode ) selected.category, selected.featureKey );
-				
+
 				// Mute some controls for FIXED case.
 				switch ( colorVertexChoices.getSelectedCategory() )
 				{
@@ -342,10 +342,10 @@ public class ColorModePicker extends JPanel
 			@Override public void focusLost( final FocusEvent e ) { current.minEdgeColorRange( ( double ) minEdge.getValue() );  }
 			@Override public void focusGained( final FocusEvent e ) {}
 		} );
-		maxEdge.addActionListener( ( e ) -> current.maxVertexColorRange( ( double ) maxEdge.getValue() ) );
+		maxEdge.addActionListener( ( e ) -> current.maxEdgeColorRange( ( double ) maxEdge.getValue() ) );
 		maxEdge.addFocusListener( new FocusListener()
 		{
-			@Override public void focusLost( final FocusEvent e ) { current.maxVertexColorRange( ( double ) maxVertex.getValue() );  }
+			@Override public void focusLost( final FocusEvent e ) { current.maxEdgeColorRange( ( double ) maxEdge.getValue() );  }
 			@Override public void focusGained( final FocusEvent e ) {}
 		} );
 		autoscaleEdge.addActionListener( autoscaleEdgeAction );
@@ -409,6 +409,8 @@ public class ColorModePicker extends JPanel
 				range = featureRangeCalculator.getRange( featureKey );
 				break;
 			}
+			current.minVertexColorRange( Double.valueOf( range[ 0 ] ) );
+			current.maxVertexColorRange( Double.valueOf( range[ 1 ] ) );
 			minVertex.setValue( Double.valueOf( range[ 0 ] ) );
 			maxVertex.setValue( Double.valueOf( range[ 1 ] ) );
 		}
@@ -440,6 +442,8 @@ public class ColorModePicker extends JPanel
 				range = featureRangeCalculator.getRange( featureKey );
 				break;
 			}
+			current.minEdgeColorRange( Double.valueOf( range[ 0 ] ) );
+			current.maxEdgeColorRange( Double.valueOf( range[ 1 ] ) );
 			minEdge.setValue( Double.valueOf( range[ 0 ] ) );
 			maxEdge.setValue( Double.valueOf( range[ 1 ] ) );
 		}
