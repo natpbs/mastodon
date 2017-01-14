@@ -48,11 +48,14 @@ public class FeaturesColorGenerator< V extends Vertex< E >, E extends Edge< V > 
 	private static final Color DEFAULT_VERTEX_COLOR = Color.BLACK;
 
 	public FeaturesColorGenerator(
+			final ColorMode colorMode,
 			final ReadOnlyGraph< V, E > graph,
 			final FeatureModel< V, E > features )
 	{
+		this.colorMode = colorMode;
 		this.graph = graph;
 		this.features = features;
+		colorModeChanged();
 	}
 
 	public void colorModeChanged()

@@ -44,12 +44,13 @@ public class FeaturesColorGeneratorBranchFeatures<
 	private final FeatureModel< BV, BE > branchFeatures;
 
 	public FeaturesColorGeneratorBranchFeatures(
+			final ColorMode colorMode,
 			final ReadOnlyGraph< V, E > graph,
 			final FeatureModel< V, E > features,
 			final BranchGraph< BV, BE, V, E > branchGraph,
 			final FeatureModel< BV, BE > branchFeatures )
 	{
-		super( graph, features );
+		super( colorMode, graph, features );
 		this.branchGraph = branchGraph;
 		this.branchFeatures = branchFeatures;
 	}

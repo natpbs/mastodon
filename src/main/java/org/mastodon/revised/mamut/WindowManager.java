@@ -80,10 +80,10 @@ import org.mastodon.revised.trackscheme.action.TrackSchemeActionProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviour;
 import org.mastodon.revised.trackscheme.action.TrackSchemeBehaviourProvider;
 import org.mastodon.revised.trackscheme.action.TrackSchemeService;
-import org.mastodon.revised.trackscheme.action.TrackSchemeStyleAction;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
+import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
 import org.mastodon.revised.trackscheme.display.style.BranchGraphTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
@@ -465,7 +465,9 @@ public class WindowManager
 		final BranchGraph< BranchVertex, BranchEdge, OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > bdvBranchGraph =
 				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
 		final FeaturesColorGenerator< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > colorGenerator =
-				new FeaturesColorGeneratorBranchFeatures<>( overlayGraph, bdvFeatures, bdvBranchGraph, model.getBranchGraphFeatureModel() );
+				new FeaturesColorGeneratorBranchFeatures<>( RenderSettings.defaultStyle(),
+						overlayGraph, bdvFeatures,
+						bdvBranchGraph, model.getBranchGraphFeatureModel() );
 
 		viewer.setTimepoint( currentTimepoint );
 		final OverlayGraphRenderer< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > tracksOverlay = new OverlayGraphRenderer<>(
@@ -562,7 +564,7 @@ public class WindowManager
 		 * BDV menu.
 		 */
 
-		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer );
+		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer, colorGenerator );
 		final JMenu styleMenu = new JMenu( "Styles" );
 		styleMenu.addMenuListener( new MenuListener()
 		{
@@ -756,7 +758,7 @@ public class WindowManager
 		 * BDV menu.
 		 */
 
-		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer );
+		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer, null ); // TODO
 		final JMenu styleMenu = new JMenu( "Styles" );
 		styleMenu.addMenuListener( new MenuListener()
 		{
@@ -804,23 +806,27 @@ public class WindowManager
 
 		private RenderSettings renderSettings;
 
-		public BdvRenderSettingsUpdater( final OverlayGraphRenderer< ?, ? > overlay, final ViewerPanel viewer )
+		private final FeaturesColorGenerator< ?, ? > colorGenerator;
+
+		public BdvRenderSettingsUpdater( final OverlayGraphRenderer< ?, ? > overlay, final ViewerPanel viewer, final FeaturesColorGenerator< ?, ? > colorGenerator )
 		{
 			this.overlay = overlay;
 			this.viewer = viewer;
+			this.colorGenerator = colorGenerator;
 		}
 
 		@Override
 		public void renderSettingsChanged()
 		{
 			overlay.setRenderSettings( renderSettings );
+			colorGenerator.setColorMode( renderSettings );
 			viewer.repaint();
 		}
 	}
 
 	/**
-	 * Sets the style of a TrackScheme panel when executed & registers itself as
-	 * a listener for style changes to repaint said panel.
+	 * Sets the style of a BDV when executed & registers itself as a listener
+	 * for style changes to repaint said BDV.
 	 */
 	private class BdvRenderSettingsAction extends AbstractNamedAction
 	{
@@ -930,8 +936,7 @@ public class WindowManager
 		final BranchGraph< BranchVertex, BranchEdge, TrackSchemeVertex, TrackSchemeEdge > trackSchemeBranchGraph =
 				new BranchGraphAdapter<>( model.getBranchGraph(), vertexMap, edgeMap );
 		final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
-				new FeaturesColorGeneratorBranchFeatures<>( trackSchemeGraph, trackSchemeFeatures, trackSchemeBranchGraph, model.getBranchGraphFeatureModel() );
-		colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
+				new FeaturesColorGeneratorBranchFeatures<>( TrackSchemeStyle.defaultStyle(), trackSchemeGraph, trackSchemeFeatures, trackSchemeBranchGraph, model.getBranchGraphFeatureModel() );
 
 		final TrackSchemeOptions options  = TrackSchemeOptions.options().
 			inputTriggerConfig( keyconf ).
@@ -1111,8 +1116,7 @@ public class WindowManager
 		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
 				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
 		final BranchGraphFeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
-				new BranchGraphFeaturesColorGenerator<>( trackSchemeGraph, trackSchemeFeatures );
-		colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
+				new BranchGraphFeaturesColorGenerator<>( TrackSchemeStyle.defaultStyle(), trackSchemeGraph, trackSchemeFeatures );
 
 		/*
 		 * TrackScheme options.
@@ -1179,9 +1183,6 @@ public class WindowManager
 		return renderSettingsManager;
 	}
 
-	/*
-	 * FIXME Stop this monstruosity.
-	 */
 	private void installTrackSchemeMenu(
 			final TrackSchemeFrame frame,
 			final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator,
@@ -1197,48 +1198,12 @@ public class WindowManager
 		// Styles auto-populated from TrackScheme style manager.
 		if ( frame.getTrackschemePanel().getGraphOverlay() instanceof DefaultTrackSchemeOverlay )
 		{
-			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) frame.getTrackschemePanel().getGraphOverlay();
-			// Update listener that repaint this TrackScheme when its style
-			// changes
-			final UpdateListener panelRepainter = new UpdateListener()
-			{
-				@Override
-				public void trackSchemeStyleChanged()
-				{
-					if ( isBranchGraph )
-					{
-						// Forbid styles that do not work for branch graph.
-						final TrackSchemeStyle style = overlay.getStyle();
-						switch ( style.getVertexColorMode() )
-						{
-						case BRANCH_EDGE:
-						case BRANCH_VERTEX:
-						case FIXED:
-							break;
-						default:
-							overlay.setStyle( TrackSchemeStyle.defaultStyle() );
-							colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
-							break;
-						}
-						switch ( style.getEdgeColorMode() )
-						{
-						case BRANCH_VERTEX:
-						case BRANCH_EDGE:
-						case FIXED:
-							break;
-						default:
-							overlay.setStyle( TrackSchemeStyle.defaultStyle() );
-							colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
-							break;
-						}
-					}
-					// Trigger relayout to get the new colors.
-					frame.getTrackschemePanel().graphChanged();
-				}
-			};
+			final TrackSchemePanel panel = frame.getTrackschemePanel();
+			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) panel.getGraphOverlay();
+			final TsStyleListener styleListener = new TsStyleListener( panel, overlay, colorGenerator, isBranchGraph );
 
 			final JMenu styleMenu = new JMenu( "Styles" );
-
+			// Populate menu on the fly when it is opened.
 			styleMenu.addMenuListener( new MenuListener()
 			{
 				@Override
@@ -1270,7 +1235,7 @@ public class WindowManager
 							}
 						}
 						styleMenu.add( new JMenuItem(
-								new TrackSchemeStyleAction( style, overlay, panelRepainter, colorGenerator ) ) );
+								new TsStyleAction( style, panel, overlay, colorGenerator, styleListener ) ) );
 					}
 				}
 
@@ -1291,13 +1256,121 @@ public class WindowManager
 				public void windowClosing( final WindowEvent e )
 				{
 					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
-						style.removeUpdateListener( panelRepainter );
+						style.removeUpdateListener( styleListener );
 				};
 			} );
 
 			menu.add( styleMenu );
 		}
 		frame.setJMenuBar( menu );
+	}
+
+	private class TsStyleAction extends AbstractNamedAction
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		private final TrackSchemeStyle style;
+
+		private final TsStyleListener updater;
+
+		private final DefaultTrackSchemeOverlay overlay;
+
+		private final FeaturesColorGenerator< ?, ? > colorGenerator;
+
+		private final TrackSchemePanel panel;
+
+		public TsStyleAction(
+				final TrackSchemeStyle style,
+				final TrackSchemePanel panel,
+				final DefaultTrackSchemeOverlay overlay,
+				final FeaturesColorGenerator< ?, ? > colorGenerator,
+				final TsStyleListener updater )
+		{
+			super( style.getName() );
+			this.style = style;
+			this.overlay = overlay;
+			this.colorGenerator = colorGenerator;
+			this.panel = panel;
+			this.updater = updater;
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			overlay.getStyle().removeUpdateListener( updater );
+			overlay.setStyle( style );
+			colorGenerator.setColorMode( style );
+			style.addUpdateListener( updater );
+			panel.graphChanged();
+		}
+	}
+
+	/**
+	 * Notifies the ColorGenerator that the style have been updated and trigger
+	 * a repaint of the TrackScheme panel.
+	 */
+	private static final class TsStyleListener implements UpdateListener
+	{
+
+		private final TrackSchemePanel panel;
+
+		private final FeaturesColorGenerator< ?, ? > colorGenerator;
+
+		private final boolean isBranchGraph;
+
+		private final DefaultTrackSchemeOverlay overlay;
+
+		public TsStyleListener(
+				final TrackSchemePanel panel,
+				final DefaultTrackSchemeOverlay overlay,
+				final FeaturesColorGenerator< ?, ? > colorGenerator,
+				final boolean isBranchGraph )
+		{
+			this.panel = panel;
+			this.overlay = overlay;
+			this.colorGenerator = colorGenerator;
+			this.isBranchGraph = isBranchGraph;
+		}
+
+		@Override
+		public void trackSchemeStyleChanged()
+		{
+			/*
+			 * If we are in a branch view, check that we can still manage this
+			 * style.
+			 */
+			if ( isBranchGraph )
+			{
+				// Forbid styles that do not work for branch graph.
+				final TrackSchemeStyle style = overlay.getStyle();
+				switch ( style.getVertexColorMode() )
+				{
+				case BRANCH_EDGE:
+				case BRANCH_VERTEX:
+				case FIXED:
+					break;
+				default:
+					overlay.setStyle( TrackSchemeStyle.defaultStyle() );
+					colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
+					break;
+				}
+				switch ( style.getEdgeColorMode() )
+				{
+				case BRANCH_VERTEX:
+				case BRANCH_EDGE:
+				case FIXED:
+					break;
+				default:
+					overlay.setStyle( TrackSchemeStyle.defaultStyle() );
+					colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
+					break;
+				}
+			}
+
+			colorGenerator.colorModeChanged();
+			panel.graphChanged();
+		}
 	}
 
 	// TODO: move somewhere else. make bdvWindows, tsWindows accessible.

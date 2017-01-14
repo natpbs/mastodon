@@ -31,9 +31,11 @@ public class BranchGraphFeaturesColorGenerator< BV extends Vertex< BE >, BE exte
 
 	private final FeatureModel< BV, BE > branchFeatures;
 
-	public BranchGraphFeaturesColorGenerator( final ReadOnlyGraph< BV, BE > branchGraph, final FeatureModel< BV, BE > branchFeatures )
+	public BranchGraphFeaturesColorGenerator(
+			final ColorMode colorMode,
+			final ReadOnlyGraph< BV, BE > branchGraph, final FeatureModel< BV, BE > branchFeatures )
 	{
-		super( branchGraph, branchFeatures );
+		super( colorMode, branchGraph, branchFeatures );
 		this.branchFeatures = branchFeatures;
 	}
 
