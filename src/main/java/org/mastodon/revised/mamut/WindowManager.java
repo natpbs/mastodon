@@ -475,6 +475,7 @@ public class WindowManager
 				overlayHighlight,
 				overlayFocus,
 				overlaySelection,
+				colorGenerator,
 				colorGenerator );
 		viewer.getDisplay().addOverlayRenderer( tracksOverlay );
 		viewer.addRenderTransformListener( tracksOverlay );
@@ -564,7 +565,7 @@ public class WindowManager
 		 * BDV menu.
 		 */
 
-		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer, colorGenerator );
+		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, colorGenerator, viewer, false );
 		final JMenu styleMenu = new JMenu( "Styles" );
 		styleMenu.addMenuListener( new MenuListener()
 		{
@@ -654,6 +655,14 @@ public class WindowManager
 		final NavigationHandler< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > overlayNavigationHandler =
 				new NavigationHandlerAdapter<>( branchGraphNavigation, vertexMap, edgeMap );
 
+		/*
+		 * Features for the BDV on a branch graph.
+		 */
+		final FeatureModel< BranchVertex, BranchEdge > featureModel = model.getBranchGraphFeatureModel();
+		final FeatureModel< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > bdvBranchFeatures =
+				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
+		final BranchGraphFeaturesColorGenerator< OverlayVertexWrapper< BranchVertex, BranchEdge >, OverlayEdgeWrapper< BranchVertex, BranchEdge > > colorGenerator =
+				new BranchGraphFeaturesColorGenerator<>( RenderSettings.defaultStyle(), overlayBranchGraph, bdvBranchFeatures );
 
 		// BDV.
 		final String windowTitle = "BigDataViewer branches " + ( bdvName++ );
@@ -668,7 +677,9 @@ public class WindowManager
 						overlayGraph,
 						overlayHighlight,
 						overlayFocus,
-						overlaySelection );
+						overlaySelection,
+						colorGenerator,
+						colorGenerator );
 		viewer.getDisplay().addOverlayRenderer( tracksOverlay );
 		viewer.addRenderTransformListener( tracksOverlay );
 		viewer.addTimePointListener( tracksOverlay );
@@ -758,7 +769,7 @@ public class WindowManager
 		 * BDV menu.
 		 */
 
-		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, viewer, null ); // TODO
+		final BdvRenderSettingsUpdater panelRepainter = new BdvRenderSettingsUpdater( tracksOverlay, colorGenerator, viewer, true );
 		final JMenu styleMenu = new JMenu( "Styles" );
 		styleMenu.addMenuListener( new MenuListener()
 		{
@@ -767,8 +778,32 @@ public class WindowManager
 			{
 				styleMenu.removeAll();
 				for ( final RenderSettings rs : renderSettingsManager.getRenderSettings() )
+				{
+					/*
+					 * Do not add RenderSettings with color modes that we cannot
+					 * define for a branch graph.
+					 */
+					switch ( rs.getVertexColorMode() )
+					{
+					case BRANCH_EDGE:
+					case BRANCH_VERTEX:
+					case FIXED:
+						break;
+					default:
+						continue;
+					}
+					switch ( rs.getEdgeColorMode() )
+					{
+					case FIXED:
+					case BRANCH_EDGE:
+					case BRANCH_VERTEX:
+						break;
+					default:
+						continue;
+					}
 					styleMenu.add( new JMenuItem(
 							new BdvRenderSettingsAction( rs, panelRepainter ) ) );
+				}
 
 			}
 
@@ -808,16 +843,64 @@ public class WindowManager
 
 		private final FeaturesColorGenerator< ?, ? > colorGenerator;
 
-		public BdvRenderSettingsUpdater( final OverlayGraphRenderer< ?, ? > overlay, final ViewerPanel viewer, final FeaturesColorGenerator< ?, ? > colorGenerator )
+		private final boolean isBranchGraph;
+
+		/**
+		 * Creates a listener to a render settings that will update a display
+		 * and a color generator, then trigger the repaint of a BDV viewer upon
+		 * render settings changes.
+		 *
+		 * @param overlay
+		 *            the overlay to be notified of render settings changes.
+		 * @param viewer
+		 *            the BDV panel to repaint.
+		 * @param colorGenerator
+		 *            the color generator to be notified of render settings
+		 *            changes.
+		 * @param isBranchGraph
+		 *            whether the display we paint in is meant for branch
+		 *            graphs.
+		 */
+		public BdvRenderSettingsUpdater( final OverlayGraphRenderer< ?, ? > overlay, final FeaturesColorGenerator< ?, ? > colorGenerator, final ViewerPanel viewer, final boolean isBranchGraph )
 		{
 			this.overlay = overlay;
 			this.viewer = viewer;
 			this.colorGenerator = colorGenerator;
+			this.isBranchGraph = isBranchGraph;
 		}
 
 		@Override
 		public void renderSettingsChanged()
 		{
+			if ( isBranchGraph )
+			{
+				/*
+				 * If we are a settings updater for the display of a branch
+				 * graph, and the render settings was updated for something not
+				 * defined for branch graph, then we set the render settings of
+				 * the display to the default one.
+				 */
+				switch ( renderSettings.getVertexColorMode() )
+				{
+				case BRANCH_EDGE:
+				case BRANCH_VERTEX:
+				case FIXED:
+					break;
+				default:
+					new BdvRenderSettingsAction( RenderSettings.defaultStyle(), this ).actionPerformed( null );
+					return;
+				}
+				switch ( renderSettings.getEdgeColorMode() )
+				{
+				case FIXED:
+				case BRANCH_EDGE:
+				case BRANCH_VERTEX:
+					break;
+				default:
+					new BdvRenderSettingsAction( RenderSettings.defaultStyle(), this ).actionPerformed( null );
+					return;
+				}
+			}
 			overlay.setRenderSettings( renderSettings );
 			colorGenerator.setColorMode( renderSettings );
 			viewer.repaint();

@@ -11,6 +11,10 @@ import java.util.Iterator;
 
 import org.mastodon.kdtree.ClipConvexPolytope;
 import org.mastodon.revised.bdv.overlay.util.GeometryUtils;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
+import org.mastodon.revised.ui.ColorMode.VertexColorMode;
+import org.mastodon.revised.ui.EdgeColorGenerator;
+import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 import org.mastodon.revised.ui.selection.Selection;
@@ -39,9 +43,11 @@ public class OverlayBranchGraphRenderer<
 			final OverlayGraph< V, E > graph,
 			final HighlightModel< BV, BE > highlight,
 			final FocusModel< BV, BE > focus,
-			final Selection< BV, BE > selection )
+			final Selection< BV, BE > selection,
+			final VertexColorGenerator< BV > vertexColorGenerator,
+			final EdgeColorGenerator< BE > edgeColorGenerator )
 	{
-		super( branchGraph, highlight, focus, selection, null ); // TODO
+		super( branchGraph, highlight, focus, selection, vertexColorGenerator, edgeColorGenerator );
 		this.branchGraph = branchGraph;
 		this.wrappedGraph = graph;
 	}
@@ -72,6 +78,13 @@ public class OverlayBranchGraphRenderer<
 
 		final double sliceDistanceFade = ellipsoidFadeDepth;
 		final double timepointDistanceFade = 0.5;
+
+		final boolean isVertexColorFixed = ( vertexColorMode == VertexColorMode.FIXED );
+		Color vertexColor1 = fixedColor1;
+		Color vertexColor2 = fixedColor2;
+		final boolean isEdgeColorFixed = ( edgeColorMode == EdgeColorMode.FIXED );
+		Color edgeColor1 = fixedColor1;
+		Color edgeColor2 = fixedColor2;
 
 		final ScreenVertexMath screenVertexMath = new ScreenVertexMath();
 
@@ -142,8 +155,13 @@ public class OverlayBranchGraphRenderer<
 							{
 								if ( ( sd0 > -1 && sd0 < 1 ) || ( sd1 > -1 && sd1 < 1 ) )
 								{
+									if ( !isEdgeColorFixed )
+									{
+										edgeColor1 = edgeColorGenerator.color( edge );
+										edgeColor2 = edgeColor1;
+									}
 									final Color c1 = getColor( sd1, td0, sliceDistanceFade, timepointDistanceFade,
-											selection.isSelected( edge ), color1, color2 );
+											selection.isSelected( edge ), edgeColor1, edgeColor2 );
 									graphics.setPaint( c1 );
 									if ( isHighlighted )
 										graphics.setStroke( highlightedEdgeStroke );
@@ -209,6 +227,12 @@ public class OverlayBranchGraphRenderer<
 					final double z = screenVertexMath.getViewPos()[ 2 ];
 					final double sd = sliceDistance( z, maxDepth );
 
+					if ( !isVertexColorFixed )
+					{
+						vertexColor1 = vertexColorGenerator.color( vertex );
+						vertexColor2 = vertexColor1;
+					}
+
 					if ( drawEllipsoidSliceIntersection )
 					{
 						if ( screenVertexMath.intersectsViewPlane() )
@@ -220,7 +244,7 @@ public class OverlayBranchGraphRenderer<
 							graphics.translate( tr[ 0 ], tr[ 1 ] );
 							graphics.rotate( theta );
 							graphics.setColor( getColor( 0, 0, ellipsoidFadeDepth, timepointDistanceFade,
-									selection.isSelected( vertex ), color1, color2 ) );
+									selection.isSelected( vertex ), vertexColor1, vertexColor2 ) );
 							if ( isHighlighted )
 								graphics.setStroke( highlightedVertexStroke );
 							else if ( isFocused )
@@ -259,7 +283,7 @@ public class OverlayBranchGraphRenderer<
 							graphics.translate( tr[ 0 ], tr[ 1 ] );
 							graphics.rotate( theta );
 							graphics.setColor( getColor( sd, 0, ellipsoidFadeDepth, timepointDistanceFade,
-									selection.isSelected( vertex ), color1, color2 ) );
+									selection.isSelected( vertex ), vertexColor1, vertexColor2 ) );
 							if ( isHighlighted )
 								graphics.setStroke( highlightedVertexStroke );
 							else if ( isFocused )
@@ -294,7 +318,7 @@ public class OverlayBranchGraphRenderer<
 						if ( drawPoint )
 						{
 							graphics.setColor( getColor( sd, 0, pointFadeDepth, timepointDistanceFade,
-									selection.isSelected( vertex ), color1, color2 ) );
+									selection.isSelected( vertex ), vertexColor1, vertexColor2 ) );
 							double radius = pointRadius;
 							if ( isHighlighted || isFocused )
 								radius *= 2;

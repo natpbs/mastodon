@@ -15,7 +15,10 @@ import org.mastodon.collection.RefCollections;
 import org.mastodon.collection.RefList;
 import org.mastodon.kdtree.ClipConvexPolytope;
 import org.mastodon.revised.bdv.overlay.util.GeometryUtils;
-import org.mastodon.revised.ui.FeaturesColorGenerator;
+import org.mastodon.revised.ui.ColorMode.EdgeColorMode;
+import org.mastodon.revised.ui.ColorMode.VertexColorMode;
+import org.mastodon.revised.ui.EdgeColorGenerator;
+import org.mastodon.revised.ui.VertexColorGenerator;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightModel;
 import org.mastodon.revised.ui.selection.Selection;
@@ -83,20 +86,35 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 
 	protected final Selection< V, E > selection;
 
-	private final FeaturesColorGenerator< V, E > colorGenerator;
+	/**
+	 * The color generator for vertices. If the vertex color mode of the render
+	 * settings is {@link VertexColorMode#FIXED}, then it is overridden and the
+	 * vertices are painted with the {@link #fixedColor1} color.
+	 */
+	protected final VertexColorGenerator< V > vertexColorGenerator;
+
+	/**
+	 * The color generator for edges. If the vertex color mode of the render
+	 * settings is {@link EdgeColorMode#FIXED}, then it is overridden and the
+	 * edges are painted with the {@link #fixedColor1} and {@link #fixedColor2}
+	 * colors.
+	 */
+	protected final EdgeColorGenerator< E > edgeColorGenerator;
 
 	public OverlayGraphRenderer(
 			final OverlayGraph< V, E > graph,
 			final HighlightModel< V, E > highlight,
 			final FocusModel< V, E > focus,
 			final Selection< V, E > selection,
-			final FeaturesColorGenerator< V, E > colorGenerator )
+			final VertexColorGenerator< V > vertexColorGenerator,
+			final EdgeColorGenerator< E > edgeColorGenerator )
 	{
 		this.graph = graph;
 		this.highlight = highlight;
 		this.focus = focus;
 		this.selection = selection;
-		this.colorGenerator = colorGenerator;
+		this.vertexColorGenerator = vertexColorGenerator;
+		this.edgeColorGenerator = edgeColorGenerator;
 		index = graph.getIndex();
 		renderTransform = new AffineTransform3D();
 		setRenderSettings( RenderSettings.defaultStyle() );
@@ -147,9 +165,11 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 		highlightedVertexStroke = settings.getSpotHighlightStroke();
 		defaultEdgeStroke = settings.getLinkStroke();
 		highlightedEdgeStroke = settings.getLinkHighlightStroke();
-		color1 = settings.getLinkColor1();
-		color2 = settings.getLinkColor2();
+		fixedColor1 = settings.getLinkColor1();
+		fixedColor2 = settings.getLinkColor2();
 		drawLinkArrows = settings.getDrawLinkArrows();
+		vertexColorMode = settings.getVertexColorMode();
+		edgeColorMode = settings.getEdgeColorMode();
 	}
 
 	public static final double pointRadius = 2.5;
@@ -285,16 +305,32 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 	protected Stroke highlightedEdgeStroke;
 
 	/**
-	 * The first color to paint links. The actual color of edges is interpolated
-	 * from {@link #color1} to {@link #color2} along time.
+	 * The color mode for vertices. If it is {@link VertexColorMode#FIXED}, all
+	 * vertices are painted using the {@link #fixedColor1} color. Otherwise, the
+	 * {@link #vertexColorGenerator} is used to determine the vertex color.
 	 */
-	protected Color color1;
+	protected VertexColorMode vertexColorMode;
+
+	/**
+	 * The color mode for edges. If it is {@link EdgeColorMode#FIXED}, all edges
+	 * are painted using the {@link #fixedColor1} and {@link #fixedColor2}
+	 * colors. Otherwise, the {@link #edgeColorGenerator} is used to determine
+	 * the vertex color.
+	 */
+	protected EdgeColorMode edgeColorMode;
+
+	/**
+	 * The first color to paint links and vertices. The actual color of edges is
+	 * interpolated from {@link #fixedColor1} to {@link #fixedColor2} along
+	 * time.
+	 */
+	protected Color fixedColor1;
 
 	/**
 	 * The second color to paint edges. The actual color of edges is
-	 * interpolated from {@link #color1} to {@link #color2} along time.
+	 * interpolated from {@link #fixedColor1} to {@link #fixedColor2} along time.
 	 */
-	protected Color color2;
+	protected Color fixedColor2;
 
 	/**
 	 * Whether do draw link arrow heads.
@@ -581,6 +617,13 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 		final double sliceDistanceFade = ellipsoidFadeDepth;
 		final double timepointDistanceFade = 0.5;
 
+		final boolean isVertexColorFixed = ( vertexColorMode == VertexColorMode.FIXED );
+		Color vertexColor1 = fixedColor1;
+		Color vertexColor2 = fixedColor2;
+		final boolean isEdgeColorFixed = ( edgeColorMode == EdgeColorMode.FIXED );
+		Color edgeColor1 = fixedColor1;
+		Color edgeColor2 = fixedColor2;
+
 		final ScreenVertexMath screenVertexMath = new ScreenVertexMath();
 
 		index.readLock().lock();
@@ -625,12 +668,17 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 							{
 								if ( ( sd0 > -1 && sd0 < 1 ) || ( sd1 > -1 && sd1 < 1 ) )
 								{
+									if ( !isEdgeColorFixed )
+									{
+										edgeColor1 = edgeColorGenerator.color( edge );
+										edgeColor2 = edgeColor1;
+									}
 									final Color c1 = getColor( sd1, td1, sliceDistanceFade, timepointDistanceFade,
-											selection.isSelected( edge ), color1, color2 );
+											selection.isSelected( edge ), edgeColor1, edgeColor2 );
 									if ( useGradient )
 									{
 										final Color c0 = getColor( sd0, td0, sliceDistanceFade, timepointDistanceFade,
-												selection.isSelected( edge ), color1, color2 );
+												selection.isSelected( edge ), edgeColor1, edgeColor2 );
 										graphics.setPaint( new GradientPaint( x0, y0, c0, x1, y1, c1 ) );
 									}
 									else
@@ -689,6 +737,12 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 					final double z = screenVertexMath.getViewPos()[ 2 ];
 					final double sd = sliceDistance( z, maxDepth );
 
+					if ( !isVertexColorFixed )
+					{
+						vertexColor1 = vertexColorGenerator.color( vertex );
+						vertexColor2 = vertexColor1;
+					}
+
 					if ( drawEllipsoidSliceIntersection )
 					{
 						if ( screenVertexMath.intersectsViewPlane() )
@@ -700,7 +754,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 							graphics.translate( tr[ 0 ], tr[ 1 ] );
 							graphics.rotate( theta );
 							graphics.setColor( getColor( 0, 0, ellipsoidFadeDepth, timepointDistanceFade,
-									selection.isSelected( vertex ), color1, color2 ) );
+									selection.isSelected( vertex ), vertexColor1, vertexColor2 ) );
 							if ( isHighlighted )
 								graphics.setStroke( highlightedVertexStroke );
 							else if ( isFocused )
@@ -739,7 +793,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 							graphics.translate( tr[ 0 ], tr[ 1 ] );
 							graphics.rotate( theta );
 							graphics.setColor( getColor( sd, 0, ellipsoidFadeDepth, timepointDistanceFade,
-									selection.isSelected( vertex ), color1, color2 ) );
+									selection.isSelected( vertex ), vertexColor1, vertexColor2 ) );
 							if ( isHighlighted )
 								graphics.setStroke( highlightedVertexStroke );
 							else if ( isFocused )
@@ -773,7 +827,7 @@ public class OverlayGraphRenderer< V extends OverlayVertex< V, E >, E extends Ov
 						if ( drawPoint )
 						{
 							graphics.setColor( getColor( sd, 0, pointFadeDepth, timepointDistanceFade,
-									selection.isSelected( vertex ), color1, color2 ) );
+									selection.isSelected( vertex ), vertexColor1, vertexColor2 ) );
 							double radius = pointRadius;
 							if ( isHighlighted || isFocused )
 								radius *= 2;
