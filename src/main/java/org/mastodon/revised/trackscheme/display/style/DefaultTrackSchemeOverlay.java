@@ -1,4 +1,4 @@
-package org.mastodon.revised.trackscheme.display.laf;
+package org.mastodon.revised.trackscheme.display.style;
 
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.APPEAR;
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.DISAPPEAR;

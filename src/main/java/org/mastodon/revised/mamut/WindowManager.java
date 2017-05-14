@@ -57,7 +57,7 @@ import org.mastodon.revised.trackscheme.TrackSchemeVertexBimap;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
-import org.mastodon.revised.trackscheme.display.ui.TrackSchemeStyleChooser;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleChooser;
 import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
 import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.revised.ui.HighlightBehaviours;

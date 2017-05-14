@@ -1,4 +1,4 @@
-package org.mastodon.revised.trackscheme.display.ui;
+package org.mastodon.revised.trackscheme.display.style;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -34,13 +34,12 @@ import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.TrackSchemeVertexBimap;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
-import org.mastodon.revised.trackscheme.display.laf.TrackSchemeStyle;
-import org.mastodon.revised.trackscheme.display.ui.dummygraph.DummyEdge;
-import org.mastodon.revised.trackscheme.display.ui.dummygraph.DummyGraph;
-import org.mastodon.revised.trackscheme.display.ui.dummygraph.DummyGraph.Examples;
+import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyEdge;
+import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph;
+import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyVertex;
+import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph.Examples;
 import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
 import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
-import org.mastodon.revised.trackscheme.display.ui.dummygraph.DummyVertex;
 import org.mastodon.revised.ui.grouping.GroupManager;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.FocusModelImp;
