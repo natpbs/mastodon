@@ -2,6 +2,8 @@ package org.mastodon.revised.trackscheme;
 
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.NONE;
 
+import java.awt.Color;
+
 import org.mastodon.pool.ByteMappedElement;
 import org.mastodon.pool.ByteMappedElementArray;
 import org.mastodon.pool.Pool;
@@ -12,6 +14,7 @@ import org.mastodon.pool.attributes.BooleanAttribute;
 import org.mastodon.pool.attributes.ByteAttribute;
 import org.mastodon.pool.attributes.DoubleAttribute;
 import org.mastodon.pool.attributes.IndexAttribute;
+import org.mastodon.pool.attributes.IntAttribute;
 import org.mastodon.revised.trackscheme.ScreenEdge.ScreenEdgePool;
 import org.mastodon.revised.trackscheme.ScreenVertex.Transition;
 
@@ -30,6 +33,7 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ScreenEdgePool, ByteMapp
 		final BooleanField selected = booleanField();
 		final ByteField transition = byteField();
 		final DoubleField ipRatio = doubleField();
+		final IntField color = intField();
 	}
 
 	public static ScreenEdgeLayout layout = new ScreenEdgeLayout();
@@ -42,6 +46,7 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ScreenEdgePool, ByteMapp
 		final BooleanAttribute< ScreenEdge > selected = new BooleanAttribute<>( layout.selected, this );
 		final ByteAttribute< ScreenEdge > transition = new ByteAttribute<>( layout.transition, this );
 		final DoubleAttribute< ScreenEdge > ipRatio = new DoubleAttribute<>( layout.ipRatio, this );
+		final IntAttribute< ScreenEdge > color = new IntAttribute<>( layout.color, this );
 
 		public ScreenEdgePool( final int initialCapacity )
 		{
@@ -76,13 +81,15 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ScreenEdgePool, ByteMapp
 			final int id,
 			final int sourceScreenVertexIndex,
 			final int targetScreenVertexIndex,
-			final boolean selected )
+			final boolean selected,
+			final Color color )
 	{
 		setTrackSchemeEdgeId( id );
 		setSourceScreenVertexIndex( sourceScreenVertexIndex );
 		setTargetScreenVertexIndex( targetScreenVertexIndex );
 		setSelected( selected );
 		setTransition( NONE );
+		setColor( color );
 		return this;
 	}
 
@@ -187,6 +194,21 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ScreenEdgePool, ByteMapp
 	protected void setSelected( final boolean selected )
 	{
 		pool.selected.setQuiet( this, selected );
+	}
+
+	/**
+	 * Returns the color of the edge.
+	 * 
+	 * @return the color.
+	 */
+	public Color getColor()
+	{
+		return new Color( pool.color.get( this ), true );
+	}
+
+	protected void setColor( final Color color )
+	{
+		pool.color.set( this, color.getRGB() );
 	}
 
 	@Override

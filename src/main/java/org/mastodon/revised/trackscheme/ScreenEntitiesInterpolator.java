@@ -6,6 +6,8 @@ import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.DISAPPEAR
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.NONE;
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.SELECTING;
 
+import java.awt.Color;
+
 import org.mastodon.collection.ref.IntRefHashMap;
 
 public class ScreenEntitiesInterpolator
@@ -126,7 +128,8 @@ public class ScreenEntitiesInterpolator
 					e.getTrackSchemeEdgeId(),
 					sourceIndex,
 					targetIndex,
-					endSelected ) );
+					endSelected,
+					Color.BLACK ) );
 			if ( idToStartEdge.get( e.getTrackSchemeEdgeId(), eStart ) != null )
 			{
 				// changing selection state?
@@ -188,6 +191,7 @@ public class ScreenEntitiesInterpolator
 						: ( endSelected
 								? SELECTING
 								: DESELECTING ) );
+		vCurrent.setColor( vEnd.getColor() );
 		vCurrent.setInterpolationCompletionRatio( ratio );
 		vEnd.setInterpolatedScreenVertexIndex( vCurrent.getInternalPoolIndex() );
 	}
@@ -209,6 +213,7 @@ public class ScreenEntitiesInterpolator
 		vCurrent.setY( startY );
 		vCurrent.setTransition( DISAPPEAR );
 		vCurrent.setInterpolationCompletionRatio( ratio );
+		vCurrent.setColor( vStart.getColor() );
 	}
 
 	private void appear( final ScreenVertex vEnd, final double ratio, final ScreenVertex vCurrent )
@@ -221,6 +226,7 @@ public class ScreenEntitiesInterpolator
 		vCurrent.setY( vEnd.getY() );
 		vCurrent.setTransition( APPEAR );
 		vCurrent.setInterpolationCompletionRatio( ratio );
+		vCurrent.setColor( vEnd.getColor() );
 		vEnd.setInterpolatedScreenVertexIndex( vCurrent.getInternalPoolIndex() );
 	}
 }

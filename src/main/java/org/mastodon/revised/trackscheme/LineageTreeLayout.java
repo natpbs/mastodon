@@ -1,5 +1,6 @@
 package org.mastodon.revised.trackscheme;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -359,7 +360,7 @@ public class LineageTreeLayout
 						final double x = ( v1.getLayoutX() - minX ) * xScale + decorationsOffsetX;
 						final boolean selected = selection.isSelected( v1 );
 						final boolean ghost = v1.isGhost();
-						screenVertexPool.create( sv ).init( id, x, y, selected, ghost );
+						screenVertexPool.create( sv ).init( id, x, y, selected, ghost, Color.BLACK );
 						screenVertices.add( sv );
 
 						minVertexScreenDist = Math.min( minVertexScreenDist, x - prevX );
@@ -376,7 +377,7 @@ public class LineageTreeLayout
 								final int sourceScreenVertexIndex = v2si;
 								final int targetScreenVertexIndex = v1si;
 								final boolean eselected = selection.isSelected( edge );
-								screenEdgePool.create( se ).init( eid, sourceScreenVertexIndex, targetScreenVertexIndex, eselected );
+								screenEdgePool.create( se ).init( eid, sourceScreenVertexIndex, targetScreenVertexIndex, eselected, Color.BLACK );
 								screenEdges.add( se );
 								final int sei = se.getInternalPoolIndex();
 								edge.setScreenEdgeIndex( sei );
