@@ -20,8 +20,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.mastodon.revised.model.feature.DefaultFeatureRangeCalculator;
 import org.mastodon.revised.model.feature.FeatureComputerService;
+import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 import org.mastodon.revised.model.mamut.Model;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
+import org.mastodon.revised.ui.DisplaySettingsDialog;
 import org.mastodon.revised.ui.util.FileChooser;
 import org.mastodon.revised.ui.util.XmlFileFilter;
 import org.scijava.Context;
@@ -53,13 +57,16 @@ public class MainWindow extends JFrame
 
 	private final JButton featureComputationButton;
 
+	private final TrackSchemeStyleManager trackSchemeStyleManager;
+
+	private final JButton displaySettingsButton;
 
 	public MainWindow( final InputTriggerConfig keyconf )
 	{
 		super( "test" );
 		this.keyconf = keyconf;
-
-		tgmmImportDialog = new TgmmImportDialog( this );
+		this.tgmmImportDialog = new TgmmImportDialog( this );
+		this.trackSchemeStyleManager = new TrackSchemeStyleManager();
 
 		final JPanel buttonsPanel = new JPanel();
 		buttonsPanel.setLayout( new GridLayout( 7, 1 ) );
@@ -90,6 +97,8 @@ public class MainWindow extends JFrame
 		this.featureComputationButton = new JButton( "features and tags" );
 		buttonsPanel.add( featureComputationButton );
 
+		this.displaySettingsButton = new JButton( "display settings" );
+		buttonsPanel.add( displaySettingsButton );
 		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
 
 		final JButton importButton = new JButton( "import tgmm" );
@@ -176,11 +185,35 @@ public class MainWindow extends JFrame
 		if ( windowManager != null )
 			windowManager.closeAllWindows();
 
-		windowManager = new WindowManager( spimDataXmlFilename, spimData, model, keyconf );
+		windowManager = new WindowManager(
+				spimDataXmlFilename, spimData,
+				model,
+				trackSchemeStyleManager,
+				keyconf );
 
 		/*
-		 * Feature calculation.
+		 * Display settings.
 		 */
+
+		final FeatureRangeCalculator graphFeatureRangeCalculator =
+				new DefaultFeatureRangeCalculator<>(
+						windowManager.getModel().getGraph(),
+						windowManager.getModel().getGraphFeatureModel() );
+
+		final DisplaySettingsDialog displaySettingsDialog =
+				new DisplaySettingsDialog(
+						this,
+						trackSchemeStyleManager,
+						windowManager.getModel().getGraphFeatureModel(),
+						graphFeatureRangeCalculator );
+		displaySettingsDialog.setSize( 480, 1000 );
+
+		final ActionListener[] listeners = displaySettingsButton.getActionListeners();
+		for ( final ActionListener listener : listeners )
+			displaySettingsButton.removeActionListener( listener );
+
+		displaySettingsButton.addActionListener(
+				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
 
 		/*
 		 * TODO FIXE Ugly hack to get proper service instantiation. Fix it by
@@ -189,7 +222,6 @@ public class MainWindow extends JFrame
 		final Context context = new Context();
 		@SuppressWarnings( "unchecked" )
 		final FeatureComputerService< Model > featureComputerService = context.getService( FeatureComputerService.class );
-
 		final Dialog featureComputationDialog = new FeatureAndTagDialog( this, windowManager.getModel(), featureComputerService );
 		featureComputationDialog.setSize( 400, 400 );
 

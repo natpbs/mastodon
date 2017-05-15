@@ -25,8 +25,8 @@ import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions.Values;
 import org.mastodon.revised.trackscheme.display.animate.AbstractAnimator;
-import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
+import org.mastodon.revised.ui.coloring.EdgeColorGenerator;
+import org.mastodon.revised.ui.coloring.VertexColorGenerator;
 import org.mastodon.revised.ui.selection.FocusListener;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.HighlightListener;
@@ -151,6 +151,10 @@ public class TrackSchemePanel extends JPanel implements
 
 	private NavigationBehaviour navigationBehaviour;
 
+	private final VertexColorGenerator< TrackSchemeVertex > vertexColorGenerator;
+
+	private final EdgeColorGenerator< TrackSchemeEdge > edgeColorGenerator;
+
 	public TrackSchemePanel(
 			final TrackSchemeGraph< ?, ? > graph,
 			final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > highlight,
@@ -165,22 +169,23 @@ public class TrackSchemePanel extends JPanel implements
 
 		final Values options = optional.values;
 
-		graph.addGraphChangeListener( this );
-		navigation.addNavigationListener( this );
+		vertexColorGenerator = options.getVertexColorGenerator();
+		edgeColorGenerator = options.getEdgeColorGenerator();
 
 		final int w = options.getWidth();
 		final int h = options.getHeight();
 		display = new InteractiveDisplayCanvasComponent<>( w, h, options.getTransformEventHandlerFactory() );
 		display.addTransformListener( this );
 
+		graphOverlay = options.getTrackSchemeOverlayFactory().create( graph, highlight, focus );
+		graphOverlay.setCanvasSize( w, h );
+		display.addOverlayRenderer( graphOverlay );
+
+		graph.addGraphChangeListener( this );
+		navigation.addNavigationListener( this );
 		highlight.addHighlightListener( this );
 		focus.addFocusListener( this );
 		selection.addSelectionListener( this );
-
-		style = TrackSchemeStyle.defaultStyle().copy( "default" );
-		graphOverlay = new DefaultTrackSchemeOverlay( graph, highlight, focus, optional, style );
-
-		display.addOverlayRenderer( graphOverlay );
 
 		// This should be the last OverlayRenderer in display.
 		// It triggers repainting if there is currently an ongoing animation.
@@ -714,17 +719,8 @@ public class TrackSchemePanel extends JPanel implements
 		return display;
 	}
 
-	// TODO: THIS IS FOR TESTING ONLY
-	private TrackSchemeStyle style;
-
 	// TODO remove??? revise TrackSchemePanel / TrackSchemeFrame construction.
-	public void setTrackSchemeStyle( final TrackSchemeStyle s )
-	{
-		style.set( s );
-	}
-
-	// TODO remove??? revise TrackSchemePanel / TrackSchemeFrame construction.
-	protected OffsetHeaders getOffsetDecorations()
+	public OffsetHeaders getOffsetDecorations()
 	{
 		return offsetHeaders;
 	}
@@ -826,7 +822,8 @@ public class TrackSchemePanel extends JPanel implements
 			if (duration > 0 )
 			{
 				copyIpStart();
-				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight() );
+				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight(),
+						vertexColorGenerator, edgeColorGenerator );
 				swapIpEnd();
 				interpolator = new ScreenEntitiesInterpolator( screenEntitiesIpStart, screenEntitiesIpEnd );
 			}
@@ -834,7 +831,8 @@ public class TrackSchemePanel extends JPanel implements
 			{
 				interpolator = null;
 				swapPools();
-				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight() );
+				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight(),
+						vertexColorGenerator, edgeColorGenerator );
 				lastComputedScreenEntities = screenEntities;
 			}
 		}
@@ -843,12 +841,13 @@ public class TrackSchemePanel extends JPanel implements
 		{
 			if ( interpolator != null )
 			{
-				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight() );
-				swapIpEnd();
-				interpolator = new ScreenEntitiesInterpolator(
-						screenEntitiesIpStart,
-						screenEntitiesIpEnd,
-						ScreenEntitiesInterpolator.getIncrementalY( screenEntitiesIpStart, screenEntitiesIpEnd ) );
+				layout.cropAndScale( transform, screenEntities, offsetHeaders.getWidth(), offsetHeaders.getHeight(),
+						vertexColorGenerator, edgeColorGenerator );;
+						swapIpEnd();
+						interpolator = new ScreenEntitiesInterpolator(
+								screenEntitiesIpStart,
+								screenEntitiesIpEnd,
+								ScreenEntitiesInterpolator.getIncrementalY( screenEntitiesIpStart, screenEntitiesIpEnd ) );
 			}
 			else
 			{

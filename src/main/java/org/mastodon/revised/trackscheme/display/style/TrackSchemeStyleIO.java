@@ -14,6 +14,9 @@ import org.mastodon.revised.io.yaml.AbstractWorkaroundConstruct;
 import org.mastodon.revised.io.yaml.WorkaroundConstructor;
 import org.mastodon.revised.io.yaml.WorkaroundRepresent;
 import org.mastodon.revised.io.yaml.WorkaroundRepresenter;
+import org.mastodon.revised.ui.coloring.ColorModeIO;
+import org.mastodon.revised.ui.coloring.ColorModeIO.ColorModeConstructor;
+import org.mastodon.revised.ui.coloring.ColorModeIO.ColorModeRepresenter;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -23,11 +26,12 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 
-public class TrackSchemeStyleIO
+class TrackSchemeStyleIO
 {
-	public static final Tag COLOR_TAG = new Tag( "!color" );
 
-	static class TrackSchemeStyleRepresenter extends WorkaroundRepresenter
+	private static final Tag COLOR_TAG = new Tag( "!color" );
+
+	private static class TrackSchemeStyleRepresenter extends ColorModeRepresenter
 	{
 		public TrackSchemeStyleRepresenter()
 		{
@@ -38,11 +42,11 @@ public class TrackSchemeStyleIO
 		}
 	}
 
-	static class TrackschemeStyleConstructor extends WorkaroundConstructor
+	private static class TrackschemeStyleConstructor extends ColorModeConstructor
 	{
 		public TrackschemeStyleConstructor()
 		{
-			super( Object.class );
+			super();
 			putConstruct( new ConstructColor( this ) );
 			putConstruct( new ConstructBasicStroke( this ) );
 			putConstruct( new ConstructFont( this ) );
@@ -59,7 +63,7 @@ public class TrackSchemeStyleIO
 		return yaml;
 	}
 
-	public static class RepresentColor extends WorkaroundRepresent
+	private static class RepresentColor extends WorkaroundRepresent
 	{
 		public RepresentColor( final WorkaroundRepresenter r )
 		{
@@ -79,7 +83,7 @@ public class TrackSchemeStyleIO
 		}
 	}
 
-	public static class ConstructColor extends AbstractWorkaroundConstruct
+	private static class ConstructColor extends AbstractWorkaroundConstruct
 	{
 		public ConstructColor( final WorkaroundConstructor c )
 		{
@@ -105,9 +109,9 @@ public class TrackSchemeStyleIO
 		}
 	}
 
-	public static final Tag STROKE_TAG = new Tag( "!stroke" );
+	private static final Tag STROKE_TAG = new Tag( "!stroke" );
 
-	public static class RepresentBasicStroke extends WorkaroundRepresent
+	private static class RepresentBasicStroke extends WorkaroundRepresent
 	{
 		public RepresentBasicStroke( final WorkaroundRepresenter r )
 		{
@@ -138,7 +142,7 @@ public class TrackSchemeStyleIO
 		}
 	}
 
-	public static class ConstructBasicStroke extends AbstractWorkaroundConstruct
+	private static class ConstructBasicStroke extends AbstractWorkaroundConstruct
 	{
 		public ConstructBasicStroke( final WorkaroundConstructor c )
 		{
@@ -176,9 +180,9 @@ public class TrackSchemeStyleIO
 		}
 	}
 
-	public static final Tag FONT_TAG = new Tag( "!font" );
+	private static final Tag FONT_TAG = new Tag( "!font" );
 
-	public static class RepresentFont extends WorkaroundRepresent
+	private static class RepresentFont extends WorkaroundRepresent
 	{
 		public RepresentFont( final WorkaroundRepresenter r )
 		{
@@ -198,7 +202,7 @@ public class TrackSchemeStyleIO
 		}
 	}
 
-	public static class ConstructFont extends AbstractWorkaroundConstruct
+	private static class ConstructFont extends AbstractWorkaroundConstruct
 	{
 		public ConstructFont( final WorkaroundConstructor c )
 		{
@@ -224,9 +228,9 @@ public class TrackSchemeStyleIO
 		}
 	}
 
-	public static final Tag STYLE_TAG = new Tag( "!trackschemestyle" );
+	private static final Tag STYLE_TAG = new Tag( "!trackschemestyle" );
 
-	public static class RepresentStyle extends WorkaroundRepresent
+	private static class RepresentStyle extends WorkaroundRepresent
 	{
 		public RepresentStyle( final WorkaroundRepresenter r )
 		{
@@ -239,42 +243,51 @@ public class TrackSchemeStyleIO
 			final TrackSchemeStyle s = ( TrackSchemeStyle ) data;
 			final Map< String, Object > mapping = new LinkedHashMap< >();
 
-			mapping.put( "name", s.name );
-			mapping.put( "edgeColor", s.edgeColor );
-			mapping.put( "vertexFillColor", s.vertexFillColor );
-			mapping.put( "vertexDrawColor", s.vertexDrawColor );
-			mapping.put( "selectedVertexFillColor", s.selectedVertexFillColor );
-			mapping.put( "selectedEdgeColor", s.selectedEdgeColor );
-			mapping.put( "selectedVertexDrawColor", s.selectedVertexDrawColor );
-			mapping.put( "simplifiedVertexFillColor", s.simplifiedVertexFillColor );
-			mapping.put( "selectedSimplifiedVertexFillColor", s.selectedSimplifiedVertexFillColor );
-			mapping.put( "backgroundColor", s.backgroundColor );
-			mapping.put( "currentTimepointColor", s.currentTimepointColor );
-			mapping.put( "decorationColor", s.decorationColor );
-			mapping.put( "vertexRangeColor", s.vertexRangeColor );
-			mapping.put( "headerBackgroundColor", s.headerBackgroundColor );
-			mapping.put( "headerDecorationColor", s.headerDecorationColor );
-			mapping.put( "headerCurrentTimepointColor", s.headerCurrentTimepointColor );
-			mapping.put( "font", s.font );
-			mapping.put( "headerFont", s.headerFont );
-			mapping.put( "edgeStroke", s.edgeStroke );
-			mapping.put( "edgeGhostStroke", s.edgeGhostStroke );
-			mapping.put( "edgeHighlightStroke", s.edgeHighlightStroke );
-			mapping.put( "vertexStroke", s.vertexStroke );
-			mapping.put( "vertexGhostStroke", s.vertexGhostStroke );
-			mapping.put( "vertexHighlightStroke", s.vertexHighlightStroke );
-			mapping.put( "focusStroke", s.focusStroke );
-			mapping.put( "highlightCurrentTimepoint", s.highlightCurrentTimepoint );
-			mapping.put( "paintRows", s.paintRows );
-			mapping.put( "paintColumns", s.paintColumns );
-			mapping.put( "paintHeaderShadow", s.paintHeaderShadow );
+			// Name.
+			mapping.put( "name", s.getName() );
+			// Color mode.
+			ColorModeIO.representData( mapping, s );
+			// Fixed colors.
+			mapping.put( "edgeColor", s.getEdgeColor() );
+			mapping.put( "vertexFillColor", s.getVertexFillColor() );
+			mapping.put( "vertexDrawColor", s.getVertexDrawColor() );
+			// Selection colors.
+			mapping.put( "selectedVertexFillColor", s.getSelectedVertexFillColor() );
+			mapping.put( "selectedEdgeColor", s.getSelectedEdgeColor() );
+			mapping.put( "selectedVertexDrawColor", s.getSelectedVertexDrawColor() );
+			mapping.put( "simplifiedVertexFillColor", s.getSimplifiedVertexFillColor() );
+			mapping.put( "selectedSimplifiedVertexFillColor", s.getSelectedSimplifiedVertexFillColor() );
+			// Decoration colors.
+			mapping.put( "backgroundColor", s.getBackgroundColor() );
+			mapping.put( "currentTimepointColor", s.getCurrentTimepointColor() );
+			mapping.put( "decorationColor", s.getDecorationColor() );
+			mapping.put( "vertexRangeColor", s.getVertexRangeColor() );
+			mapping.put( "headerBackgroundColor", s.getHeaderBackgroundColor() );
+			mapping.put( "headerDecorationColor", s.getHeaderDecorationColor() );
+			mapping.put( "headerCurrentTimepointColor", s.getHeaderCurrentTimepointColor() );
+			// Fonts.
+			mapping.put( "font", s.getFont() );
+			mapping.put( "headerFont", s.getHeaderFont() );
+			// Strokes.
+			mapping.put( "edgeStroke", s.getEdgeStroke() );
+			mapping.put( "edgeGhostStroke", s.getEdgeGhostStroke() );
+			mapping.put( "edgeHighlightStroke", s.getEdgeHighlightStroke() );
+			mapping.put( "vertexStroke", s.getVertexStroke() );
+			mapping.put( "vertexGhostStroke", s.getVertexGhostStroke() );
+			mapping.put( "vertexHighlightStroke", s.getVertexHighlightStroke() );
+			mapping.put( "focusStroke", s.getFocusStroke() );
+			// Paint decorations.
+			mapping.put( "highlightCurrentTimepoint", s.isHighlightCurrentTimepoint() );
+			mapping.put( "paintRows", s.isPaintRows() );
+			mapping.put( "paintColumns", s.isPaintColumns() );
+			mapping.put( "paintHeaderShadow", s.isPaintHeaderShadow() );
 
 			final Node node = representMapping( getTag(), mapping, getDefaultFlowStyle() );
 			return node;
 		}
 	}
 
-	public static class ConstructStyle extends AbstractWorkaroundConstruct
+	private static class ConstructStyle extends AbstractWorkaroundConstruct
 	{
 		public ConstructStyle( final WorkaroundConstructor c )
 		{
@@ -289,6 +302,9 @@ public class TrackSchemeStyleIO
 				final Map< Object, Object > mapping = constructMapping( ( MappingNode  ) node );
 				final String name = ( String ) mapping.get( "name" );
 				final TrackSchemeStyle s = TrackSchemeStyle.defaultStyle().copy( name );
+
+				// ColorMode
+				ColorModeIO.construct( mapping, s );
 
 				s.edgeColor( ( Color ) mapping.get( "edgeColor" ) );
 				s.vertexFillColor( ( Color ) mapping.get( "vertexFillColor" ) );

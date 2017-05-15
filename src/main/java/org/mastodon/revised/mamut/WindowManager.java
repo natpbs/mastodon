@@ -1,5 +1,6 @@
 package org.mastodon.revised.mamut;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -9,10 +10,15 @@ import java.util.List;
 
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
+import org.mastodon.adapter.FeatureModelAdapter;
 import org.mastodon.adapter.FocusAdapter;
 import org.mastodon.adapter.HighlightAdapter;
 import org.mastodon.adapter.NavigationHandlerAdapter;
@@ -43,6 +49,7 @@ import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
+import org.mastodon.revised.model.feature.FeatureModel;
 import org.mastodon.revised.model.mamut.BoundingSphereRadiusStatistics;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
@@ -57,11 +64,15 @@ import org.mastodon.revised.trackscheme.TrackSchemeVertexBimap;
 import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleChooser;
+import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
+import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
+import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
 import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
 import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
+import org.mastodon.revised.ui.coloring.FeaturesColorGenerator;
 import org.mastodon.revised.ui.grouping.GroupHandle;
 import org.mastodon.revised.ui.grouping.GroupManager;
 import org.mastodon.revised.ui.selection.FocusListener;
@@ -81,6 +92,7 @@ import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.InputTriggerDescription;
 import org.scijava.ui.behaviour.io.InputTriggerDescriptionsBuilder;
 import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
+import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import bdv.spimdata.SpimDataMinimal;
 import bdv.tools.ToggleDialogAction;
@@ -268,13 +280,20 @@ public class WindowManager
 	 */
 	private final List< TsWindow > tsWindows = new ArrayList<>();
 
+	/**
+	 * Class that manages all available TrackScheme styles.
+	 */
+	private final TrackSchemeStyleManager trackSchemeStyleManager;
+
 	public WindowManager(
 			final String spimDataXmlFilename,
 			final SpimDataMinimal spimData,
 			final Model model,
+			final TrackSchemeStyleManager trackSchemeStyleManager,
 			final InputTriggerConfig keyconf )
 	{
 		this.model = model;
+		this.trackSchemeStyleManager = trackSchemeStyleManager;
 		this.keyconf = keyconf;
 
 		groupManager = new GroupManager();
@@ -542,7 +561,6 @@ public class WindowManager
 		 */
 		final HighlightModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeHighlight = new HighlightAdapter<>( highlightModel, vertexMap, edgeMap );
 
-
 		/*
 		 * TrackScheme selection
 		 */
@@ -567,17 +585,38 @@ public class WindowManager
 		/*
 		 * TrackScheme ContextChooser
 		 */
-		final TrackSchemeContextListener< Spot > contextListener = new TrackSchemeContextListener< >(
+		final TrackSchemeContextListener< Spot > contextListener = new TrackSchemeContextListener<>(
 				idmap,
 				trackSchemeGraph );
 		final ContextChooser< Spot > contextChooser = new ContextChooser<>( contextListener );
 
+
 		/*
-		 * show TrackSchemeFrame
+		 * Features for TrackScheme.
 		 */
-		final TrackSchemeOptions options = TrackSchemeOptions.options()
-				.inputTriggerConfig( keyconf )
-				.shareKeyPressedEvents( keyPressedManager );
+		final FeatureModel< Spot, Link > featureModel = model.getGraphFeatureModel();
+		final FeatureModel< TrackSchemeVertex, TrackSchemeEdge > trackSchemeFeatures =
+				new FeatureModelAdapter<>( featureModel, vertexMap, edgeMap );
+
+		/*
+		 * Tune TrackScheme options to use a feature and tag-based coloring
+		 * scheme.
+		 */
+
+		final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator =
+				new FeaturesColorGenerator<>( TrackSchemeStyle.defaultStyle(),
+						trackSchemeGraph, trackSchemeFeatures );
+
+		final TrackSchemeOptions options = TrackSchemeOptions.options().
+				inputTriggerConfig( keyconf ).
+				vertexColorGenerator( colorGenerator ).
+				edgeColorGenerator( colorGenerator ).
+				shareKeyPressedEvents( keyPressedManager );
+
+		/*
+		 * Show TrackSchemeFrame.
+		 */
+
 		final TrackSchemeFrame frame = new TrackSchemeFrame(
 				trackSchemeGraph,
 				trackSchemeHighlight,
@@ -588,6 +627,9 @@ public class WindowManager
 				groupHandle,
 				contextChooser,
 				options );
+
+		installTrackSchemeMenu( frame, colorGenerator, false );
+
 		frame.getTrackschemePanel().setTimepointRange( minTimepoint, maxTimepoint );
 		frame.getTrackschemePanel().graphChanged();
 		contextListener.setContextListener( frame.getTrackschemePanel() );
@@ -620,21 +662,200 @@ public class WindowManager
 				model.getGraph().getGraphIdBimap(),
 				model );
 
-		// TrackSchemeStyleDialog triggered by "R"
-		final String TRACK_SCHEME_STYLE_SETTINGS = "render settings";
-		final TrackSchemeStyleChooser styleChooser = new TrackSchemeStyleChooser( frame, frame.getTrackschemePanel() );
-		final JDialog styleDialog = styleChooser.getDialog();
-		final ActionMap actionMap = new ActionMap();
-		new ToggleDialogAction( TRACK_SCHEME_STYLE_SETTINGS, styleDialog ).put( actionMap );
-		final InputMap inputMap = new InputMap();
-		final KeyStrokeAdder a = keyconf.keyStrokeAdder( inputMap, "mamut" );
-		a.put( TRACK_SCHEME_STYLE_SETTINGS, "R" );
-		frame.getKeybindings().addActionMap( "mamut", actionMap );
-		frame.getKeybindings().addInputMap( "mamut", inputMap );
-
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );
 		addTsWindow( tsWindow );
 		frame.getTrackschemePanel().repaint();
+	}
+
+	private void installTrackSchemeMenu(
+			final TrackSchemeFrame frame,
+			final FeaturesColorGenerator< TrackSchemeVertex, TrackSchemeEdge > colorGenerator,
+			final boolean isBranchGraph )
+	{
+
+		final JMenuBar menu;
+		if ( frame.getJMenuBar() == null )
+			menu = new JMenuBar();
+		else
+			menu = frame.getJMenuBar();
+
+		// Styles auto-populated from TrackScheme style manager.
+		if ( frame.getTrackschemePanel().getGraphOverlay() instanceof DefaultTrackSchemeOverlay )
+		{
+			final TrackSchemePanel panel = frame.getTrackschemePanel();
+			final DefaultTrackSchemeOverlay overlay = ( DefaultTrackSchemeOverlay ) panel.getGraphOverlay();
+			final TsStyleListener styleListener = new TsStyleListener( panel, overlay, colorGenerator, isBranchGraph );
+
+			final JMenu styleMenu = new JMenu( "Styles" );
+			// Populate menu on the fly when it is opened.
+			styleMenu.addMenuListener( new MenuListener()
+			{
+				@Override
+				public void menuSelected( final MenuEvent e )
+				{
+					styleMenu.removeAll();
+					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
+					{
+						// Branch graph cannot get styles not set to a branch
+						// feature.
+						if ( isBranchGraph )
+						{
+							switch ( style.getVertexColorMode() )
+							{
+							case BRANCH_EDGE:
+							case BRANCH_VERTEX:
+							case FIXED:
+								break;
+							default:
+								continue;
+							}
+							switch ( style.getEdgeColorMode() )
+							{
+							case FIXED:
+							case BRANCH_EDGE:
+							case BRANCH_VERTEX:
+								break;
+							default:
+								continue;
+							}
+						}
+						styleMenu.add( new JMenuItem(
+								new TsStyleAction( style, panel, overlay, colorGenerator, styleListener ) ) );
+					}
+				}
+
+				@Override
+				public void menuDeselected( final MenuEvent e )
+				{}
+
+				@Override
+				public void menuCanceled( final MenuEvent e )
+				{}
+			} );
+			/*
+			 * De-register style listener upon window closing.
+			 */
+			frame.addWindowListener( new WindowAdapter()
+			{
+				@Override
+				public void windowClosing( final WindowEvent e )
+				{
+					for ( final TrackSchemeStyle style : trackSchemeStyleManager.getStyles() )
+						style.removeUpdateListener( styleListener );
+				};
+			} );
+
+			menu.add( styleMenu );
+		}
+		frame.setJMenuBar( menu );
+	}
+
+	/**
+	 * Notifies the ColorGenerator that the style have been updated and trigger
+	 * a repaint of the TrackScheme panel.
+	 */
+	private static final class TsStyleListener implements TrackSchemeStyle.UpdateListener
+	{
+
+		private final TrackSchemePanel panel;
+
+		private final FeaturesColorGenerator< ?, ? > colorGenerator;
+
+		private final boolean isBranchGraph;
+
+		private final DefaultTrackSchemeOverlay overlay;
+
+		public TsStyleListener(
+				final TrackSchemePanel panel,
+				final DefaultTrackSchemeOverlay overlay,
+				final FeaturesColorGenerator< ?, ? > colorGenerator,
+				final boolean isBranchGraph )
+		{
+			this.panel = panel;
+			this.overlay = overlay;
+			this.colorGenerator = colorGenerator;
+			this.isBranchGraph = isBranchGraph;
+		}
+
+		@Override
+		public void trackSchemeStyleChanged()
+		{
+			/*
+			 * If we are in a branch view, check that we can still manage this
+			 * style.
+			 */
+			if ( isBranchGraph )
+			{
+				// Forbid styles that do not work for branch graph.
+				final TrackSchemeStyle style = overlay.getStyle();
+				switch ( style.getVertexColorMode() )
+				{
+				case BRANCH_EDGE:
+				case BRANCH_VERTEX:
+				case FIXED:
+					break;
+				default:
+					overlay.setStyle( TrackSchemeStyle.defaultStyle() );
+					colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
+					break;
+				}
+				switch ( style.getEdgeColorMode() )
+				{
+				case BRANCH_VERTEX:
+				case BRANCH_EDGE:
+				case FIXED:
+					break;
+				default:
+					overlay.setStyle( TrackSchemeStyle.defaultStyle() );
+					colorGenerator.setColorMode( TrackSchemeStyle.defaultStyle() );
+					break;
+				}
+			}
+
+			colorGenerator.colorModeChanged();
+			panel.graphChanged();
+		}
+	}
+
+	private class TsStyleAction extends AbstractNamedAction
+	{
+
+		private static final long serialVersionUID = 1L;
+
+		private final TrackSchemeStyle style;
+
+		private final TsStyleListener updater;
+
+		private final DefaultTrackSchemeOverlay overlay;
+
+		private final FeaturesColorGenerator< ?, ? > colorGenerator;
+
+		private final TrackSchemePanel panel;
+
+		public TsStyleAction(
+				final TrackSchemeStyle style,
+				final TrackSchemePanel panel,
+				final DefaultTrackSchemeOverlay overlay,
+				final FeaturesColorGenerator< ?, ? > colorGenerator,
+				final TsStyleListener updater )
+		{
+			super( style.getName() );
+			this.style = style;
+			this.overlay = overlay;
+			this.colorGenerator = colorGenerator;
+			this.panel = panel;
+			this.updater = updater;
+		}
+
+		@Override
+		public void actionPerformed( final ActionEvent e )
+		{
+			overlay.getStyle().removeUpdateListener( updater );
+			overlay.setStyle( style );
+			colorGenerator.setColorMode( style );
+			style.addUpdateListener( updater );
+			panel.graphChanged();
+		}
 	}
 
 	public void closeAllWindows()
