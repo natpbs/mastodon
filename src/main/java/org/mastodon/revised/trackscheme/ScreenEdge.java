@@ -198,7 +198,7 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ScreenEdgePool, ByteMapp
 
 	/**
 	 * Returns the color of the edge.
-	 * 
+	 *
 	 * @return the color.
 	 */
 	public Color getColor()
@@ -232,6 +232,7 @@ public class ScreenEdge extends PoolObject< ScreenEdge, ScreenEdgePool, ByteMapp
 		setSelected( e.isSelected() );
 		setTransition( e.getTransition() );
 		setInterpolationCompletionRatio( e.getInterpolationCompletionRatio() );
+		setColor( e.getColor() );
 		return this;
 	}
 

@@ -298,7 +298,7 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ScreenVertexPool, By
 
 	/**
 	 * Returns the color of this vertex.
-	 * 
+	 *
 	 * @return the color.
 	 */
 	public Color getColor()
@@ -336,6 +336,7 @@ public class ScreenVertex extends PoolObject< ScreenVertex, ScreenVertexPool, By
 		setTransition( v.getTransition() );
 		setInterpolatedScreenVertexIndex( v.getInterpolatedScreenVertexIndex() );
 		setInterpolationCompletionRatio( v.getInterpolationCompletionRatio() );
+		setColor( v.getColor() );
 		return this;
 	}
 
