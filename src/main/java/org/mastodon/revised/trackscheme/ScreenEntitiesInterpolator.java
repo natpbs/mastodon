@@ -6,8 +6,6 @@ import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.DISAPPEAR
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.NONE;
 import static org.mastodon.revised.trackscheme.ScreenVertex.Transition.SELECTING;
 
-import java.awt.Color;
-
 import org.mastodon.collection.ref.IntRefHashMap;
 
 public class ScreenEntitiesInterpolator
@@ -129,7 +127,7 @@ public class ScreenEntitiesInterpolator
 					sourceIndex,
 					targetIndex,
 					endSelected,
-					Color.BLACK ) );
+					e.getColor() ) );
 			if ( idToStartEdge.get( e.getTrackSchemeEdgeId(), eStart ) != null )
 			{
 				// changing selection state?
