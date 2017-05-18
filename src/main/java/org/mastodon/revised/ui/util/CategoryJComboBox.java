@@ -210,7 +210,8 @@ public class CategoryJComboBox< K, V > extends JComboBox< Object >
 					c = ( JLabel ) r.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
 					c.setEnabled( true );
 					c.setFont( getFont().deriveFont( Font.PLAIN ) );
-					c.setText( INDENT + ( ( itemNames == null || itemNames.isEmpty() ) ? value.toString() : itemNames.get( value ) ) );
+					c.setText( INDENT + ( ( itemNames == null || itemNames.isEmpty() || !itemNames.containsKey( value ) )
+							? value.toString() : itemNames.get( value ) ) );
 				}
 				return c;
 			}
