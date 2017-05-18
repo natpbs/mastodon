@@ -3,7 +3,9 @@ package org.mastodon.revised.mamut;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dialog;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -11,13 +13,16 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.mastodon.revised.model.feature.DefaultFeatureRangeCalculator;
@@ -64,12 +69,27 @@ public class MainWindow extends JFrame
 	public MainWindow( final InputTriggerConfig keyconf )
 	{
 		super( "test" );
+		setTitle( "Mastodon MaMuT" );
 		this.keyconf = keyconf;
 		this.tgmmImportDialog = new TgmmImportDialog( this );
 		this.trackSchemeStyleManager = new TrackSchemeStyleManager();
 
 		final JPanel buttonsPanel = new JPanel();
-		buttonsPanel.setLayout( new GridLayout( 7, 1 ) );
+		final GridBagLayout gbl_buttonsPanel = new GridBagLayout();
+		gbl_buttonsPanel.columnWidths = new int[] { 135, 135, 0 };
+		gbl_buttonsPanel.rowHeights = new int[] { 0, 0, 25, 0, 0, 25, 25, 0, 25, 0, 0, 25, 0 };
+		gbl_buttonsPanel.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+		gbl_buttonsPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		buttonsPanel.setLayout( gbl_buttonsPanel );
+
+		final JLabel lblViews = new JLabel( "Views" );
+		final GridBagConstraints gbc_lblViews = new GridBagConstraints();
+		gbc_lblViews.anchor = GridBagConstraints.WEST;
+		gbc_lblViews.gridwidth = 2;
+		gbc_lblViews.insets = new Insets( 0, 0, 5, 0 );
+		gbc_lblViews.gridx = 0;
+		gbc_lblViews.gridy = 1;
+		buttonsPanel.add( lblViews, gbc_lblViews );
 		final JButton bdvButton = new JButton( "bdv" );
 		bdvButton.addActionListener( new ActionListener()
 		{
@@ -80,6 +100,12 @@ public class MainWindow extends JFrame
 					windowManager.createBigDataViewer();
 			}
 		} );
+		final GridBagConstraints gbc_bdvButton = new GridBagConstraints();
+		gbc_bdvButton.fill = GridBagConstraints.BOTH;
+		gbc_bdvButton.insets = new Insets( 0, 0, 5, 0 );
+		gbc_bdvButton.gridx = 1;
+		gbc_bdvButton.gridy = 2;
+		buttonsPanel.add( bdvButton, gbc_bdvButton );
 		final JButton trackschemeButton = new JButton( "trackscheme" );
 		trackschemeButton.addActionListener( new ActionListener()
 		{
@@ -90,27 +116,46 @@ public class MainWindow extends JFrame
 					windowManager.createTrackScheme();
 			}
 		} );
-		buttonsPanel.add( bdvButton );
-		buttonsPanel.add( trackschemeButton );
-		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
+		final GridBagConstraints gbc_trackschemeButton = new GridBagConstraints();
+		gbc_trackschemeButton.fill = GridBagConstraints.BOTH;
+		gbc_trackschemeButton.insets = new Insets( 0, 0, 5, 0 );
+		gbc_trackschemeButton.gridx = 1;
+		gbc_trackschemeButton.gridy = 3;
+		buttonsPanel.add( trackschemeButton, gbc_trackschemeButton );
+
+		final JLabel lblFeatureSettings = new JLabel( "Feature & Settings" );
+		final GridBagConstraints gbc_lblFeatureSettings = new GridBagConstraints();
+		gbc_lblFeatureSettings.anchor = GridBagConstraints.WEST;
+		gbc_lblFeatureSettings.gridwidth = 2;
+		gbc_lblFeatureSettings.insets = new Insets( 0, 0, 5, 0 );
+		gbc_lblFeatureSettings.gridx = 0;
+		gbc_lblFeatureSettings.gridy = 4;
+		buttonsPanel.add( lblFeatureSettings, gbc_lblFeatureSettings );
 
 		this.featureComputationButton = new JButton( "features and tags" );
-		buttonsPanel.add( featureComputationButton );
+		final GridBagConstraints gbc_featureComputationButton = new GridBagConstraints();
+		gbc_featureComputationButton.fill = GridBagConstraints.BOTH;
+		gbc_featureComputationButton.insets = new Insets( 0, 0, 5, 0 );
+		gbc_featureComputationButton.gridx = 1;
+		gbc_featureComputationButton.gridy = 5;
+		buttonsPanel.add( featureComputationButton, gbc_featureComputationButton );
 
 		this.displaySettingsButton = new JButton( "display settings" );
-		buttonsPanel.add( displaySettingsButton );
-		buttonsPanel.add( Box.createVerticalStrut( 20 ) );
+		final GridBagConstraints gbc_displaySettingsButton = new GridBagConstraints();
+		gbc_displaySettingsButton.fill = GridBagConstraints.BOTH;
+		gbc_displaySettingsButton.insets = new Insets( 0, 0, 5, 0 );
+		gbc_displaySettingsButton.gridx = 1;
+		gbc_displaySettingsButton.gridy = 6;
+		buttonsPanel.add( displaySettingsButton, gbc_displaySettingsButton );
 
-		final JButton importButton = new JButton( "import tgmm" );
-		importButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				tgmmImportDialog.showImportDialog( windowManager.getSpimData(), windowManager.getModel() );
-			}
-		} );
-		buttonsPanel.add( importButton );
+		final JLabel lblProject = new JLabel( "Project" );
+		final GridBagConstraints gbc_lblProject = new GridBagConstraints();
+		gbc_lblProject.anchor = GridBagConstraints.WEST;
+		gbc_lblProject.gridwidth = 2;
+		gbc_lblProject.insets = new Insets( 0, 0, 5, 0 );
+		gbc_lblProject.gridx = 0;
+		gbc_lblProject.gridy = 7;
+		buttonsPanel.add( lblProject, gbc_lblProject );
 
 		final JButton createProjectButton = new JButton( "new project" );
 		createProjectButton.addActionListener( new ActionListener()
@@ -121,18 +166,15 @@ public class MainWindow extends JFrame
 				createProject();
 			}
 		} );
-		buttonsPanel.add( createProjectButton );
+		final GridBagConstraints gbc_createProjectButton = new GridBagConstraints();
+		gbc_createProjectButton.fill = GridBagConstraints.BOTH;
+		gbc_createProjectButton.insets = new Insets( 0, 0, 5, 0 );
+		gbc_createProjectButton.gridx = 1;
+		gbc_createProjectButton.gridy = 8;
+		buttonsPanel.add( createProjectButton, gbc_createProjectButton );
 
-		final JButton loadProjectButton = new JButton( "load project" );
-		loadProjectButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				loadProject();
-			}
-		} );
-		buttonsPanel.add( loadProjectButton );
+		final Container content = getContentPane();
+		content.add( buttonsPanel, BorderLayout.NORTH );
 
 		final JButton saveProjectButton = new JButton( "save project" );
 		saveProjectButton.addActionListener( new ActionListener()
@@ -143,10 +185,43 @@ public class MainWindow extends JFrame
 				saveProject();
 			}
 		} );
-		buttonsPanel.add( saveProjectButton );
 
-		final Container content = getContentPane();
-		content.add( buttonsPanel, BorderLayout.NORTH );
+		final JButton loadProjectButton = new JButton( "load project" );
+		loadProjectButton.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				loadProject();
+			}
+		} );
+
+		final JButton importButton = new JButton( "import tgmm" );
+		importButton.addActionListener( new ActionListener()
+		{
+			@Override
+			public void actionPerformed( final ActionEvent e )
+			{
+				tgmmImportDialog.showImportDialog( windowManager.getSpimData(), windowManager.getModel() );
+			}
+		} );
+		final GridBagConstraints gbc_importButton = new GridBagConstraints();
+		gbc_importButton.fill = GridBagConstraints.BOTH;
+		gbc_importButton.insets = new Insets( 0, 0, 5, 0 );
+		gbc_importButton.gridx = 1;
+		gbc_importButton.gridy = 9;
+		buttonsPanel.add( importButton, gbc_importButton );
+		final GridBagConstraints gbc_loadProjectButton = new GridBagConstraints();
+		gbc_loadProjectButton.insets = new Insets( 0, 0, 5, 0 );
+		gbc_loadProjectButton.fill = GridBagConstraints.BOTH;
+		gbc_loadProjectButton.gridx = 1;
+		gbc_loadProjectButton.gridy = 10;
+		buttonsPanel.add( loadProjectButton, gbc_loadProjectButton );
+		final GridBagConstraints gbc_saveProjectButton = new GridBagConstraints();
+		gbc_saveProjectButton.fill = GridBagConstraints.BOTH;
+		gbc_saveProjectButton.gridx = 1;
+		gbc_saveProjectButton.gridy = 11;
+		buttonsPanel.add( saveProjectButton, gbc_saveProjectButton );
 
 		setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
 		addWindowListener( new WindowAdapter()
@@ -370,14 +445,15 @@ public class MainWindow extends JFrame
 		return conf;
 	}
 
-	public static void main( final String[] args ) throws IOException, SpimDataException, InvocationTargetException, InterruptedException, ExecutionException
+	public static void main( final String[] args ) throws IOException, SpimDataException, InvocationTargetException, InterruptedException, ExecutionException, ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
 	{
+		Locale.setDefault( Locale.US );
+		UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 
 		final String bdvFile = "samples/datasethdf5.xml";
 		final String modelFile = "samples/model_revised.raw";
 		final MamutProject project = new MamutProject( new File( "." ), new File( bdvFile ), new File( modelFile ) );
 //		final MamutProject project = new MamutProjectIO().load( "samples/mamutproject.xml" );
-
 
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
