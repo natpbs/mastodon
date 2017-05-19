@@ -8,7 +8,6 @@ import org.mastodon.graph.Vertex;
 import org.mastodon.revised.bdv.overlay.OverlayContext;
 import org.mastodon.revised.context.Context;
 import org.mastodon.revised.context.ContextListener;
-import org.mastodon.revised.mamut.WindowManager.BdvContextAdapter;
 
 /**
  * TODO!!! related to {@link BdvContextAdapter}

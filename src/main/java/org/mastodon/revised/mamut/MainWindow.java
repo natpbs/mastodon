@@ -2,7 +2,6 @@ package org.mastodon.revised.mamut;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.Dialog;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -20,26 +19,18 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
-import org.mastodon.revised.model.feature.DefaultFeatureRangeCalculator;
-import org.mastodon.revised.model.feature.FeatureComputerService;
-import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 import org.mastodon.revised.model.mamut.Model;
-import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
-import org.mastodon.revised.ui.DisplaySettingsDialog;
 import org.mastodon.revised.ui.util.FileChooser;
 import org.mastodon.revised.ui.util.XmlFileFilter;
-import org.scijava.Context;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
 import org.scijava.ui.behaviour.io.yaml.YamlConfigIO;
 
 import bdv.spimdata.SpimDataMinimal;
 import bdv.spimdata.XmlIoSpimDataMinimal;
-import bdv.tools.ToggleDialogAction;
 import mpicbg.spim.data.SpimDataException;
 
 public class MainWindow extends JFrame
@@ -50,36 +41,48 @@ public class MainWindow extends JFrame
 	 * FIELDS.
 	 */
 
-	private final InputTriggerConfig keyconf;
+	private final MamutProject project;
 
-	private MamutProject project;
-
-	private WindowManager windowManager;
+	private final WindowManager windowManager;
 
 	private File proposedProjectFile;
 
-	private final TgmmImportDialog tgmmImportDialog;
-
 	private final JButton featureComputationButton;
-
-	private final TrackSchemeStyleManager trackSchemeStyleManager;
 
 	private final JButton displaySettingsButton;
 
-	public MainWindow( final InputTriggerConfig keyconf )
+	public MainWindow( final MamutProject project, final InputTriggerConfig keyconf ) throws IOException, SpimDataException
 	{
 		super( "test" );
 		setTitle( "Mastodon MaMuT" );
-		this.keyconf = keyconf;
-		this.tgmmImportDialog = new TgmmImportDialog( this );
-		this.trackSchemeStyleManager = new TrackSchemeStyleManager();
+		this.project = project;
+
+		/*
+		 * Load Model
+		 */
+		final Model model = new Model();
+		if ( project.getRawModelFile() != null )
+			model.loadRaw( project.getRawModelFile() );
+
+		/*
+		 * Load SpimData
+		 */
+		final String spimDataXmlFilename = project.getDatasetXmlFile().getAbsolutePath();
+		final SpimDataMinimal spimData = new XmlIoSpimDataMinimal().load( spimDataXmlFilename );
+
+		this.windowManager = new WindowManager(
+				this,
+				spimDataXmlFilename,
+				spimData,
+				model,
+				keyconf );
 
 		final JPanel buttonsPanel = new JPanel();
 		final GridBagLayout gbl_buttonsPanel = new GridBagLayout();
 		gbl_buttonsPanel.columnWidths = new int[] { 135, 135, 0 };
-		gbl_buttonsPanel.rowHeights = new int[] { 0, 0, 25, 0, 0, 25, 25, 0, 25, 0, 0, 25, 0 };
+		gbl_buttonsPanel.rowHeights = new int[] { 0, 0, 25, 0, 0, 0, 25, 25, 0, 0, 25, 0 };
 		gbl_buttonsPanel.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
-		gbl_buttonsPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_buttonsPanel.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		buttonsPanel.setLayout( gbl_buttonsPanel );
 
 		final JLabel lblViews = new JLabel( "Views" );
@@ -90,32 +93,14 @@ public class MainWindow extends JFrame
 		gbc_lblViews.gridx = 0;
 		gbc_lblViews.gridy = 1;
 		buttonsPanel.add( lblViews, gbc_lblViews );
-		final JButton bdvButton = new JButton( "bdv" );
-		bdvButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				if ( windowManager != null )
-					windowManager.createBigDataViewer();
-			}
-		} );
+		final JButton bdvButton = new JButton( windowManager.getCreateBdvAction() );
 		final GridBagConstraints gbc_bdvButton = new GridBagConstraints();
 		gbc_bdvButton.fill = GridBagConstraints.BOTH;
 		gbc_bdvButton.insets = new Insets( 0, 0, 5, 0 );
 		gbc_bdvButton.gridx = 1;
 		gbc_bdvButton.gridy = 2;
 		buttonsPanel.add( bdvButton, gbc_bdvButton );
-		final JButton trackschemeButton = new JButton( "trackscheme" );
-		trackschemeButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				if ( windowManager != null )
-					windowManager.createTrackScheme();
-			}
-		} );
+		final JButton trackschemeButton = new JButton( windowManager.getCreateTrackSchemeAction() );
 		final GridBagConstraints gbc_trackschemeButton = new GridBagConstraints();
 		gbc_trackschemeButton.fill = GridBagConstraints.BOTH;
 		gbc_trackschemeButton.insets = new Insets( 0, 0, 5, 0 );
@@ -123,29 +108,37 @@ public class MainWindow extends JFrame
 		gbc_trackschemeButton.gridy = 3;
 		buttonsPanel.add( trackschemeButton, gbc_trackschemeButton );
 
+		final JButton btnCloseAll = new JButton( windowManager.getCloseAllAction() );
+		final GridBagConstraints gbc_btnCloseAll = new GridBagConstraints();
+		gbc_btnCloseAll.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnCloseAll.insets = new Insets( 0, 0, 5, 0 );
+		gbc_btnCloseAll.gridx = 1;
+		gbc_btnCloseAll.gridy = 4;
+		buttonsPanel.add( btnCloseAll, gbc_btnCloseAll );
+
 		final JLabel lblFeatureSettings = new JLabel( "Feature & Settings" );
 		final GridBagConstraints gbc_lblFeatureSettings = new GridBagConstraints();
 		gbc_lblFeatureSettings.anchor = GridBagConstraints.WEST;
 		gbc_lblFeatureSettings.gridwidth = 2;
 		gbc_lblFeatureSettings.insets = new Insets( 0, 0, 5, 0 );
 		gbc_lblFeatureSettings.gridx = 0;
-		gbc_lblFeatureSettings.gridy = 4;
+		gbc_lblFeatureSettings.gridy = 5;
 		buttonsPanel.add( lblFeatureSettings, gbc_lblFeatureSettings );
 
-		this.featureComputationButton = new JButton( "features and tags" );
+		this.featureComputationButton = new JButton( windowManager.getFeatureCalculationAction() );
 		final GridBagConstraints gbc_featureComputationButton = new GridBagConstraints();
 		gbc_featureComputationButton.fill = GridBagConstraints.BOTH;
 		gbc_featureComputationButton.insets = new Insets( 0, 0, 5, 0 );
 		gbc_featureComputationButton.gridx = 1;
-		gbc_featureComputationButton.gridy = 5;
+		gbc_featureComputationButton.gridy = 6;
 		buttonsPanel.add( featureComputationButton, gbc_featureComputationButton );
 
-		this.displaySettingsButton = new JButton( "display settings" );
+		this.displaySettingsButton = new JButton( windowManager.getDisplaySettingsAction() );
 		final GridBagConstraints gbc_displaySettingsButton = new GridBagConstraints();
 		gbc_displaySettingsButton.fill = GridBagConstraints.BOTH;
 		gbc_displaySettingsButton.insets = new Insets( 0, 0, 5, 0 );
 		gbc_displaySettingsButton.gridx = 1;
-		gbc_displaySettingsButton.gridy = 6;
+		gbc_displaySettingsButton.gridy = 7;
 		buttonsPanel.add( displaySettingsButton, gbc_displaySettingsButton );
 
 		final JLabel lblProject = new JLabel( "Project" );
@@ -154,24 +147,8 @@ public class MainWindow extends JFrame
 		gbc_lblProject.gridwidth = 2;
 		gbc_lblProject.insets = new Insets( 0, 0, 5, 0 );
 		gbc_lblProject.gridx = 0;
-		gbc_lblProject.gridy = 7;
+		gbc_lblProject.gridy = 8;
 		buttonsPanel.add( lblProject, gbc_lblProject );
-
-		final JButton createProjectButton = new JButton( "new project" );
-		createProjectButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				createProject();
-			}
-		} );
-		final GridBagConstraints gbc_createProjectButton = new GridBagConstraints();
-		gbc_createProjectButton.fill = GridBagConstraints.BOTH;
-		gbc_createProjectButton.insets = new Insets( 0, 0, 5, 0 );
-		gbc_createProjectButton.gridx = 1;
-		gbc_createProjectButton.gridy = 8;
-		buttonsPanel.add( createProjectButton, gbc_createProjectButton );
 
 		final Container content = getContentPane();
 		content.add( buttonsPanel, BorderLayout.NORTH );
@@ -186,41 +163,18 @@ public class MainWindow extends JFrame
 			}
 		} );
 
-		final JButton loadProjectButton = new JButton( "load project" );
-		loadProjectButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				loadProject();
-			}
-		} );
 
-		final JButton importButton = new JButton( "import tgmm" );
-		importButton.addActionListener( new ActionListener()
-		{
-			@Override
-			public void actionPerformed( final ActionEvent e )
-			{
-				tgmmImportDialog.showImportDialog( windowManager.getSpimData(), windowManager.getModel() );
-			}
-		} );
+		final JButton importButton = new JButton( windowManager.getTgmmImportAction() );
 		final GridBagConstraints gbc_importButton = new GridBagConstraints();
 		gbc_importButton.fill = GridBagConstraints.BOTH;
 		gbc_importButton.insets = new Insets( 0, 0, 5, 0 );
 		gbc_importButton.gridx = 1;
 		gbc_importButton.gridy = 9;
 		buttonsPanel.add( importButton, gbc_importButton );
-		final GridBagConstraints gbc_loadProjectButton = new GridBagConstraints();
-		gbc_loadProjectButton.insets = new Insets( 0, 0, 5, 0 );
-		gbc_loadProjectButton.fill = GridBagConstraints.BOTH;
-		gbc_loadProjectButton.gridx = 1;
-		gbc_loadProjectButton.gridy = 10;
-		buttonsPanel.add( loadProjectButton, gbc_loadProjectButton );
 		final GridBagConstraints gbc_saveProjectButton = new GridBagConstraints();
 		gbc_saveProjectButton.fill = GridBagConstraints.BOTH;
 		gbc_saveProjectButton.gridx = 1;
-		gbc_saveProjectButton.gridy = 11;
+		gbc_saveProjectButton.gridy = 10;
 		buttonsPanel.add( saveProjectButton, gbc_saveProjectButton );
 
 		setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
@@ -229,78 +183,12 @@ public class MainWindow extends JFrame
 			@Override
 			public void windowClosed( final WindowEvent e )
 			{
-				project = null;
-				if ( windowManager != null )
-					windowManager.closeAllWindows();
-				windowManager = null;
+				windowManager.closeAllWindows();
 			}
 		} );
 
 		setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
 		pack();
-	}
-
-	public void open( final MamutProject project ) throws IOException, SpimDataException
-	{
-		/*
-		 * Load Model
-		 */
-		final Model model = new Model();
-		if ( project.getRawModelFile() != null )
-			model.loadRaw( project.getRawModelFile() );
-
-		/*
-		 * Load SpimData
-		 */
-		final String spimDataXmlFilename = project.getDatasetXmlFile().getAbsolutePath();
-		final SpimDataMinimal spimData = new XmlIoSpimDataMinimal().load( spimDataXmlFilename );
-
-		this.project = project;
-
-		if ( windowManager != null )
-			windowManager.closeAllWindows();
-
-		windowManager = new WindowManager(
-				spimDataXmlFilename, spimData,
-				model,
-				trackSchemeStyleManager,
-				keyconf );
-
-		/*
-		 * Display settings.
-		 */
-
-		final FeatureRangeCalculator graphFeatureRangeCalculator =
-				new DefaultFeatureRangeCalculator<>(
-						windowManager.getModel().getGraph(),
-						windowManager.getModel().getGraphFeatureModel() );
-
-		final DisplaySettingsDialog displaySettingsDialog =
-				new DisplaySettingsDialog(
-						this,
-						trackSchemeStyleManager,
-						windowManager.getModel().getGraphFeatureModel(),
-						graphFeatureRangeCalculator );
-		displaySettingsDialog.setSize( 480, 1000 );
-
-		final ActionListener[] listeners = displaySettingsButton.getActionListeners();
-		for ( final ActionListener listener : listeners )
-			displaySettingsButton.removeActionListener( listener );
-
-		displaySettingsButton.addActionListener(
-				new ToggleDialogAction( "display settings", displaySettingsDialog ) );
-
-		/*
-		 * TODO FIXE Ugly hack to get proper service instantiation. Fix it by
-		 * proposing a proper Command decoupled from the GUI.
-		 */
-		final Context context = new Context();
-		@SuppressWarnings( "unchecked" )
-		final FeatureComputerService< Model > featureComputerService = context.getService( FeatureComputerService.class );
-		final Dialog featureComputationDialog = new FeatureAndTagDialog( this, windowManager.getModel(), featureComputerService );
-		featureComputationDialog.setSize( 400, 400 );
-
-		featureComputationButton.addActionListener( new ToggleDialogAction( "feature computation", featureComputationDialog ) );
 	}
 
 	public void saveProject( final File projectFile ) throws IOException
@@ -318,11 +206,6 @@ public class MainWindow extends JFrame
 		model.saveRaw( modelFile );
 
 		new MamutProjectIO().save( project, projectFile.getAbsolutePath() );
-	}
-
-	public void loadProject( final File projectFile ) throws IOException, SpimDataException
-	{
-		open( new MamutProjectIO().load( projectFile.getAbsolutePath() ) );
 	}
 
 	public void saveProject()
@@ -355,51 +238,6 @@ public class MainWindow extends JFrame
 			e.printStackTrace();
 		}
 	}
-
-	public void loadProject()
-	{
-		final String fn = proposedProjectFile == null ? null : proposedProjectFile.getAbsolutePath();
-		final File file = FileChooser.chooseFile(
-				this,
-				fn,
-				new XmlFileFilter(),
-				"Open MaMuT Project File",
-				FileChooser.DialogType.LOAD );
-		if ( file == null )
-			return;
-
-		try
-		{
-			proposedProjectFile = file;
-			loadProject( proposedProjectFile );
-		}
-		catch ( final IOException | SpimDataException e )
-		{
-			e.printStackTrace();
-		}
-	}
-
-	public void createProject()
-	{
-		final File file = FileChooser.chooseFile(
-				this,
-				null,
-				new XmlFileFilter(),
-				"Open BigDataViewer File",
-				FileChooser.DialogType.LOAD );
-		if ( file == null )
-			return;
-
-		try
-		{
-			open( new MamutProject( file.getParentFile(), file, null ) );
-		}
-		catch ( final IOException | SpimDataException e )
-		{
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * Try to load {@link InputTriggerConfig} from files in this order:
 	 * <ol>
@@ -453,17 +291,10 @@ public class MainWindow extends JFrame
 		final String bdvFile = "samples/datasethdf5.xml";
 		final String modelFile = "samples/model_revised.raw";
 		final MamutProject project = new MamutProject( new File( "." ), new File( bdvFile ), new File( modelFile ) );
-//		final MamutProject project = new MamutProjectIO().load( "samples/mamutproject.xml" );
 
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
-		final MainWindow mw = new MainWindow( getInputTriggerConfig() );
-		mw.open( project );
+		final MainWindow mw = new MainWindow( project, getInputTriggerConfig() );
 		mw.setVisible( true );
-
-		SwingUtilities.invokeAndWait( () -> {
-			mw.windowManager.createBigDataViewer();
-			mw.windowManager.createTrackScheme();
-		} );
 	}
 }
