@@ -12,7 +12,10 @@ import org.mastodon.graph.Edges;
 import org.mastodon.revised.trackscheme.ScreenEdge.ScreenEdgePool;
 import org.mastodon.revised.trackscheme.ScreenVertex.ScreenVertexPool;
 import org.mastodon.revised.trackscheme.ScreenVertexRange.ScreenVertexRangePool;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge.TrackSchemeEdgeGeometry;
 import org.mastodon.revised.ui.selection.Selection;
+
+import com.github.davidmoten.rtree.RTree;
 
 import gnu.trove.iterator.TIntAlternatingIterator;
 import gnu.trove.iterator.TIntIterator;
@@ -162,6 +165,10 @@ public class LineageTreeLayout
 		layout( layoutRoots, -1 );
 	}
 
+	// R TREE STUFF
+
+	private RTree< TrackSchemeEdge, TrackSchemeEdgeGeometry > rtree;
+
 	// TODO: add javadoc ref to context trackscheme class
 	/**
 	 * Layout graph in trackscheme coordinates starting from specified roots.
@@ -191,6 +198,10 @@ public class LineageTreeLayout
 		timepointToOrderedVertices.clear();
 		currentLayoutColumnX.clear();
 		currentLayoutColumnRoot.clear();
+
+		// R-tree stuff
+		rtree = RTree.create();
+
 		final TrackSchemeVertex previousGraphRoot = graph.vertexRef();
 		final TrackSchemeVertex currentGraphRoot = graph.vertexRef();
 		this.mark = mark;
@@ -365,6 +376,12 @@ public class LineageTreeLayout
 						minVertexScreenDist = Math.min( minVertexScreenDist, x - prevX );
 						prevX = x;
 
+						/*
+						 * TODO This following part would change. Actually it
+						 * would get out of the outter loop in i. We would
+						 * simply query the R-Tree for the edges that intersect
+						 * with the minX, maxX, minY, maxY rectangle.
+						 */
 						for ( final TrackSchemeEdge edge : v1.incomingEdges() )
 						{
 							edge.getSource( v2 );
@@ -717,6 +734,21 @@ A:		while ( true )
 				while ( f.edges.hasNext() )
 				{
 					final TrackSchemeEdge edge = f.edges.next();
+
+					/*
+					 * Add to r-tree.
+					 *
+					 * This is where it does not work for us:
+					 *
+					 * 1. A new tree instance is created each time we call
+					 * add().
+					 *
+					 * 2. The edges are stored as if they were real objects. We
+					 * have to create a true R-Tree structure specialized for
+					 * Ref collections, as for the org.mastodon.kdtree
+					 */
+					rtree = rtree.add( edge );
+
 					edge.getTarget( f.child );
 					if ( f.child.getLayoutTimestamp() < timestamp )
 					{
