@@ -1,5 +1,6 @@
 package org.mastodon.revised;
 
+import java.awt.geom.Line2D;
 
 // TODO rename to something more specifice, e.g., "GeometryUtils"
 // TODO move (to package ...trackscheme.util ?)
@@ -38,6 +39,33 @@ public class Util
 				( y2 - y1 ) * x0 - ( x2 - x1 ) * y0 + x2 * y1 - y2 * x1
 				) / Math.sqrt( l12sq );
 		return d;
+	}
+
+	/**
+	 * Tests if the line segment AB from (x1,y1) to (x2,y2) intersects the line
+	 * segment CD from (x3,y3) to (x4,y4).
+	 *
+	 * @param x1
+	 *            x coordinates of A
+	 * @param y1
+	 *            y coordinates of A
+	 * @param x2
+	 *            x coordinates of B
+	 * @param y2
+	 *            y coordinates of B
+	 * @param x3
+	 *            x coordinates of C
+	 * @param y3
+	 *            y coordinates of C
+	 * @param x4
+	 *            x coordinates of D
+	 * @param y4
+	 *            y coordinates of D
+	 * @return <code>true</code> if AB intersects CD.
+	 */
+	public static final boolean lineSegmentIntersect( final double x1, final double y1, final double x2, final double y2, final double x3, final double y3, final double x4, final double y4 )
+	{
+		return Line2D.linesIntersect( x1, y1, x2, y2, x3, y3, x4, y4 );
 	}
 
 	private Util()
