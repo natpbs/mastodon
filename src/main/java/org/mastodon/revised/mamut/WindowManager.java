@@ -616,8 +616,6 @@ public class WindowManager
 				frame.getTrackschemePanel(),
 				trackSchemeGraph,
 				frame.getTrackschemePanel().getGraphOverlay(),
-				model.getGraph(),
-				model.getGraph().getGraphIdBimap(),
 				model );
 
 		// TrackSchemeStyleDialog triggered by "R"
