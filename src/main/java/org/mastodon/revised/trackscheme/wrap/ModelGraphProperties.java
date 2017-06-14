@@ -1,6 +1,7 @@
 package org.mastodon.revised.trackscheme.wrap;
 
 import org.mastodon.revised.model.HasLabel;
+import org.mastodon.revised.model.mamut.DefaultModelGraphProperties;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.spatial.HasTimepoint;
 
@@ -24,6 +25,17 @@ public interface ModelGraphProperties< V, E >
 
 	public String getLabel( V v );
 
-	// TODO move to separate interface? ModelGraphModifyProperties?
 	public void setLabel( V v, String label );
+
+	public E addEdge( V source, V target, E ref );
+
+	public V addVertex( V ref );
+
+	public void removeEdge( E e );
+
+	public void removeVertex( V v );
+
+	public void notifyGraphChanged();
+
+
 }

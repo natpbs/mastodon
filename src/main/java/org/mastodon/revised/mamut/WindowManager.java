@@ -44,6 +44,7 @@ import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.context.ContextListener;
 import org.mastodon.revised.context.ContextProvider;
 import org.mastodon.revised.model.mamut.BoundingSphereRadiusStatistics;
+import org.mastodon.revised.model.mamut.DefaultModelGraphProperties;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelOverlayProperties;
@@ -58,7 +59,6 @@ import org.mastodon.revised.trackscheme.display.TrackSchemeEditBehaviours;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
 import org.mastodon.revised.trackscheme.display.ui.TrackSchemeStyleChooser;
-import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
 import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
@@ -532,7 +532,7 @@ public class WindowManager
 		/*
 		 * TrackSchemeGraph listening to model
 		 */
-		final ModelGraphProperties< Spot, Link > properties = new DefaultModelGraphProperties<>();
+		final ModelGraphProperties< Spot, Link > properties = new DefaultModelGraphProperties( model.getGraph() );
 		final TrackSchemeGraph< Spot, Link > trackSchemeGraph = new TrackSchemeGraph<>( graph, idmap, properties );
 		final RefBimap< Spot, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, trackSchemeGraph );
 		final RefBimap< Link, TrackSchemeEdge > edgeMap = new TrackSchemeEdgeBimap<>( idmap, trackSchemeGraph );
