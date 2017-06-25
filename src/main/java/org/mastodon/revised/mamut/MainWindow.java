@@ -47,13 +47,26 @@ public class MainWindow extends JFrame
 
 	private File proposedProjectFile;
 
-	private final JButton featureComputationButton;
+	private JButton featureComputationButton;
 
-	private final JButton displaySettingsButton;
+	private JButton displaySettingsButton;
+
+
+	public MainWindow( final Model model, final SpimDataMinimal spimData, final String bdvFile, final InputTriggerConfig keyconf )
+	{
+		this.project = new MamutProject( new File( "." ), new File( bdvFile ), null );
+		this.windowManager = new WindowManager(
+				this,
+				bdvFile,
+				spimData,
+				model,
+				keyconf );
+		go();
+	}
+
 
 	public MainWindow( final MamutProject project, final InputTriggerConfig keyconf ) throws IOException, SpimDataException
 	{
-		super( "test" );
 		setTitle( "Mastodon MaMuT" );
 		this.project = project;
 
@@ -76,6 +89,11 @@ public class MainWindow extends JFrame
 				spimData,
 				model,
 				keyconf );
+		go();
+	}
+
+	private void go()
+	{
 
 		final JPanel buttonsPanel = new JPanel();
 		final GridBagLayout gbl_buttonsPanel = new GridBagLayout();
