@@ -204,6 +204,7 @@ public class BdvManager
 		final RenderSettingsDialog renderSettingsDialog = new RenderSettingsDialog( viewerFrame, renderSettings );
 		final ActionMap actionMap = new ActionMap();
 		new ToggleDialogAction( RENDER_SETTINGS, renderSettingsDialog ).put( actionMap );
+
 		final InputMap inputMap = new InputMap();
 		final KeyStrokeAdder a = mamutWindowModel.keyconf.keyStrokeAdder( inputMap, "mamut" );
 		a.put( RENDER_SETTINGS, "R" );
@@ -228,7 +229,7 @@ public class BdvManager
 	/**
 	 * Information for one BigDataViewer window.
 	 */
-	static class BdvWindow
+	public static class BdvWindow
 	{
 		private final ViewerFrame viewerFrame;
 

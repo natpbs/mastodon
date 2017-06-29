@@ -234,4 +234,14 @@ public class WindowManager
 		return mamutAppModel.model;
 	}
 
+	public SharedBigDataViewerData getSharedBigDataViewerData()
+	{
+		return mamutAppModel.sharedBdvData;
+	}
+
+	public MamutWindowModel getMamutWindowModel()
+	{
+		return mamutWindowModel;
+	}
+
 }

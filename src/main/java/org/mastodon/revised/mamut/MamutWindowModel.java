@@ -46,4 +46,14 @@ public class MamutWindowModel
 		this.groupManager = new GroupManager();
 	}
 
+	public List< BdvWindow > getBdvWindows()
+	{
+		return bdvWindows;
+	}
+
+	public List< TsWindow > getTrackSchemeWindows()
+	{
+		return tsWindows;
+	}
+
 }
