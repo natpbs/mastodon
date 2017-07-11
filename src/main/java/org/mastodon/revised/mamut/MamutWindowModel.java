@@ -56,4 +56,9 @@ public class MamutWindowModel
 		return tsWindows;
 	}
 
+	public InputTriggerConfig getInputTriggerConfig()
+	{
+		return keyconf;
+	}
+
 }

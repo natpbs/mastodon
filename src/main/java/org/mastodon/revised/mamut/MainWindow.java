@@ -226,6 +226,11 @@ public class MainWindow extends JFrame
 		new MamutProjectIO().save( project, projectFile.getAbsolutePath() );
 	}
 
+	public WindowManager getWindowManager()
+	{
+		return windowManager;
+	}
+
 	public void saveProject()
 	{
 		String fn = proposedProjectFile == null ? null : proposedProjectFile.getAbsolutePath();
@@ -263,7 +268,7 @@ public class MainWindow extends JFrame
 	 * <li>".mastodon/keyconfig.yaml" in the user's home directory.
 	 * </ol>
 	 */
-	static final InputTriggerConfig getInputTriggerConfig()
+	public static final InputTriggerConfig getInputTriggerConfig()
 	{
 		InputTriggerConfig conf = null;
 

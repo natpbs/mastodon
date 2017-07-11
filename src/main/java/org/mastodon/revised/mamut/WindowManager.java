@@ -23,6 +23,7 @@ import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import bdv.spimdata.SpimDataMinimal;
 import bdv.tools.ToggleDialogAction;
 import bdv.viewer.RequestRepaint;
+import bdv.viewer.ViewerFrame;
 import bdv.viewer.ViewerOptions;
 
 public class WindowManager
@@ -201,9 +202,9 @@ public class WindowManager
 		return closeAllAction;
 	}
 
-	private void createBigDataViewer()
+	public ViewerFrame createBigDataViewer()
 	{
-		bdvManager.createBigDataViewer();
+		return bdvManager.createBigDataViewer();
 	}
 
 	private void createTrackScheme()

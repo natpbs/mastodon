@@ -93,7 +93,7 @@ public class BdvManager
 
 	private int bdvName = 1;
 
-	void createBigDataViewer()
+	ViewerFrame createBigDataViewer()
 	{
 		final GroupHandle bdvGroupHandle = mamutWindowModel.groupManager.createGroupHandle();
 
@@ -224,6 +224,8 @@ public class BdvManager
 
 		final BdvWindow bdvWindow = new BdvWindow( viewerFrame, tracksOverlay, bdvGroupHandle, contextProvider );
 		addBdvWindow( bdvWindow );
+
+		return viewerFrame;
 	}
 
 	/**
