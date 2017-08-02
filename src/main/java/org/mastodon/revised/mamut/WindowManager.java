@@ -4,6 +4,7 @@ import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -22,9 +23,12 @@ import org.scijava.ui.behaviour.util.AbstractNamedAction;
 
 import bdv.spimdata.SpimDataMinimal;
 import bdv.tools.ToggleDialogAction;
+import bdv.util.BehaviourTransformEventHandlerPlanar;
 import bdv.viewer.RequestRepaint;
 import bdv.viewer.ViewerFrame;
 import bdv.viewer.ViewerOptions;
+import mpicbg.spim.data.generic.sequence.BasicViewSetup;
+import net.imglib2.Dimensions;
 
 public class WindowManager
 {
@@ -49,6 +53,11 @@ public class WindowManager
 
 	private final AbstractNamedAction tgmmImportAction;
 
+	/**
+	 * <code>true</code> if the provided image data is 2D over time and not 3D.
+	 */
+	private final boolean is2D;
+
 	public WindowManager(
 			final JFrame owner,
 			final String spimDataXmlFilename,
@@ -66,9 +75,27 @@ public class WindowManager
 					w.getViewerFrame().getViewerPanel().requestRepaint();
 			}
 		};
+
 		final ViewerOptions options = ViewerOptions.options()
 				.inputTriggerConfig( keyconf )
 				.shareKeyPressedEvents( mamutWindowModel.keyPressedManager );
+
+		// Test if we have 2D data.
+		final List< BasicViewSetup > setups = spimData.getSequenceDescription().getViewSetupsOrdered();
+		boolean testIs2D = true;
+		for ( final BasicViewSetup setup : setups )
+		{
+			final Dimensions size = setup.getSize();
+			if (size.dimension( 2 ) > 1)
+			{
+				testIs2D = false;
+				break;
+			}
+		}
+		this.is2D = testIs2D;
+		if ( is2D )
+			options.transformEventHandlerFactory( BehaviourTransformEventHandlerPlanar.factory() );
+
 		final SharedBigDataViewerData sharedBdvData = new SharedBigDataViewerData( spimDataXmlFilename, spimData, options, requestRepaint );
 		this.mamutAppModel = new MamutAppModel( model, sharedBdvData );
 		this.trackSchemeManager = new TrackSchemeManager( mamutAppModel, mamutWindowModel );
@@ -204,7 +231,7 @@ public class WindowManager
 
 	public ViewerFrame createBigDataViewer()
 	{
-		return bdvManager.createBigDataViewer();
+		return bdvManager.createBigDataViewer( is2D );
 	}
 
 	private void createTrackScheme()
