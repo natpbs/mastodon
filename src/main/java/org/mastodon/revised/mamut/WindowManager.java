@@ -16,6 +16,7 @@ import org.mastodon.revised.model.feature.DefaultFeatureRangeCalculator;
 import org.mastodon.revised.model.feature.FeatureComputerService;
 import org.mastodon.revised.model.feature.FeatureRangeCalculator;
 import org.mastodon.revised.model.mamut.Model;
+import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.ui.DisplaySettingsDialog;
 import org.scijava.Context;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -234,9 +235,9 @@ public class WindowManager
 		return bdvManager.createBigDataViewer( is2D );
 	}
 
-	private void createTrackScheme()
+	public TrackSchemeFrame createTrackScheme()
 	{
-		trackSchemeManager.createTrackScheme();
+		return trackSchemeManager.createTrackScheme();
 	}
 
 	public void closeAllWindows()

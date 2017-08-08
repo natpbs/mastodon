@@ -65,7 +65,7 @@ public class TrackSchemeManager
 		this.trackSchemeStyleManager = new TrackSchemeStyleManager();
 	}
 
-	public void createTrackScheme()
+	public TrackSchemeFrame createTrackScheme()
 	{
 		final ListenableReadOnlyGraph< Spot, Link > graph = mamutAppModel.model.getGraph();
 		final GraphIdBimap< Spot, Link > idmap = mamutAppModel.model.getGraphIdBimap();
@@ -188,6 +188,8 @@ public class TrackSchemeManager
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );
 		addTsWindow( tsWindow );
 		frame.getTrackschemePanel().repaint();
+
+		return frame;
 	}
 
 	private void installTrackSchemeMenu(
