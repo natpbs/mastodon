@@ -6,6 +6,8 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
@@ -28,8 +30,10 @@ import bdv.util.BehaviourTransformEventHandlerPlanar;
 import bdv.viewer.RequestRepaint;
 import bdv.viewer.ViewerFrame;
 import bdv.viewer.ViewerOptions;
+import bdv.viewer.ViewerPanel;
 import mpicbg.spim.data.generic.sequence.BasicViewSetup;
 import net.imglib2.Dimensions;
+import net.imglib2.realtransform.AffineTransform3D;
 
 public class WindowManager
 {
@@ -87,7 +91,7 @@ public class WindowManager
 		for ( final BasicViewSetup setup : setups )
 		{
 			final Dimensions size = setup.getSize();
-			if (size.dimension( 2 ) > 1)
+			if ( size.dimension( 2 ) > 1 )
 			{
 				testIs2D = false;
 				break;
@@ -232,7 +236,33 @@ public class WindowManager
 
 	public ViewerFrame createBigDataViewer()
 	{
-		return bdvManager.createBigDataViewer( is2D );
+		final ViewerFrame viewerFrame = bdvManager.createBigDataViewer();
+		if ( is2D )
+		{
+			final ViewerPanel viewer = viewerFrame.getViewerPanel();
+			// Constraint transform position for 2D data.
+			final AffineTransform3D t = new AffineTransform3D();
+			viewer.getState().getViewerTransform( t );
+			t.set( 0., 2, 3 );
+			viewer.setCurrentViewerTransform( t );
+
+			// Blocks some actions that make no sense for 2D data.
+			final AbstractAction blockerAction = new AbstractAction( "Do nothing" )
+			{
+
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				public void actionPerformed( final ActionEvent e )
+				{}
+			};
+
+			final ActionMap actionMap = new ActionMap();
+			actionMap.put( "align ZY plane", blockerAction );
+			actionMap.put( "align XZ plane", blockerAction );
+			viewerFrame.getKeybindings().addActionMap( "2d mamut", actionMap );
+		}
+		return viewerFrame;
 	}
 
 	public TrackSchemeFrame createTrackScheme()
