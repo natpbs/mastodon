@@ -3,7 +3,6 @@ package org.mastodon.revised.trackscheme;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.graph.Vertex;
-import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 
 public class ModelGraphWrapper< V extends Vertex< E >, E extends Edge< V > >
 {

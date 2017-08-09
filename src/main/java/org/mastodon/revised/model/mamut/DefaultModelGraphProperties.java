@@ -1,6 +1,6 @@
 package org.mastodon.revised.model.mamut;
 
-import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
+import org.mastodon.revised.trackscheme.ModelGraphProperties;
 
 public class DefaultModelGraphProperties
 		implements ModelGraphProperties< Spot, Link >

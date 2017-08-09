@@ -25,8 +25,6 @@ import org.mastodon.pool.attributes.BooleanAttribute;
 import org.mastodon.pool.attributes.DoubleAttribute;
 import org.mastodon.pool.attributes.IndexAttribute;
 import org.mastodon.pool.attributes.IntAttribute;
-import org.mastodon.revised.model.mamut.DefaultModelGraphProperties;
-import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.spatial.HasTimepoint;
 
 /**
@@ -64,9 +62,7 @@ import org.mastodon.spatial.HasTimepoint;
  * database. The only requirements on the model graph is that its vertices
  * implement {@link HasTimepoint}. Other properties (such as vertex labels or
  * selection states) are accessed through {@link ModelGraphProperties} that know
- * how to retrieve/compute them for a given model vertex/edge ID. We provide a
- * default implementation of {@link DefaultModelGraphProperties} that should be
- * applicable for almost all model graphs.
+ * how to retrieve/compute them for a given model vertex/edge ID.
  * <p>
  * {@link TrackSchemeGraph} registers as a {@link GraphChangeListener} with the
  * model graph and forwards {@link GraphChangeListener#graphChanged()

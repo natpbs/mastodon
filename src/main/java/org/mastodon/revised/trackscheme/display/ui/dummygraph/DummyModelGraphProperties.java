@@ -1,6 +1,6 @@
 package org.mastodon.revised.trackscheme.display.ui.dummygraph;
 
-import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
+import org.mastodon.revised.trackscheme.ModelGraphProperties;
 
 public class DummyModelGraphProperties implements ModelGraphProperties< DummyVertex, DummyEdge >
 {
