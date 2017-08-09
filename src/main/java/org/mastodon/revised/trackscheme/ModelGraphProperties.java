@@ -1,8 +1,4 @@
-package org.mastodon.revised.trackscheme.wrap;
-
-import org.mastodon.revised.model.HasLabel;
-import org.mastodon.revised.trackscheme.TrackSchemeGraph;
-import org.mastodon.spatial.HasTimepoint;
+package org.mastodon.revised.trackscheme;
 
 /**
  * Interface for accessing model graph properties.
@@ -11,10 +7,6 @@ import org.mastodon.spatial.HasTimepoint;
  * without requiring the graph to implement specific interfaces, we access
  * properties of model vertices and edges (for example the label of a vertex)
  * through {@link ModelGraphProperties}.
- * <p>
- * For model graphs that implement the required additional interfaces (
- * {@link HasTimepoint}, {@link HasLabel}, etc),
- * {@link DefaultModelGraphProperties} can be used.
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
@@ -24,6 +16,17 @@ public interface ModelGraphProperties< V, E >
 
 	public String getLabel( V v );
 
-	// TODO move to separate interface? ModelGraphModifyProperties?
 	public void setLabel( V v, String label );
+
+	public E addEdge( V source, V target, E ref );
+
+	public V addVertex( V ref );
+
+	public void removeEdge( E e );
+
+	public void removeVertex( V v );
+
+	public void notifyGraphChanged();
+
+
 }

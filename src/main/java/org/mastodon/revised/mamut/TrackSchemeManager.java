@@ -21,8 +21,10 @@ import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.graph.ListenableReadOnlyGraph;
 import org.mastodon.revised.context.ContextChooser;
 import org.mastodon.revised.model.feature.FeatureModel;
+import org.mastodon.revised.model.mamut.DefaultModelGraphProperties;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Spot;
+import org.mastodon.revised.trackscheme.ModelGraphProperties;
 import org.mastodon.revised.trackscheme.TrackSchemeContextListener;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeEdgeBimap;
@@ -36,8 +38,6 @@ import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
 import org.mastodon.revised.trackscheme.display.style.DefaultTrackSchemeOverlay;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyleManager;
-import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
-import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
 import org.mastodon.revised.ui.coloring.FeaturesColorGenerator;
@@ -73,7 +73,7 @@ public class TrackSchemeManager
 		/*
 		 * TrackSchemeGraph listening to model
 		 */
-		final ModelGraphProperties< Spot, Link > properties = new DefaultModelGraphProperties<>();
+		final ModelGraphProperties< Spot, Link > properties = new DefaultModelGraphProperties( mamutAppModel.model.getGraph() );
 		final TrackSchemeGraph< Spot, Link > trackSchemeGraph = new TrackSchemeGraph<>( graph, idmap, properties );
 		final RefBimap< Spot, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, trackSchemeGraph );
 		final RefBimap< Link, TrackSchemeEdge > edgeMap = new TrackSchemeEdgeBimap<>( idmap, trackSchemeGraph );
@@ -181,8 +181,6 @@ public class TrackSchemeManager
 				frame.getTrackschemePanel(),
 				trackSchemeGraph,
 				frame.getTrackschemePanel().getGraphOverlay(),
-				mamutAppModel.model.getGraph(),
-				mamutAppModel.model.getGraph().getGraphIdBimap(),
 				mamutAppModel.model );
 
 		final TsWindow tsWindow = new TsWindow( frame, groupHandle, contextChooser );

@@ -25,8 +25,6 @@ import org.mastodon.pool.attributes.BooleanAttribute;
 import org.mastodon.pool.attributes.DoubleAttribute;
 import org.mastodon.pool.attributes.IndexAttribute;
 import org.mastodon.pool.attributes.IntAttribute;
-import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
-import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.spatial.HasTimepoint;
 
 /**
@@ -64,9 +62,7 @@ import org.mastodon.spatial.HasTimepoint;
  * database. The only requirements on the model graph is that its vertices
  * implement {@link HasTimepoint}. Other properties (such as vertex labels or
  * selection states) are accessed through {@link ModelGraphProperties} that know
- * how to retrieve/compute them for a given model vertex/edge ID. We provide a
- * default implementation of {@link DefaultModelGraphProperties} that should be
- * applicable for almost all model graphs.
+ * how to retrieve/compute them for a given model vertex/edge ID.
  * <p>
  * {@link TrackSchemeGraph} registers as a {@link GraphChangeListener} with the
  * model graph and forwards {@link GraphChangeListener#graphChanged()
@@ -108,6 +104,8 @@ public class TrackSchemeGraph<
 	private final TrackSchemeEdge tse;
 
 	private final ArrayList< GraphChangeListener > listeners;
+
+	private final ModelGraphProperties< V, E > properties;
 
 	/**
 	 * Creates a new TrackSchemeGraph with a default initial capacity.
@@ -153,6 +151,7 @@ public class TrackSchemeGraph<
 						new ModelGraphWrapper<>( idmap, modelGraphProperties ) ) ) );
 		this.modelGraph = modelGraph;
 		this.idmap = idmap;
+		this.properties = modelGraphProperties;
 		idToTrackSchemeVertex =	new IntRefArrayMap<>( vertexPool );
 		idToTrackSchemeEdge = new IntRefArrayMap<>( edgePool );
 		roots = new RefSetImp<>( vertexPool );
@@ -249,6 +248,75 @@ public class TrackSchemeGraph<
 		return idToTrackSchemeEdge.get( modelId, ref );
 	}
 
+	/*
+	 * Graph modifications.
+	 *
+	 * Vertex & edge removal as well as edge additions are defered to the model
+	 * graph via properties.
+	 */
+
+	@Override
+	public void remove( final TrackSchemeVertex vertex )
+	{
+		@SuppressWarnings( "unchecked" )
+		final V vref = ( V ) vertex.modelVertex.getReusableRef();
+		final V v = idmap.getVertex( vertex.getModelVertexId(), vref );
+		properties.removeVertex( v );
+		properties.notifyGraphChanged();;
+	}
+
+	@Override
+	public void remove( final TrackSchemeEdge edge )
+	{
+		@SuppressWarnings( "unchecked" )
+		final E eref = ( E ) edge.modelEdge.getReusableRef();
+		final E e = idmap.getEdge( edge.getModelEdgeId(), eref );
+		properties.removeEdge( e );
+		properties.notifyGraphChanged();
+	}
+
+	@Override
+	public TrackSchemeEdge addEdge( final TrackSchemeVertex source, final TrackSchemeVertex target )
+	{
+		return addEdge( source, target, edgeRef() );
+	}
+
+	@Override
+	public TrackSchemeEdge addEdge( final TrackSchemeVertex source, final TrackSchemeVertex target, final TrackSchemeEdge ref )
+	{
+		@SuppressWarnings( "unchecked" )
+		final V svref = ( V ) source.modelVertex.getReusableRef();
+		final V s = idmap.getVertex( source.getModelVertexId(), svref );
+
+		@SuppressWarnings( "unchecked" )
+		final V tvref = ( V ) target.modelVertex.getReusableRef();
+		final V t = idmap.getVertex( target.getModelVertexId(), tvref );
+
+		@SuppressWarnings( "unchecked" )
+		final E eref = ( E ) ref.modelEdge.getReusableRef();
+		final E edge = properties.addEdge( s, t, eref );
+		ref.setModelEdgeId( idmap.getEdgeId( edge ) );
+
+		properties.notifyGraphChanged();
+		return ref;
+	}
+
+	@Override
+	public TrackSchemeVertex addVertex()
+	{
+		throw new UnsupportedOperationException( "Cannot add directly a vertex to a TrackScheme graph." );
+	}
+
+	@Override
+	public TrackSchemeVertex addVertex( final TrackSchemeVertex vertex )
+	{
+		throw new UnsupportedOperationException( "Cannot add directly a vertex to a TrackScheme graph." );
+	}
+
+	/*
+	 * GraphChangeListener
+	 */
+
 	/**
 	 * Adds a GraphChangeListener that will be notified when this
 	 * TrackSchemeGraph changes.
@@ -283,10 +351,6 @@ public class TrackSchemeGraph<
 		return listeners.remove( listener );
 	}
 
-	/*
-	 * GraphChangeListener
-	 */
-
 	@Override
 	public void graphChanged()
 	{
@@ -308,7 +372,7 @@ public class TrackSchemeGraph<
 		for ( final V v : modelGraph.vertices() )
 		{
 			final int id = idmap.getVertexId( v );
-			addVertex( tsv ).init( id );
+			super.addVertex( tsv ).init( id );
 			idToTrackSchemeVertex.put( id, tsv );
 			if ( v.incomingEdges().isEmpty() )
 				roots.add( tsv );
@@ -318,7 +382,7 @@ public class TrackSchemeGraph<
 			final int id = idmap.getEdgeId( e );
 			idToTrackSchemeVertex.get( idmap.getVertexId( e.getSource( mv ) ), tsv );
 			idToTrackSchemeVertex.get( idmap.getVertexId( e.getTarget( mv ) ), tsv2 );
-			insertEdge( tsv, e.getSourceOutIndex(), tsv2, e.getTargetInIndex(), tse ).init( id );
+			super.insertEdge( tsv, e.getSourceOutIndex(), tsv2, e.getTargetInIndex(), tse ).init( id );
 			idToTrackSchemeEdge.put( id, tse );
 		}
 	}
@@ -327,7 +391,7 @@ public class TrackSchemeGraph<
 	public void vertexAdded( final V vertex )
 	{
 		final int id = idmap.getVertexId( vertex );
-		addVertex( tsv ).init( id );
+		super.addVertex( tsv ).init( id );
 		idToTrackSchemeVertex.put( id, tsv );
 		roots.add( tsv );
 	}
@@ -340,7 +404,7 @@ public class TrackSchemeGraph<
 		{
 			if ( tsv.incomingEdges().isEmpty() )
 				roots.remove( tsv );
-			this.remove( tsv );
+			super.remove( tsv );
 		}
 	}
 
@@ -352,7 +416,7 @@ public class TrackSchemeGraph<
 		idToTrackSchemeVertex.get( idmap.getVertexId( edge.getTarget( mv ) ), tsv2 );
 		if ( tsv2.incomingEdges().isEmpty() )
 			roots.remove( tsv2 );
-		insertEdge( tsv, edge.getSourceOutIndex(), tsv2, edge.getTargetInIndex(), tse ).init( id );
+		super.insertEdge( tsv, edge.getSourceOutIndex(), tsv2, edge.getTargetInIndex(), tse ).init( id );
 		idToTrackSchemeEdge.put( id, tse );
 	}
 
@@ -364,7 +428,7 @@ public class TrackSchemeGraph<
 		{
 			if ( tse.getTarget( tsv ).incomingEdges().size() == 1 )
 				roots.add( tsv );
-			this.remove( tse );
+			super.remove( tse );
 		}
 	}
 

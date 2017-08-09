@@ -27,6 +27,7 @@ import org.mastodon.adapter.SelectionAdapter;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.revised.model.feature.FeatureKeys;
 import org.mastodon.revised.model.feature.FeatureRangeCalculator;
+import org.mastodon.revised.trackscheme.ModelGraphProperties;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeEdgeBimap;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
@@ -39,9 +40,8 @@ import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle.UpdateLis
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyEdge;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyGraph.Examples;
+import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyModelGraphProperties;
 import org.mastodon.revised.trackscheme.display.style.dummygraph.DummyVertex;
-import org.mastodon.revised.trackscheme.wrap.DefaultModelGraphProperties;
-import org.mastodon.revised.trackscheme.wrap.ModelGraphProperties;
 import org.mastodon.revised.ui.grouping.GroupManager;
 import org.mastodon.revised.ui.selection.FocusModel;
 import org.mastodon.revised.ui.selection.FocusModelImp;
@@ -81,7 +81,7 @@ class TrackSchemeStyleChooserPanel extends JPanel
 		final Examples ex = DummyGraph.Examples.CELEGANS;
 		final DummyGraph example = ex.getGraph();
 		final GraphIdBimap< DummyVertex, DummyEdge > idmap = example.getIdBimap();
-		final ModelGraphProperties< DummyVertex, DummyEdge > dummyProps = new DefaultModelGraphProperties<>();
+		final ModelGraphProperties< DummyVertex, DummyEdge > dummyProps = new DummyModelGraphProperties( example );
 		final TrackSchemeGraph< DummyVertex, DummyEdge > graph = new TrackSchemeGraph<>( example, idmap, dummyProps );
 		final RefBimap< DummyVertex, TrackSchemeVertex > vertexMap = new TrackSchemeVertexBimap<>( idmap, graph );
 		final RefBimap< DummyEdge, TrackSchemeEdge > edgeMap = new TrackSchemeEdgeBimap<>( idmap, graph );

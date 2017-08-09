@@ -8,14 +8,10 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-import org.mastodon.graph.Edge;
-import org.mastodon.graph.GraphIdBimap;
-import org.mastodon.graph.ListenableGraph;
-import org.mastodon.graph.Vertex;
 import org.mastodon.revised.trackscheme.ScreenTransform;
+import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
 import org.mastodon.revised.trackscheme.TrackSchemeVertex;
-import org.mastodon.spatial.HasTimepoint;
 import org.mastodon.undo.UndoPointMarker;
 import org.scijava.ui.behaviour.DragBehaviour;
 import org.scijava.ui.behaviour.io.InputTriggerConfig;
@@ -29,8 +25,7 @@ import net.imglib2.ui.TransformListener;
  * @author Jean-Yves Tinevez &lt;jeanyves.tinevez@gmail.com&gt;
  *
  */
-public class TrackSchemeEditBehaviours< V extends Vertex< E > & HasTimepoint, E extends Edge< V > >
-		extends Behaviours
+public class TrackSchemeEditBehaviours< V, E > extends Behaviours
 {
 
 	private static final String TOGGLE_LINK = "toggle link";
@@ -43,7 +38,7 @@ public class TrackSchemeEditBehaviours< V extends Vertex< E > & HasTimepoint, E 
 			1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL,
 			1.0f, new float[] { 4f, 10f }, 0f );
 
-	private final TrackSchemeGraph< V, E > graph;
+	private final TrackSchemeGraph< ?, ? > graph;
 
 	private final AbstractTrackSchemeOverlay renderer;
 
@@ -53,39 +48,29 @@ public class TrackSchemeEditBehaviours< V extends Vertex< E > & HasTimepoint, E 
 
 	private final EditOverlay overlay;
 
-	private final ListenableGraph< V, E > modelGraph;
-
-	private final GraphIdBimap< V, E > idBimap;
-
-	public static < V extends Vertex< E > & HasTimepoint, E extends Edge< V > > void installActionBindings(
+	public static < V, E > void installActionBindings(
 			final TriggerBehaviourBindings triggerBehaviourBindings,
 			final InputTriggerConfig config,
 			final TrackSchemePanel panel,
-			final TrackSchemeGraph< V, E > graph,
+			final TrackSchemeGraph< ?, ? > graph,
 			final AbstractTrackSchemeOverlay renderer,
-			final ListenableGraph< V, E > modelGraph,
-			final GraphIdBimap< V, E > idBimap,
 			final UndoPointMarker undo )
 	{
-		new TrackSchemeEditBehaviours<>( config, panel, graph, renderer, modelGraph, idBimap, undo )
+		new TrackSchemeEditBehaviours< V, E >( config, panel, graph, renderer, undo )
 				.install( triggerBehaviourBindings, "graph-special" );
 	}
 
 	private TrackSchemeEditBehaviours(
 			final InputTriggerConfig config,
 			final TrackSchemePanel panel,
-			final TrackSchemeGraph< V, E > graph,
+			final TrackSchemeGraph< ?, ? > graph,
 			final AbstractTrackSchemeOverlay renderer,
-			final ListenableGraph< V, E > modelGraph,
-			final GraphIdBimap< V, E > idBimap,
 			final UndoPointMarker undo )
 	{
 		super( config, new String[] { "ts" } );
 		this.panel = panel;
 		this.graph = graph;
 		this.renderer = renderer;
-		this.modelGraph = modelGraph;
-		this.idBimap = idBimap;
 		this.undo = undo;
 
 		// Create and register overlay.
@@ -108,24 +93,17 @@ public class TrackSchemeEditBehaviours< V extends Vertex< E > & HasTimepoint, E 
 
 		private final TrackSchemeVertex tmp;
 
+		private final TrackSchemeEdge eref;
 
 		private boolean editing;
-
-		private final V ref1;
-
-		private final V ref2;
-
-		private final E edgeRef;
 
 		public ToggleLink()
 		{
 			source = graph.vertexRef();
 			target = graph.vertexRef();
 			tmp = graph.vertexRef();
+			eref = graph.edgeRef();
 			editing = false;
-			ref1 = modelGraph.vertexRef();
-			ref2 = modelGraph.vertexRef();
-			edgeRef = modelGraph.edgeRef();
 		}
 
 		@Override
@@ -194,23 +172,11 @@ public class TrackSchemeEditBehaviours< V extends Vertex< E > & HasTimepoint, E 
 						target.refTo( tmp );
 					}
 
-					final V sv = idBimap.getVertex( source.getModelVertexId(), ref1 );
-					final V tv = idBimap.getVertex( target.getModelVertexId(), ref2 );
-
-					/*
-					 * FIXME: Does not work in practice for MaMuT, because Spots
-					 * and Links need to be init() after being added to the
-					 * model graph.
-					 *
-					 * Trying to add 2 links with this method will generate an
-					 * exception.
-					 */
-
-					final E edge = modelGraph.getEdge( sv, tv, edgeRef );
+					final TrackSchemeEdge edge = graph.getEdge( source, target, eref );
 					if ( null == edge )
-						modelGraph.addEdge( sv, tv, edgeRef );
+						graph.addEdge( source, target, eref );
 					else
-						modelGraph.remove( edge );
+						graph.remove( edge );
 
 					undo.setUndoPoint();
 				}
