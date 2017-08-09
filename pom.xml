@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>14.0.0</version>
+		<version>16.1.0</version>
 	</parent>
 
 	<groupId>net.trackmate</groupId>
@@ -39,13 +39,12 @@
 		<dependency>
 			<groupId>org.mastodon</groupId>
 			<artifactId>mastodon-graph</artifactId>
-			<version>1.0.0-beta-3-SNAPSHOT</version>
+			<version>1.0.0-beta-4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-core</artifactId>
-			<version>4.0.2-SNAPSHOT</version>
-			<!-- <version>4.0.1</version> -->
+			<version>4.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scijava</groupId>
@@ -55,23 +54,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-		</dependency>
-
-		<!-- Temporary dependencies until versions are promoted to parent -->
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2</artifactId>
-			<version>4.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-cache</artifactId>
-			<version>1.0.0-beta-2</version>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ui</artifactId>
-			<version>2.0.0-beta-32</version>
 		</dependency>
 
 		<!-- Test dependencies -->
@@ -120,7 +102,7 @@
 			<id>tinevez</id>
 			<name>Jean-Yves Tinevez</name>
 			<email>jean-yves.tinevez@pasteur.fr</email>
-			<url>http://www.pasteur.fr/ip/easysite/pasteur/fr/recherche/plates-formes-technologiques/imagopole/plates-formes-imagopole/la-plate-forme-d-imagerie-dynamique/equipe-pfid/equipe-pfid-jyt</url>
+			<url>https://research.pasteur.fr/en/member/jean-yves-tinevez/</url>
 			<organization>Institut Pasteur</organization>
 			<organizationUrl>http://www.pasteur.fr/</organizationUrl>
 			<roles>
