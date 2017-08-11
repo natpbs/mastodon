@@ -112,6 +112,7 @@ public final class Spot extends AbstractSpot< Spot, Link, SpotPool, ByteMappedEl
 
 		setCovarianceInternal( cov );
 		pool.boundingSphereRadiusSqu.setQuiet( this, radiusSquaredFromCovariance( cov ) );
+		pool.visibility.setQuiet( this, true );
 
 		super.initDone();
 		return this;
@@ -129,6 +130,16 @@ public final class Spot extends AbstractSpot< Spot, Link, SpotPool, ByteMappedEl
 		pool.covariance.notifyPropertyChanged( this );
 
 		pool.boundingSphereRadiusSqu.set( this, radiusSquaredFromCovariance( cov ) );
+	}
+
+	public boolean getVisibility()
+	{
+		return pool.visibility.get( this );
+	}
+
+	public void setVisibility( final boolean visible )
+	{
+		pool.visibility.set( this, visible );
 	}
 
 	public double getBoundingSphereRadiusSquared()

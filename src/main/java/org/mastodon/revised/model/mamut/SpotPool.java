@@ -3,6 +3,7 @@ package org.mastodon.revised.model.mamut;
 import org.mastodon.pool.ByteMappedElement;
 import org.mastodon.pool.ByteMappedElementArray;
 import org.mastodon.pool.SingleArrayMemPool;
+import org.mastodon.pool.attributes.BooleanAttribute;
 import org.mastodon.pool.attributes.DoubleArrayAttribute;
 import org.mastodon.pool.attributes.DoubleAttribute;
 import org.mastodon.properties.ObjPropertyMap;
@@ -20,6 +21,7 @@ public class SpotPool extends AbstractSpotPool< Spot, Link, ByteMappedElement, M
 
 		final DoubleArrayField covariance = doubleArrayField( 6 );
 		final DoubleField boundingSphereRadiusSqu = doubleField();
+		final BooleanField visibility = booleanField();
 	}
 
 	public static final SpotLayout layout = new SpotLayout();
@@ -27,6 +29,8 @@ public class SpotPool extends AbstractSpotPool< Spot, Link, ByteMappedElement, M
 	final DoubleArrayAttribute< Spot > covariance = new DoubleArrayAttribute<>( layout.covariance, this );
 
 	final DoubleAttribute< Spot > boundingSphereRadiusSqu = new DoubleAttribute<>( layout.boundingSphereRadiusSqu, this );
+
+	final BooleanAttribute< Spot > visibility = new BooleanAttribute<>( layout.visibility, this );
 
 	final ObjPropertyMap< Spot, String > label = new ObjPropertyMap<>( this );
 
@@ -59,5 +63,10 @@ public class SpotPool extends AbstractSpotPool< Spot, Link, ByteMappedElement, M
 	public final Property< Spot > labelProperty()
 	{
 		return label;
+	}
+
+	public BooleanAttribute< Spot > visbilityProperty()
+	{
+		return visibility;
 	}
 }
