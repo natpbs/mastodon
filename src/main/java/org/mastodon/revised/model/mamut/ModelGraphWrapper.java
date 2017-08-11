@@ -4,7 +4,9 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.mastodon.collection.ref.RefArrayList;
+import org.mastodon.pool.Pool;
 import org.mastodon.pool.PoolCollectionWrapper;
+import org.mastodon.pool.PoolObject;
 import org.mastodon.properties.BooleanPropertyMap;
 import org.mastodon.revised.model.feature.FeatureFilter;
 import org.mastodon.revised.model.feature.FeatureModel;
@@ -13,9 +15,13 @@ import org.mastodon.revised.model.feature.FeatureProjection;
 public class ModelGraphWrapper extends ModelGraph
 {
 
-	private final BooleanPropertyMap< Spot > visibility;
+	private final BooleanPropertyMap< Spot > vertexVisibility;
 
-	private final VisibleVertices visibleVertices;
+	private final VisibleEntities< Spot > visibleVertices;
+
+	private final BooleanPropertyMap< Link > edgeVisibility;
+
+	private final VisibleEntities< Link > visibleEdges;
 
 	public ModelGraphWrapper()
 	{
@@ -25,13 +31,15 @@ public class ModelGraphWrapper extends ModelGraph
 	public ModelGraphWrapper( final int initialCapacity )
 	{
 		super( initialCapacity );
-		this.visibility = new BooleanPropertyMap<>( vertexPool, initialCapacity );
-		this.visibleVertices = new VisibleVertices( vertexPool );
+		this.vertexVisibility = new BooleanPropertyMap<>( vertexPool, initialCapacity );
+		this.edgeVisibility = new BooleanPropertyMap<>( edgePool, initialCapacity );
+		this.visibleVertices = new VisibleEntities<>( vertexPool, vertexVisibility );
+		this.visibleEdges = new VisibleEntities<>( edgePool, edgeVisibility );
 	}
 
 	public BooleanPropertyMap< Spot > getVisibility()
 	{
-		return visibility;
+		return vertexVisibility;
 	}
 
 	public void filter( final Collection< FeatureFilter > filters, final FeatureModel< Spot, Link > featureModel )
@@ -58,21 +66,27 @@ public class ModelGraphWrapper extends ModelGraph
 		}
 
 		for ( final Spot spot : allVertices )
-			visibility.set( spot, true );
+			vertexVisibility.set( spot, true );
+		for ( final Link link : super.edges() )
+			edgeVisibility.set( link, true );
+
 		for ( final Spot spot : toHide )
-			visibility.set( spot, false );
+		{
+			vertexVisibility.set( spot, false );
+			for ( final Link link : spot.edges() )
+				edgeVisibility.set( link, false );
+		}
 
 		resumeListeners();
 		notifyGraphChanged();
 	}
-
 
 	@Override
 	public Spot addVertex( final Spot vertex )
 	{
 		// Mark all newly created spot as visible.
 		final Spot spot = super.addVertex( vertex );
-		visibility.set( spot, true );
+		vertexVisibility.set( spot, true );
 		return spot;
 	}
 
@@ -82,18 +96,26 @@ public class ModelGraphWrapper extends ModelGraph
 		return visibleVertices;
 	}
 
+	@Override
+	public PoolCollectionWrapper< Link > edges()
+	{
+		return visibleEdges;
+	}
+
 	public PoolCollectionWrapper< Spot > allVertices()
 	{
 		return super.vertices();
 	}
 
-
-	private class VisibleVertices extends PoolCollectionWrapper< Spot >
+	private class VisibleEntities< O extends PoolObject< O, ?, ? > > extends PoolCollectionWrapper< O >
 	{
 
-		public VisibleVertices( final SpotPool pool )
+		private final BooleanPropertyMap< O > visibility;
+
+		public VisibleEntities( final Pool< O, ? > pool, final BooleanPropertyMap< O > visibility )
 		{
 			super( pool );
+			this.visibility = visibility;
 		}
 
 		@Override
@@ -103,7 +125,7 @@ public class ModelGraphWrapper extends ModelGraph
 		}
 
 		@Override
-		public Iterator< Spot > iterator()
+		public Iterator< O > iterator()
 		{
 			return visibility.trueValueIterator();
 		}
