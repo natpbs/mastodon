@@ -48,7 +48,7 @@ public class Model extends AbstractModel< ModelGraph, Spot, Link > implements Un
 
 	public Model()
 	{
-		super( new ModelGraph() );
+		super( new ModelGraphWrapper() );
 		index = new SpatioTemporalIndexImp<>( modelGraph, modelGraph.idmap().vertexIdBimap() );
 
 		final int initialCapacity = 1024;
