@@ -1,9 +1,14 @@
 package org.mastodon.revised.model.mamut;
 
+import java.util.Collection;
 import java.util.Iterator;
 
+import org.mastodon.collection.ref.RefArrayList;
 import org.mastodon.pool.PoolCollectionWrapper;
 import org.mastodon.properties.BooleanPropertyMap;
+import org.mastodon.revised.model.feature.FeatureFilter;
+import org.mastodon.revised.model.feature.FeatureModel;
+import org.mastodon.revised.model.feature.FeatureProjection;
 
 public class ModelGraphWrapper extends ModelGraph
 {
@@ -24,6 +29,44 @@ public class ModelGraphWrapper extends ModelGraph
 		this.visibleVertices = new VisibleVertices( vertexPool );
 	}
 
+	public BooleanPropertyMap< Spot > getVisibility()
+	{
+		return visibility;
+	}
+
+	public void filter( final Collection< FeatureFilter > filters, final FeatureModel< Spot, Link > featureModel )
+	{
+		final RefArrayList< Spot > toHide = new RefArrayList<>( vertexPool );
+		final PoolCollectionWrapper< Spot > allVertices = super.vertices();
+
+		pauseListeners();
+		for ( final FeatureFilter filter : filters )
+		{
+			final FeatureProjection< Spot > feature = featureModel.getVertexProjection( filter.key );
+			if ( null == feature )
+				continue;
+
+			for ( final Spot spot : allVertices )
+			{
+				if ( !feature.isSet( spot )
+						|| ( filter.above && feature.value( spot ) < filter.threshold )
+						|| ( !filter.above && feature.value( spot ) > filter.threshold ) )
+				{
+					toHide.add( spot );
+				}
+			}
+		}
+
+		for ( final Spot spot : allVertices )
+			visibility.set( spot, true );
+		for ( final Spot spot : toHide )
+			visibility.set( spot, false );
+
+		resumeListeners();
+		notifyGraphChanged();
+	}
+
+
 	@Override
 	public Spot addVertex( final Spot vertex )
 	{
@@ -38,6 +81,12 @@ public class ModelGraphWrapper extends ModelGraph
 	{
 		return visibleVertices;
 	}
+
+	public PoolCollectionWrapper< Spot > allVertices()
+	{
+		return super.vertices();
+	}
+
 
 	private class VisibleVertices extends PoolCollectionWrapper< Spot >
 	{
