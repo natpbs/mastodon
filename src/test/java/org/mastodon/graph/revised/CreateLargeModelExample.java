@@ -9,7 +9,7 @@ public class CreateLargeModelExample
 {
 	private static final int N_STARTING_CELLS = 6;
 
-	private static final int N_DIVISIONS = 17;
+	private static final int N_DIVISIONS = 4;
 
 	private static final int N_FRAMES_PER_DIVISION = 5;
 

@@ -4,6 +4,7 @@ import org.mastodon.pool.ByteMappedElement;
 import org.mastodon.revised.bdv.overlay.util.JamaEigenvalueDecomposition;
 import org.mastodon.revised.model.AbstractSpot;
 import org.mastodon.revised.model.HasLabel;
+import org.mastodon.revised.model.HasVisibility;
 
 /**
  * {@link AbstractSpot} implementation where the spot shape is stored in a
@@ -11,7 +12,7 @@ import org.mastodon.revised.model.HasLabel;
  *
  * @author Tobias Pietzsch
  */
-public final class Spot extends AbstractSpot< Spot, Link, SpotPool, ByteMappedElement, ModelGraph > implements HasLabel
+public final class Spot extends AbstractSpot< Spot, Link, SpotPool, ByteMappedElement, ModelGraph > implements HasLabel, HasVisibility
 {
 	private final JamaEigenvalueDecomposition eig = new JamaEigenvalueDecomposition( 3 );
 
@@ -83,6 +84,7 @@ public final class Spot extends AbstractSpot< Spot, Link, SpotPool, ByteMappedEl
 		covarianceFromRadiusSquared( radius * radius, cov );
 		setCovarianceInternal( cov );
 		pool.boundingSphereRadiusSqu.setQuiet( this, radius * radius );
+		pool.visibility.setQuiet( this, true );
 
 		super.initDone();
 		return this;
@@ -132,11 +134,13 @@ public final class Spot extends AbstractSpot< Spot, Link, SpotPool, ByteMappedEl
 		pool.boundingSphereRadiusSqu.set( this, radiusSquaredFromCovariance( cov ) );
 	}
 
+	@Override
 	public boolean getVisibility()
 	{
 		return pool.visibility.get( this );
 	}
 
+	@Override
 	public void setVisibility( final boolean visible )
 	{
 		pool.visibility.set( this, visible );

@@ -2,8 +2,9 @@ package org.mastodon.revised.model.mamut;
 
 import org.mastodon.graph.ref.AbstractListenableEdge;
 import org.mastodon.pool.ByteMappedElement;
+import org.mastodon.revised.model.HasVisibility;
 
-public class Link extends AbstractListenableEdge< Link, Spot, LinkPool, ByteMappedElement >
+public class Link extends AbstractListenableEdge< Link, Spot, LinkPool, ByteMappedElement > implements HasVisibility
 {
 	/**
 	 * Initialize a new {@link Link}.
@@ -31,4 +32,17 @@ public class Link extends AbstractListenableEdge< Link, Spot, LinkPool, ByteMapp
 	{
 		super.initDone();
 	}
+
+	@Override
+	public boolean getVisibility()
+	{
+		return pool.visibility.get( this );
+	}
+
+	@Override
+	public void setVisibility( final boolean visible )
+	{
+		pool.visibility.set( this, visible );
+	}
+
 }

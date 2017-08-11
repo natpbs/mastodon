@@ -1,14 +1,23 @@
 package org.mastodon.revised.model.mamut;
 
+import java.util.Collection;
 import java.util.Iterator;
 
+import org.mastodon.collection.ref.RefArrayList;
+import org.mastodon.pool.Pool;
 import org.mastodon.pool.PoolCollectionWrapper;
-import org.mastodon.pool.attributes.BooleanAttribute;
+import org.mastodon.pool.PoolObject;
+import org.mastodon.revised.model.HasVisibility;
+import org.mastodon.revised.model.feature.FeatureFilter;
+import org.mastodon.revised.model.feature.FeatureModel;
+import org.mastodon.revised.model.feature.FeatureProjection;
 
 public class ModelGraphWrapper extends ModelGraph
 {
 
-	private final VisibleVertices visibleVertices;
+	private final VisibleEntities< Spot > visibleVertices;
+
+	private final VisibleEntities< Link > visibleEdges;
 
 	public ModelGraphWrapper()
 	{
@@ -18,7 +27,47 @@ public class ModelGraphWrapper extends ModelGraph
 	public ModelGraphWrapper( final int initialCapacity )
 	{
 		super( initialCapacity );
-		this.visibleVertices = new VisibleVertices( vertexPool );
+		this.visibleVertices = new VisibleEntities<>( vertexPool );
+		this.visibleEdges = new VisibleEntities<>( edgePool );
+	}
+
+	public void filter( final Collection< FeatureFilter > filters, final FeatureModel< Spot, Link > featureModel )
+	{
+		final RefArrayList< Spot > toHide = new RefArrayList<>( vertexPool );
+		final PoolCollectionWrapper< Spot > allVertices = super.vertices();
+
+		pauseListeners();
+		for ( final FeatureFilter filter : filters )
+		{
+			final FeatureProjection< Spot > feature = featureModel.getVertexProjection( filter.key );
+			if ( null == feature )
+				continue;
+
+			for ( final Spot spot : allVertices )
+			{
+				if ( !feature.isSet( spot )
+						|| ( filter.above && feature.value( spot ) < filter.threshold )
+						|| ( !filter.above && feature.value( spot ) > filter.threshold ) )
+				{
+					toHide.add( spot );
+				}
+			}
+		}
+
+		for ( final Spot spot : allVertices )
+			spot.setVisibility( true );
+		for ( final Link link : super.edges() )
+			link.setVisibility( true );
+
+		for ( final Spot spot : toHide )
+		{
+			spot.setVisibility( false );
+			for ( final Link link : spot.edges() )
+				link.setVisibility( false );
+		}
+
+		resumeListeners();
+		notifyGraphChanged();
 	}
 
 	@Override
@@ -27,34 +76,32 @@ public class ModelGraphWrapper extends ModelGraph
 		return visibleVertices;
 	}
 
-	private class VisibleVertices extends PoolCollectionWrapper< Spot >
+	@Override
+	public PoolCollectionWrapper< Link > edges()
+	{
+		return visibleEdges;
+	}
+
+	public PoolCollectionWrapper< Spot > allVertices()
+	{
+		return super.vertices();
+	}
+
+	private class VisibleEntities< O extends PoolObject< O, ?, ? > & HasVisibility > extends PoolCollectionWrapper< O >
 	{
 
-		private final BooleanAttribute< Spot > visibility;
+		private final Pool< O, ? > pool;
 
-		public VisibleVertices( final SpotPool pool )
+		public VisibleEntities( final Pool< O, ? > pool )
 		{
 			super( pool );
-			this.visibility = pool.visibility;
+			this.pool = pool;
 		}
 
 		@Override
-		public int size()
+		public Iterator< O > iterator()
 		{
-			int n = 0;
-			final Iterator< Spot > it = iterator();
-			while ( it.hasNext() )
-			{
-				it.next();
-				n++;
-			}
-			return n;
-		}
-
-		@Override
-		public Iterator< Spot > iterator()
-		{
-			return new VisibilityIterator( visibility );
+			return new VisibilityIterator<>( pool );
 		}
 
 		@Override
@@ -65,20 +112,20 @@ public class ModelGraphWrapper extends ModelGraph
 
 	}
 
-	private class VisibilityIterator implements Iterator< Spot >
+	private class VisibilityIterator< O extends PoolObject< O, ?, ? > & HasVisibility > implements Iterator< O >
 	{
-		private final BooleanAttribute< Spot > visibility;
 
-		private final Iterator< Spot > it;
+		private O next;
 
-		private Spot next;
+		private final O out;
 
-		private final Spot out = vertexRef();
+		private final Iterator< O > it;
 
-		public VisibilityIterator( final BooleanAttribute< Spot > visibility )
+		public VisibilityIterator( final Pool< O, ? > pool )
 		{
-			this.visibility = visibility;
-			this.it = ModelGraphWrapper.super.vertices().iterator();
+			this.next = pool.createRef();
+			this.it = pool.iterator( next );
+			this.out = pool.createRef();
 			fetchNext();
 		}
 
@@ -86,9 +133,10 @@ public class ModelGraphWrapper extends ModelGraph
 		{
 			while ( it.hasNext() )
 			{
-				next = it.next();
-				if ( visibility.get( next ) )
+				it.next();
+				if ( next.getVisibility() )
 					return;
+
 			}
 			next = null;
 		}
@@ -100,7 +148,7 @@ public class ModelGraphWrapper extends ModelGraph
 		}
 
 		@Override
-		public Spot next()
+		public O next()
 		{
 			out.refTo( next );
 			fetchNext();
