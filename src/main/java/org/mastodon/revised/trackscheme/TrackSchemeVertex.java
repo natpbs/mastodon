@@ -4,14 +4,16 @@ import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.graph.ref.AbstractVertex;
 import org.mastodon.pool.ByteMappedElement;
 import org.mastodon.pool.PoolObject;
+import org.mastodon.revised.model.HasLabel;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph.TrackSchemeVertexPool;
+import org.mastodon.spatial.HasTimepoint;
 
 /**
  * The vertex class for TrackScheme.
  *
  * @author Tobias Pietzsch &lt;tobias.pietzsch@gmail.com&gt;
  */
-public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackSchemeEdge, TrackSchemeVertexPool, ByteMappedElement >
+public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackSchemeEdge, TrackSchemeVertexPool, ByteMappedElement > implements HasLabel, HasTimepoint
 {
 	final ModelGraphWrapper< ?, ? >.ModelVertexWrapper modelVertex;
 
@@ -72,6 +74,7 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 	 * @return the label.
 	 *
 	 */
+	@Override
 	public String getLabel()
 	{
 		return modelVertex.getLabel();
@@ -83,11 +86,13 @@ public class TrackSchemeVertex extends AbstractVertex< TrackSchemeVertex, TrackS
 	 * @param label
 	 *            the label to set.
 	 */
+	@Override
 	public void setLabel( final String label )
 	{
 		modelVertex.setLabel( label );
 	}
 
+	@Override
 	public int getTimepoint()
 	{
 		return pool.timepoint.get( this );
