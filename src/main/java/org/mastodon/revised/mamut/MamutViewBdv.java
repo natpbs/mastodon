@@ -7,8 +7,10 @@ import static org.mastodon.revised.mamut.MamutMenuBuilder.fileMenu;
 import static org.mastodon.revised.mamut.MamutMenuBuilder.viewMenu;
 
 import javax.swing.ActionMap;
+import javax.swing.JPanel;
 
 import org.mastodon.app.ui.MastodonFrameViewActions;
+import org.mastodon.app.ui.SearchVertexLabel;
 import org.mastodon.app.ui.ViewMenu;
 import org.mastodon.app.ui.ViewMenuBuilder;
 import org.mastodon.model.AutoNavigateFocusModel;
@@ -144,6 +146,9 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		EditSpecialBehaviours.install( viewBehaviours, frame.getViewerPanel(), viewGraph, tracksOverlay, selectionModel, focusModel, model );
 		HighlightBehaviours.install( viewBehaviours, viewGraph, viewGraph.getLock(), viewGraph, highlightModel, model );
 		FocusActions.install( viewActions, viewGraph, viewGraph.getLock(), navigateFocusModel, selectionModel );
+
+		final JPanel searchField = SearchVertexLabel.install( viewActions, viewGraph, navigationHandler, selectionModel, focusModel );
+		frame.getSettingsPanel().add( searchField );
 
 		NavigationActionsMamut.install( viewActions, viewer );
 		viewer.getTransformEventHandler().install( viewBehaviours );
