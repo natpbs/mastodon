@@ -58,6 +58,7 @@ public class TgmmImportDialog extends JDialog
 	public TgmmImportDialog( final Frame owner )
 	{
 		super( owner, true );
+		setLocationByPlatform( true );
 
 		final JPanel content = new JPanel();
 		getContentPane().add( content, BorderLayout.CENTER );

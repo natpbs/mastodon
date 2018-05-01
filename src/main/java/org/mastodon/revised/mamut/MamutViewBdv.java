@@ -103,6 +103,7 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		);
 		appModel.getPlugins().addMenus( menu );
 
+		frame.setLocationByPlatform( true );
 		frame.setVisible( true );
 
 		viewer = bdv.getViewer();

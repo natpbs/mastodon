@@ -91,6 +91,7 @@ public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Lin
 		onClose( () -> forwardDefaultStyle.updateListeners().remove( updateListener ) );
 
 		setFrame( frame );
+		frame.setLocationByPlatform( true );
 		frame.setVisible( true );
 
 		MastodonFrameViewActions.install( viewActions, this );

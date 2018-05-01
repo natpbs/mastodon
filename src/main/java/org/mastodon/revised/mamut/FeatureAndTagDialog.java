@@ -17,6 +17,7 @@ public class FeatureAndTagDialog extends JDialog
 	public FeatureAndTagDialog( final JFrame owner, final Model model, final MamutFeatureComputerService computerService )
 	{
 		super( owner, "Features and tags" );
+		setLocationByPlatform( true );
 
 		// Feature computing panel.
 		final FeatureComputersPanel featureComputersPanel = new FeatureComputersPanel( computerService, model );

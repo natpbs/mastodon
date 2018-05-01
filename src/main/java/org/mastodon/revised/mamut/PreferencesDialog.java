@@ -51,6 +51,7 @@ public class PreferencesDialog extends JDialog
 		keymap.updateListeners().add( () -> actions.updateKeyConfig( keymap.getConfig() ) );
 
 		getContentPane().add( settingsPanel, BorderLayout.CENTER );
+		setLocationByPlatform( true );
 		pack();
 	}
 

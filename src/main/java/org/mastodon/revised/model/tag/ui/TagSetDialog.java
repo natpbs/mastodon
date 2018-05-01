@@ -89,6 +89,7 @@ public class TagSetDialog extends JDialog
 			final TagSetManager manager )
 	{
 		super( owner, "Configure Tag Sets", false );
+		setLocationByPlatform( true );
 		this.manager = manager;
 		this.runOnDispose = new ArrayList<>();
 

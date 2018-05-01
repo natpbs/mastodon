@@ -34,6 +34,7 @@ public class MainWindow extends JFrame
 	public MainWindow( final WindowManager windowManager )
 	{
 		super( "Mastodon" );
+		setLocationByPlatform( true );
 
 		final ActionMap actionMap = windowManager.getGlobalAppActions().getActionMap();
 
