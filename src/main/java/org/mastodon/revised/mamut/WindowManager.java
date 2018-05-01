@@ -153,6 +153,7 @@ public class WindowManager
 		globalAppActions.namedAction( editTagSetsAction, TAGSETS_DIALOG_KEYS );
 
 		final PreferencesDialog settings = new PreferencesDialog( null, keymap, new String[] { KeyConfigContexts.MASTODON } );
+		settings.setIconImage( Mastodon.MASTODON_LOGO.getImage() );
 		settings.addPage( new TrackSchemeStyleSettingsPage( "TrackScheme Styles", trackSchemeStyleManager ) );
 		settings.addPage( new RenderSettingsConfigPage( "BDV Render Settings", renderSettingsManager ) );
 		settings.addPage( new KeymapSettingsPage( "Keymap", keymapManager, descriptions ) );
@@ -210,6 +211,7 @@ public class WindowManager
 
 		final Keymap keymap = keymapManager.getForwardDefaultKeymap();
 		tagSetDialog = new TagSetDialog( null, model.getTagSetModel(), model, keymap, new String[] { KeyConfigContexts.MASTODON } );
+		tagSetDialog.setIconImage( Mastodon.MASTODON_LOGO.getImage() );
 		updateEnabledActions();
 
 		plugins.setAppModel( new MastodonPluginAppModel( appModel, this ) );
@@ -260,6 +262,7 @@ public class WindowManager
 		if ( appModel != null )
 		{
 			final MamutViewBdv view = new MamutViewBdv( appModel );
+			view.getFrame().setIconImage( Mastodon.MASTODON_LOGO.getImage() );
 			addBdvWindow( view );
 			return view;
 		}
@@ -271,6 +274,7 @@ public class WindowManager
 		if ( appModel != null )
 		{
 			final MamutViewTrackScheme view = new MamutViewTrackScheme( appModel );
+			view.getFrame().setIconImage( Mastodon.MASTODON_LOGO.getImage() );
 			addTsWindow( view );
 			return view;
 		}

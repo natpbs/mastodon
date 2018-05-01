@@ -3,6 +3,7 @@ package org.mastodon.revised.mamut;
 import java.io.IOException;
 import java.util.Locale;
 
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
@@ -17,6 +18,8 @@ import mpicbg.spim.data.SpimDataException;
 @Plugin( type = Command.class, menuPath = "Plugins>Mastodon (preview)" )
 public class Mastodon extends ContextCommand
 {
+	public static final ImageIcon MASTODON_LOGO = new ImageIcon( Mastodon.class.getResource( "Mastodon-logo-01-256x256.png" ) );
+
 	private WindowManager windowManager;
 
 	private MainWindow mainWindow;
@@ -27,6 +30,7 @@ public class Mastodon extends ContextCommand
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 		windowManager = new WindowManager( getContext() );
 		mainWindow = new MainWindow( windowManager );
+		mainWindow.setIconImage( MASTODON_LOGO.getImage() );
 		mainWindow.setVisible( true );
 	}
 

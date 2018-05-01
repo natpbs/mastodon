@@ -108,6 +108,8 @@ public class ProjectManager
 
 		tgmmImportDialog = new TgmmImportDialog( null );
 		simiImportDialog = new SimiImportDialog( null );
+		tgmmImportDialog.setIconImage( Mastodon.MASTODON_LOGO.getImage() );
+		simiImportDialog.setIconImage( Mastodon.MASTODON_LOGO.getImage() );
 
 		createProjectAction = new RunnableAction( CREATE_PROJECT, this::createProject );
 		loadProjectAction = new RunnableAction( LOAD_PROJECT, this::loadProject );
@@ -314,6 +316,7 @@ public class ProjectManager
 		final MamutFeatureComputerService featureComputerService = windowManager.getContext().getService( MamutFeatureComputerService.class );
 		final JFrame owner = null; // TODO
 		final Dialog featureComputationDialog = new FeatureAndTagDialog( owner, model, featureComputerService );
+		featureComputationDialog.setIconImage( Mastodon.MASTODON_LOGO.getImage() );
 		featureComputationDialog.setSize( 400, 400 );
 
 		final ToggleDialogAction toggleFeatureComputationDialogAction = new ToggleDialogAction( "feature computation", featureComputationDialog );
