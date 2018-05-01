@@ -1,11 +1,13 @@
 package org.mastodon.app.ui;
 
+import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.jdom2.Element;
 import org.mastodon.app.MastodonAppModel;
 import org.mastodon.app.MastodonView;
 import org.mastodon.app.ViewGraph;
@@ -46,6 +48,15 @@ public class MastodonFrameView<
 		E extends Edge< V > >
 	extends MastodonView< M, VG, MV, ME, V, E >
 {
+
+	public static final String VIEW_TYPE_TAG = "Type";
+	public static final String MASTODON_FRAME_VIEW_TAG = "MastodonFrameView";
+	private static final String FRAME_POSITION_TAG = "FramePosition";
+	private static final String X_ATTRIBUTE = "x";
+	private static final String Y_ATTRIBUTE = "y";
+	private static final String WIDTH_ATTRIBUTE = "width";
+	private static final String HEIGHT_ATTRIBUTE = "height";
+
 	protected ViewFrame frame;
 
 	protected final String[] keyConfigContexts;
@@ -130,5 +141,49 @@ public class MastodonFrameView<
 	String[] getKeyConfigContexts()
 	{
 		return keyConfigContexts;
+	}
+
+	/**
+	 * Stores the frame position in a new XML element.
+	 * 
+	 * @return the element.
+	 */
+	public Element toXml()
+	{
+		final Element element = new Element( MASTODON_FRAME_VIEW_TAG );
+		final Rectangle bounds = getFrame().getBounds();
+		final Element position = new Element( FRAME_POSITION_TAG);
+		position.setAttribute( X_ATTRIBUTE, Integer.toString( ( int ) bounds.getMinX() ) );
+		position.setAttribute( Y_ATTRIBUTE, Integer.toString( ( int ) bounds.getMinY() ) );
+		position.setAttribute( WIDTH_ATTRIBUTE, Integer.toString( ( int ) bounds.getWidth() ) );
+		position.setAttribute( HEIGHT_ATTRIBUTE, Integer.toString( ( int ) bounds.getHeight() ) );
+		element.addContent( position );
+		return element;
+	}
+
+	/**
+	 * Restores the frame position from the specified element.
+	 * 
+	 * @param element
+	 *            the element.
+	 */
+	public void restoreFromXml( final Element element )
+	{
+		final Element position = element.getChild( FRAME_POSITION_TAG );
+		if ( null == position )
+			return;
+		final ViewFrame frame = getFrame();
+		if ( null == frame )
+			return;
+		try
+		{
+			final int x = Integer.parseInt( position.getAttributeValue( X_ATTRIBUTE ) );
+			final int y = Integer.parseInt( position.getAttributeValue( Y_ATTRIBUTE ) );
+			final int width = Integer.parseInt( position.getAttributeValue( WIDTH_ATTRIBUTE ) );
+			final int height = Integer.parseInt( position.getAttributeValue( HEIGHT_ATTRIBUTE ) );
+			frame.setBounds( new Rectangle( x, y, width, height ) );
+		}
+		catch ( final NumberFormatException nfe )
+		{}
 	}
 }

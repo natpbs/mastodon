@@ -8,6 +8,7 @@ import static org.mastodon.revised.mamut.MamutMenuBuilder.viewMenu;
 
 import javax.swing.ActionMap;
 
+import org.jdom2.Element;
 import org.mastodon.app.ui.MastodonFrameViewActions;
 import org.mastodon.app.ui.ViewMenu;
 import org.mastodon.app.ui.ViewMenuBuilder;
@@ -44,6 +45,8 @@ import bdv.tools.InitializeViewerState;
 
 public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > >
 {
+	public static final String BDV_TYPE_VALUE = "BigDataViewer";
+
 	// TODO
 	private static int bdvName = 1;
 
@@ -173,5 +176,13 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 	public void requestRepaint()
 	{
 		viewer.requestRepaint();
+	}
+
+	@Override
+	public Element toXml()
+	{
+		final Element element = super.toXml();
+		element.setAttribute( VIEW_TYPE_TAG, BDV_TYPE_VALUE );
+		return element;
 	}
 }

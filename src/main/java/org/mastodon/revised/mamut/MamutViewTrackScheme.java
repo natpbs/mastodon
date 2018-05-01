@@ -8,6 +8,7 @@ import static org.mastodon.revised.mamut.MamutMenuBuilder.viewMenu;
 
 import javax.swing.ActionMap;
 
+import org.jdom2.Element;
 import org.mastodon.app.ui.MastodonFrameViewActions;
 import org.mastodon.app.ui.ViewMenu;
 import org.mastodon.app.ui.ViewMenuBuilder.JMenuHandle;
@@ -40,6 +41,9 @@ import org.scijava.ui.behaviour.KeyPressedManager;
 
 public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Link >, TrackSchemeVertex, TrackSchemeEdge >
 {
+
+	public static final String TRACKSCHEME_TYPE_VALUE = "TrackScheme";
+
 	private final ContextChooser< Spot > contextChooser;
 
 	public MamutViewTrackScheme( final MamutAppModel appModel )
@@ -169,4 +173,13 @@ public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Lin
 	{
 		return contextChooser;
 	}
+
+	@Override
+	public Element toXml()
+	{
+		final Element element = super.toXml();
+		element.setAttribute( VIEW_TYPE_TAG, TRACKSCHEME_TYPE_VALUE );
+		return element;
+	}
+
 }

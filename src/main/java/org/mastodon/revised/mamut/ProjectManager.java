@@ -1,13 +1,26 @@
 package org.mastodon.revised.mamut;
 
+import static org.mastodon.app.ui.MastodonFrameView.MASTODON_FRAME_VIEW_TAG;
+import static org.mastodon.revised.mamut.MamutProjectIO.MAMUTPROJECT_VERSION_ATTRIBUTE_CURRENT;
+import static org.mastodon.revised.mamut.MamutProjectIO.MAMUTPROJECT_VERSION_ATTRIBUTE_NAME;
+
 import java.awt.Component;
 import java.awt.Dialog;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
 
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
+import org.mastodon.app.ui.MastodonFrameView;
 import org.mastodon.plugin.MastodonPlugins;
 import org.mastodon.revised.bdv.SharedBigDataViewerData;
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
@@ -53,6 +66,9 @@ public class ProjectManager
 	static final String[] IMPORT_SIMI_KEYS = new String[] { "not mapped" };
 	static final String[] IMPORT_MAMUT_KEYS = new String[] { "not mapped" };
 	static final String[] EXPORT_MAMUT_KEYS = new String[] { "not mapped" };
+
+	private static final String GUI_TAG = "MamutGui";
+	private static final String WINDOW_TAG = "Windows";
 
 	/*
 	 * Command descriptions for all provided commands
@@ -241,6 +257,20 @@ public class ProjectManager
 		final Model model = windowManager.getAppModel().getModel();
 		model.saveRaw( project );
 
+		/*
+		 * Serialize window positions.
+		 */
+
+		final Element guiRoot = new Element( GUI_TAG );
+		guiRoot.setAttribute( MAMUTPROJECT_VERSION_ATTRIBUTE_NAME, MAMUTPROJECT_VERSION_ATTRIBUTE_CURRENT );
+		final Element windows = new Element( WINDOW_TAG );
+		windowManager.forEachBdvView( ( view ) -> windows.addContent( view.toXml() ) );
+		windowManager.forEachTrackSchemeView( ( view ) -> windows.addContent( view.toXml() ) );
+		guiRoot.addContent( windows );
+		final Document doc = new Document( guiRoot );
+		final XMLOutputter xout = new XMLOutputter( Format.getPrettyFormat() );
+		xout.output( doc, new FileOutputStream( project.getGuiFile() ) );
+		
 		updateEnabledActions();
 	}
 
@@ -321,8 +351,62 @@ public class ProjectManager
 
 		final ToggleDialogAction toggleFeatureComputationDialogAction = new ToggleDialogAction( "feature computation", featureComputationDialog );
 
+		// Restore windows & positions.
+		loadGUI( project.getGuiFile() );
+
 		this.project = project;
 		updateEnabledActions();
+	}
+
+	private void loadGUI( final File guiFile ) throws IOException
+	{
+		if ( !guiFile.exists() || !guiFile.canRead() )
+			return;
+
+		final String guiXmlFilename = guiFile.getAbsolutePath();
+		final SAXBuilder sax = new SAXBuilder();
+		Document guiDoc;
+		try
+		{
+			guiDoc = sax.build( guiXmlFilename );
+		}
+		catch ( final JDOMException e )
+		{
+			throw new IOException( e );
+		}
+		final Element root = guiDoc.getRootElement();
+		if ( !GUI_TAG.equals( root.getName() ) )
+			throw new IOException( "expected <" + GUI_TAG + "> root element. wrong file?" );
+
+		final Element windowEl = root.getChild( WINDOW_TAG );
+		if ( null == windowEl )
+			return;
+
+		final List< Element > viewEls = windowEl.getChildren( MASTODON_FRAME_VIEW_TAG );
+		for ( final Element viewEl : viewEls )
+		{
+			final String typeStr = viewEl.getAttributeValue( MastodonFrameView.VIEW_TYPE_TAG );
+			if ( null == typeStr )
+				continue;
+			switch ( typeStr )
+			{
+			case MamutViewBdv.BDV_TYPE_VALUE:
+				final MamutViewBdv viewBdv = windowManager.createBigDataViewer();
+				if ( null != viewBdv )
+					viewBdv.restoreFromXml( viewEl );
+				break;
+
+			case MamutViewTrackScheme.TRACKSCHEME_TYPE_VALUE:
+				final MamutViewTrackScheme viewTrackScheme = windowManager.createTrackScheme();
+				if ( null != viewTrackScheme )
+					viewTrackScheme.restoreFromXml( viewEl );
+				break;
+
+			default:
+				System.err.println( "Unknown window type: " + typeStr + " in " + guiXmlFilename + "." );
+				continue;
+			}
+		}
 	}
 
 	public synchronized void importTgmm()
