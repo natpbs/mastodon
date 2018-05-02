@@ -1,12 +1,14 @@
 package org.mastodon.revised.mamut;
 
-import static org.mastodon.app.ui.MastodonFrameView.MASTODON_FRAME_VIEW_TAG;
+import static org.mastodon.app.MastodonView.MASTODON_VIEW_TAG;
+import static org.mastodon.app.ui.MastodonFrameView.VIEW_TYPE_TAG;
 import static org.mastodon.revised.mamut.MamutProjectIO.MAMUTPROJECT_VERSION_ATTRIBUTE_CURRENT;
 import static org.mastodon.revised.mamut.MamutProjectIO.MAMUTPROJECT_VERSION_ATTRIBUTE_NAME;
 
 import java.awt.Component;
 import java.awt.Dialog;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +22,6 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
-import org.mastodon.app.ui.MastodonFrameView;
 import org.mastodon.plugin.MastodonPlugins;
 import org.mastodon.revised.bdv.SharedBigDataViewerData;
 import org.mastodon.revised.bdv.overlay.ui.RenderSettingsManager;
@@ -257,10 +258,19 @@ public class ProjectManager
 		final Model model = windowManager.getAppModel().getModel();
 		model.saveRaw( project );
 
-		/*
-		 * Serialize window positions.
-		 */
+		saveGUI( project.getGuiFile() );
 
+		updateEnabledActions();
+	}
+
+	/**
+	 * Serialize window positions.
+	 * 
+	 * @throws IOException
+	 * @throws FileNotFoundException
+	 */
+	private void saveGUI( final File guiFile ) throws FileNotFoundException, IOException
+	{
 		final Element guiRoot = new Element( GUI_TAG );
 		guiRoot.setAttribute( MAMUTPROJECT_VERSION_ATTRIBUTE_NAME, MAMUTPROJECT_VERSION_ATTRIBUTE_CURRENT );
 		final Element windows = new Element( WINDOW_TAG );
@@ -269,9 +279,7 @@ public class ProjectManager
 		guiRoot.addContent( windows );
 		final Document doc = new Document( guiRoot );
 		final XMLOutputter xout = new XMLOutputter( Format.getPrettyFormat() );
-		xout.output( doc, new FileOutputStream( project.getGuiFile() ) );
-		
-		updateEnabledActions();
+		xout.output( doc, new FileOutputStream( guiFile ) );
 	}
 
 	/**
@@ -382,10 +390,10 @@ public class ProjectManager
 		if ( null == windowEl )
 			return;
 
-		final List< Element > viewEls = windowEl.getChildren( MASTODON_FRAME_VIEW_TAG );
+		final List< Element > viewEls = windowEl.getChildren( MASTODON_VIEW_TAG );
 		for ( final Element viewEl : viewEls )
 		{
-			final String typeStr = viewEl.getAttributeValue( MastodonFrameView.VIEW_TYPE_TAG );
+			final String typeStr = viewEl.getAttributeValue( VIEW_TYPE_TAG );
 			if ( null == typeStr )
 				continue;
 			switch ( typeStr )

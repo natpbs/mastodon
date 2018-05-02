@@ -50,7 +50,6 @@ public class MastodonFrameView<
 {
 
 	public static final String VIEW_TYPE_TAG = "Type";
-	public static final String MASTODON_FRAME_VIEW_TAG = "MastodonFrameView";
 	private static final String FRAME_POSITION_TAG = "FramePosition";
 	private static final String X_ATTRIBUTE = "x";
 	private static final String Y_ATTRIBUTE = "y";
@@ -148,9 +147,10 @@ public class MastodonFrameView<
 	 * 
 	 * @return the element.
 	 */
+	@Override
 	public Element toXml()
 	{
-		final Element element = new Element( MASTODON_FRAME_VIEW_TAG );
+		final Element element = super.toXml();
 		final Rectangle bounds = getFrame().getBounds();
 		final Element position = new Element( FRAME_POSITION_TAG);
 		position.setAttribute( X_ATTRIBUTE, Integer.toString( ( int ) bounds.getMinX() ) );
@@ -167,8 +167,11 @@ public class MastodonFrameView<
 	 * @param element
 	 *            the element.
 	 */
+	@Override
 	public void restoreFromXml( final Element element )
 	{
+		super.restoreFromXml( element );
+
 		final Element position = element.getChild( FRAME_POSITION_TAG );
 		if ( null == position )
 			return;

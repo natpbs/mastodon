@@ -1,13 +1,14 @@
 package org.mastodon.app;
 
 import java.util.ArrayList;
+
+import org.jdom2.Element;
 import org.mastodon.adapter.FocusModelAdapter;
 import org.mastodon.adapter.HighlightModelAdapter;
 import org.mastodon.adapter.NavigationHandlerAdapter;
 import org.mastodon.adapter.RefBimap;
 import org.mastodon.adapter.SelectionModelAdapter;
 import org.mastodon.adapter.TimepointModelAdapter;
-import org.mastodon.app.ui.ViewFrame;
 import org.mastodon.graph.Edge;
 import org.mastodon.graph.Vertex;
 import org.mastodon.graph.ref.AbstractListenableEdge;
@@ -18,7 +19,8 @@ import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.SelectionModel;
 import org.mastodon.model.TimepointModel;
 import org.mastodon.revised.model.AbstractSpot;
-import org.mastodon.util.Listeners;
+
+import mpicbg.spim.data.XmlHelpers;
 
 /**
  *
@@ -43,6 +45,9 @@ public class MastodonView<
 		V extends Vertex< E >,
 		E extends Edge< V > >
 {
+	public static final String MASTODON_VIEW_TAG = "MastodonView";
+	private static final String GROUP_ID_TAG = "GroupID";
+
 	protected final M appModel;
 
 	protected VG viewGraph;
@@ -104,5 +109,24 @@ public class MastodonView<
 	{
 		runOnClose.forEach( Runnable::run );
 		runOnClose.clear();
+	}
+
+	/**
+	 * Stores information relative to this view in a new XML element.
+	 * 
+	 * @return a new element.
+	 */
+	public Element toXml()
+	{
+		final Element element = new Element( MASTODON_VIEW_TAG );
+		final int groupId = groupHandle.getGroupId();
+		element.addContent( XmlHelpers.intElement( GROUP_ID_TAG, groupId ) );
+		return element;
+	}
+
+	public void restoreFromXml( final Element element )
+	{
+		final int groupId = XmlHelpers.getInt( element, GROUP_ID_TAG );
+		groupHandle.setGroupId( groupId );
 	}
 }

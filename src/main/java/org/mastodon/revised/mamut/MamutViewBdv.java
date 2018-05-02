@@ -42,10 +42,22 @@ import org.mastodon.revised.ui.SelectionActions;
 import org.mastodon.views.context.ContextProvider;
 
 import bdv.tools.InitializeViewerState;
+import bdv.viewer.DisplayMode;
+import bdv.viewer.Interpolation;
+import bdv.viewer.VisibilityAndGrouping;
+import bdv.viewer.state.ViewerState;
+import mpicbg.spim.data.XmlHelpers;
+import net.imglib2.realtransform.AffineTransform3D;
 
 public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > >
 {
 	public static final String BDV_TYPE_VALUE = "BigDataViewer";
+	private static final String VIEWER_TRANSFORM_TAG = "ViewerTransform";
+	private static final String TIMEPOINT_TAG = "CurrentTimepoint";
+	private static final String GROUP_TAG = "CurrentGroup";
+	private static final String SOURCE_TAG = "CurrentSource";
+	private static final String INTERPOLATION_TAG = "Interpolation";
+	private static final String DISPLAY_MODE_TAG = "DisplayMode";
 
 	// TODO
 	private static int bdvName = 1;
@@ -183,6 +195,38 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 	{
 		final Element element = super.toXml();
 		element.setAttribute( VIEW_TYPE_TAG, BDV_TYPE_VALUE );
+
+		final ViewerState state = viewer.getState();
+		element.addContent( XmlHelpers.intElement( TIMEPOINT_TAG, state.getCurrentTimepoint() ) );
+		element.addContent( XmlHelpers.intElement( GROUP_TAG, state.getCurrentGroup() ) );
+		element.addContent( XmlHelpers.intElement( SOURCE_TAG, state.getCurrentSource() ) );
+		element.addContent( XmlHelpers.textElement( INTERPOLATION_TAG, state.getInterpolation().name() ) );
+		element.addContent( XmlHelpers.textElement( DISPLAY_MODE_TAG, state.getDisplayMode().name() ) );
+		final AffineTransform3D t = new AffineTransform3D();
+		state.getViewerTransform( t );
+		element.addContent( XmlHelpers.affineTransform3DElement( VIEWER_TRANSFORM_TAG, t ) );
+
 		return element;
+	}
+
+	@Override
+	public void restoreFromXml( final Element element )
+	{
+		super.restoreFromXml( element );
+
+		final int timepoint = XmlHelpers.getInt( element, TIMEPOINT_TAG );
+		final int group = XmlHelpers.getInt( element, GROUP_TAG );
+		final int source = XmlHelpers.getInt( element, SOURCE_TAG );
+		final Interpolation interpolation = Interpolation.valueOf( XmlHelpers.getText( element, INTERPOLATION_TAG, Interpolation.NLINEAR.name() ) );
+		final DisplayMode displayMode = DisplayMode.valueOf( XmlHelpers.getText( element, DISPLAY_MODE_TAG, DisplayMode.SINGLE.name() ) );
+		final AffineTransform3D t = XmlHelpers.getAffineTransform3D( element, VIEWER_TRANSFORM_TAG );
+
+		viewer.setTimepoint( timepoint );
+		final VisibilityAndGrouping visibilityAndGrouping = viewer.getVisibilityAndGrouping();
+		visibilityAndGrouping.setCurrentGroup( group );
+		visibilityAndGrouping.setCurrentSource( source );
+		viewer.setDisplayMode( displayMode );
+		viewer.setInterpolation( interpolation );
+		viewer.setCurrentViewerTransform( t );
 	}
 }
