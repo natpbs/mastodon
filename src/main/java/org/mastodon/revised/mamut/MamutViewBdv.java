@@ -213,20 +213,52 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 	public void restoreFromXml( final Element element )
 	{
 		super.restoreFromXml( element );
-
-		final int timepoint = XmlHelpers.getInt( element, TIMEPOINT_TAG );
-		final int group = XmlHelpers.getInt( element, GROUP_TAG );
-		final int source = XmlHelpers.getInt( element, SOURCE_TAG );
-		final Interpolation interpolation = Interpolation.valueOf( XmlHelpers.getText( element, INTERPOLATION_TAG, Interpolation.NLINEAR.name() ) );
-		final DisplayMode displayMode = DisplayMode.valueOf( XmlHelpers.getText( element, DISPLAY_MODE_TAG, DisplayMode.SINGLE.name() ) );
-		final AffineTransform3D t = XmlHelpers.getAffineTransform3D( element, VIEWER_TRANSFORM_TAG );
-
-		viewer.setTimepoint( timepoint );
+		try
+		{
+			final int numTimepoints = sharedBdvData.getNumTimepoints();
+			int timepoint = XmlHelpers.getInt( element, TIMEPOINT_TAG );
+			timepoint = Math.max( timepoint, 0 );
+			timepoint = Math.min( timepoint, numTimepoints - 1 );
+			viewer.setTimepoint( timepoint );
+		}
+		catch (final NumberFormatException nfe)
+		{}
 		final VisibilityAndGrouping visibilityAndGrouping = viewer.getVisibilityAndGrouping();
-		visibilityAndGrouping.setCurrentGroup( group );
-		visibilityAndGrouping.setCurrentSource( source );
-		viewer.setDisplayMode( displayMode );
-		viewer.setInterpolation( interpolation );
-		viewer.setCurrentViewerTransform( t );
+		try
+		{
+			final int group = XmlHelpers.getInt( element, GROUP_TAG );
+			visibilityAndGrouping.setCurrentGroup( group );
+		}
+		catch (final NumberFormatException nfe)
+		{}
+		try
+		{
+			final int source = XmlHelpers.getInt( element, SOURCE_TAG );
+			visibilityAndGrouping.setCurrentSource( source );
+		}
+		catch (final NumberFormatException nfe)
+		{}
+		try
+		{
+			final Interpolation interpolation = Interpolation.valueOf( XmlHelpers.getText( element, INTERPOLATION_TAG, Interpolation.NLINEAR.name() ) );
+			viewer.setInterpolation( interpolation );
+		}
+		catch ( final IllegalArgumentException iae )
+		{}
+		try
+		{
+			final DisplayMode displayMode = DisplayMode.valueOf( XmlHelpers.getText( element, DISPLAY_MODE_TAG, DisplayMode.SINGLE.name() ) );
+			viewer.setDisplayMode( displayMode );
+		}
+		catch ( final IllegalArgumentException iae )
+		{}
+		try
+		{
+			final AffineTransform3D t = XmlHelpers.getAffineTransform3D( element, VIEWER_TRANSFORM_TAG );
+			if ( null != t )
+				viewer.setCurrentViewerTransform( t );
+		}
+		catch(final NumberFormatException nfe)
+		{}
 	}
 }

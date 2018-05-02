@@ -1,5 +1,7 @@
 package org.mastodon.app.ui;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -186,8 +188,15 @@ public class MastodonFrameView<
 		{
 			final int x = Integer.parseInt( position.getAttributeValue( X_ATTRIBUTE ) );
 			final int y = Integer.parseInt( position.getAttributeValue( Y_ATTRIBUTE ) );
-			final int width = Integer.parseInt( position.getAttributeValue( WIDTH_ATTRIBUTE ) );
-			final int height = Integer.parseInt( position.getAttributeValue( HEIGHT_ATTRIBUTE ) );
+
+			int width = Integer.parseInt( position.getAttributeValue( WIDTH_ATTRIBUTE ) );
+			int height = Integer.parseInt( position.getAttributeValue( HEIGHT_ATTRIBUTE ) );
+			final GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+			final int screenWidth = gd.getDisplayMode().getWidth();
+			final int screenHeight = gd.getDisplayMode().getHeight();
+			width = Math.min( width, screenWidth );
+			height = Math.min( height, screenHeight );
+
 			frame.setBounds( new Rectangle( x, y, width, height ) );
 		}
 		catch ( final NumberFormatException nfe )
