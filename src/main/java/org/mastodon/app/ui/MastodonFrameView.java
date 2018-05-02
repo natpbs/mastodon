@@ -22,6 +22,8 @@ import org.scijava.ui.behaviour.util.Behaviours;
 import org.scijava.ui.behaviour.util.WrappedActionMap;
 import org.scijava.ui.behaviour.util.WrappedInputMap;
 
+import mpicbg.spim.data.XmlHelpers;
+
 /**
  * A {@link MastodonView} that is displayed in a {@link ViewFrame} (instead of
  * just a panel, for instance).
@@ -55,6 +57,7 @@ public class MastodonFrameView<
 	private static final String Y_ATTRIBUTE = "y";
 	private static final String WIDTH_ATTRIBUTE = "width";
 	private static final String HEIGHT_ATTRIBUTE = "height";
+	private static final String SETTINGS_PANEL_VISIBILITY_TAG = "SettingsPanelVisible";
 
 	protected ViewFrame frame;
 
@@ -144,7 +147,7 @@ public class MastodonFrameView<
 
 	/**
 	 * Stores the frame position in a new XML element.
-	 * 
+	 *
 	 * @return the element.
 	 */
 	@Override
@@ -158,12 +161,13 @@ public class MastodonFrameView<
 		position.setAttribute( WIDTH_ATTRIBUTE, Integer.toString( ( int ) bounds.getWidth() ) );
 		position.setAttribute( HEIGHT_ATTRIBUTE, Integer.toString( ( int ) bounds.getHeight() ) );
 		element.addContent( position );
+		element.addContent( XmlHelpers.booleanElement( SETTINGS_PANEL_VISIBILITY_TAG, getFrame().isSettingsPanelVisible() ) );
 		return element;
 	}
 
 	/**
 	 * Restores the frame position from the specified element.
-	 * 
+	 *
 	 * @param element
 	 *            the element.
 	 */
@@ -188,5 +192,6 @@ public class MastodonFrameView<
 		}
 		catch ( final NumberFormatException nfe )
 		{}
+		getFrame().setSettingsPanelVisible( XmlHelpers.getBoolean( element, SETTINGS_PANEL_VISIBILITY_TAG ) );
 	}
 }

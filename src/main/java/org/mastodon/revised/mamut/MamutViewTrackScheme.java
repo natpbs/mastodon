@@ -18,6 +18,8 @@ import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelGraphTrackSchemeProperties;
 import org.mastodon.revised.model.mamut.Spot;
 import org.mastodon.revised.model.tag.TagSetModel;
+import org.mastodon.revised.model.tag.TagSetStructure.TagSet;
+import org.mastodon.revised.trackscheme.ScreenTransform;
 import org.mastodon.revised.trackscheme.TrackSchemeContextListener;
 import org.mastodon.revised.trackscheme.TrackSchemeEdge;
 import org.mastodon.revised.trackscheme.TrackSchemeGraph;
@@ -27,6 +29,7 @@ import org.mastodon.revised.trackscheme.display.ToggleLinkBehaviour;
 import org.mastodon.revised.trackscheme.display.TrackSchemeFrame;
 import org.mastodon.revised.trackscheme.display.TrackSchemeNavigationActions;
 import org.mastodon.revised.trackscheme.display.TrackSchemeOptions;
+import org.mastodon.revised.trackscheme.display.TrackSchemePanel;
 import org.mastodon.revised.trackscheme.display.style.TrackSchemeStyle;
 import org.mastodon.revised.ui.EditTagActions;
 import org.mastodon.revised.ui.FocusActions;
@@ -39,12 +42,28 @@ import org.mastodon.revised.ui.coloring.TagSetGraphColorGenerator;
 import org.mastodon.views.context.ContextChooser;
 import org.scijava.ui.behaviour.KeyPressedManager;
 
+import mpicbg.spim.data.XmlHelpers;
+
 public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Link >, TrackSchemeVertex, TrackSchemeEdge >
 {
 
 	public static final String TRACKSCHEME_TYPE_VALUE = "TrackScheme";
+	private static final String VIEWER_TRANSFORM_TAG = "ViewerTransform";
+	private static final String MIN_X_TAG = "MinX";
+	private static final String MAX_X_TAG = "MaxX";
+	private static final String MIN_Y_TAG = "MinY";
+	private static final String MAX_Y_TAG = "MaxY";
+	private static final String SCREEN_WIDTH_TAG = "ScreenWidth";
+	private static final String SCREEN_HEIGHT_TAG = "ScreenHeight";
+	private static final String COLORING_TAG = "Coloring";
+	private static final String NO_COLORING_TAG = "NoColoring";
+	private static final String TAG_SET_TAG = "TagSet";
 
 	private final ContextChooser< Spot > contextChooser;
+
+	private final TrackSchemePanel trackschemePanel;
+
+	private final ColoringModel coloringModel;
 
 	public MamutViewTrackScheme( final MamutAppModel appModel )
 	{
@@ -86,11 +105,14 @@ public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Lin
 				groupHandle,
 				contextChooser,
 				options );
-		frame.getTrackschemePanel().setTimepointRange( appModel.getMinTimepoint(), appModel.getMaxTimepoint() );
-		frame.getTrackschemePanel().graphChanged();
-		contextListener.setContextListener( frame.getTrackschemePanel() );
 
-		final TrackSchemeStyle.UpdateListener updateListener = () -> frame.getTrackschemePanel().repaint();
+		this.trackschemePanel = frame.getTrackschemePanel();
+
+		trackschemePanel.setTimepointRange( appModel.getMinTimepoint(), appModel.getMaxTimepoint() );
+		trackschemePanel.graphChanged();
+		contextListener.setContextListener( trackschemePanel );
+
+		final TrackSchemeStyle.UpdateListener updateListener = () -> trackschemePanel.repaint();
 		forwardDefaultStyle.updateListeners().add( updateListener );
 		onClose( () -> forwardDefaultStyle.updateListeners().remove( updateListener ) );
 
@@ -100,16 +122,16 @@ public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Lin
 
 		MastodonFrameViewActions.install( viewActions, this );
 		HighlightBehaviours.install( viewBehaviours, viewGraph, viewGraph.getLock(), viewGraph, highlightModel, model );
-		ToggleLinkBehaviour.install( viewBehaviours, frame.getTrackschemePanel(),	viewGraph, viewGraph.getLock(),	viewGraph, model );
-		EditFocusVertexLabelAction.install( viewActions, frame.getTrackschemePanel(), focusModel, model );
+		ToggleLinkBehaviour.install( viewBehaviours, trackschemePanel,	viewGraph, viewGraph.getLock(),	viewGraph, model );
+		EditFocusVertexLabelAction.install( viewActions, trackschemePanel, focusModel, model );
 		FocusActions.install( viewActions, viewGraph, viewGraph.getLock(), navigateFocusModel, selectionModel );
-		EditTagActions.install( viewActions, frame.getKeybindings(), frame.getTriggerbindings(), model.getTagSetModel(), appModel.getSelectionModel(), frame.getTrackschemePanel(), frame.getTrackschemePanel().getDisplay(), model );
+		EditTagActions.install( viewActions, frame.getKeybindings(), frame.getTriggerbindings(), model.getTagSetModel(), appModel.getSelectionModel(), trackschemePanel, trackschemePanel.getDisplay(), model );
 		viewActions.runnableAction( () -> System.out.println( model.getTagSetModel() ), "output tags", "U" ); // DEBUG TODO: REMOVE
 
 		// TODO Let the user choose between the two selection/focus modes.
-		frame.getTrackschemePanel().getNavigationActions().install( viewActions, TrackSchemeNavigationActions.NavigatorEtiquette.FINDER_LIKE );
-		frame.getTrackschemePanel().getNavigationBehaviours().install( viewBehaviours );
-		frame.getTrackschemePanel().getTransformEventHandler().install( viewBehaviours );
+		trackschemePanel.getNavigationActions().install( viewActions, TrackSchemeNavigationActions.NavigatorEtiquette.FINDER_LIKE );
+		trackschemePanel.getNavigationBehaviours().install( viewBehaviours );
+		trackschemePanel.getTransformEventHandler().install( viewBehaviours );
 
 		final ViewMenu menu = new ViewMenu( this );
 		final ActionMap actionMap = frame.getKeybindings().getConcatenatedActionMap();
@@ -148,7 +170,7 @@ public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Lin
 		appModel.getPlugins().addMenus( menu );
 
 		final TagSetModel< Spot, Link > tagSetModel = appModel.getModel().getTagSetModel();
-		final ColoringModel coloringModel = new ColoringModel( tagSetModel );
+		this.coloringModel = new ColoringModel( tagSetModel );
 		tagSetModel.listeners().add( coloringModel );
 		onClose( () -> tagSetModel.listeners().remove( coloringModel ) );
 
@@ -162,11 +184,11 @@ public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Lin
 				coloring.setColorGenerator( null );
 			else if ( coloringModel.getTagSet() != null)
 				coloring.setColorGenerator( new TagSetGraphColorGenerator<>( tagSetModel, coloringModel.getTagSet() ) );
-			frame.getTrackschemePanel().entitiesAttributesChanged();
+			trackschemePanel.entitiesAttributesChanged();
 		};
 		coloringModel.listeners().add( coloringChangedListener );
 
-		frame.getTrackschemePanel().repaint();
+		trackschemePanel.repaint();
 	}
 
 	public ContextChooser< Spot > getContextChooser()
@@ -179,7 +201,90 @@ public class MamutViewTrackScheme extends MamutView< TrackSchemeGraph< Spot, Lin
 	{
 		final Element element = super.toXml();
 		element.setAttribute( VIEW_TYPE_TAG, TRACKSCHEME_TYPE_VALUE );
+
+		// View transform.
+		final ScreenTransform t = trackschemePanel.getTransformEventHandler().getTransform();
+		final double minX = t.getMinX();
+		final double maxX = t.getMaxX();
+		final double minY = t.getMinY();
+		final double maxY = t.getMaxY();
+		final int screenWidth = t.getScreenWidth();
+		final int screenHeight = t.getScreenHeight();
+		final Element screenTransformEl = new Element( VIEWER_TRANSFORM_TAG );
+		screenTransformEl.addContent( XmlHelpers.doubleElement( MIN_X_TAG, minX ) );
+		screenTransformEl.addContent( XmlHelpers.doubleElement( MAX_X_TAG, maxX ) );
+		screenTransformEl.addContent( XmlHelpers.doubleElement( MIN_Y_TAG, minY ) );
+		screenTransformEl.addContent( XmlHelpers.doubleElement( MAX_Y_TAG, maxY ) );
+		screenTransformEl.addContent( XmlHelpers.intElement( SCREEN_WIDTH_TAG, screenWidth ) );
+		screenTransformEl.addContent( XmlHelpers.intElement( SCREEN_HEIGHT_TAG, screenHeight ) );
+		element.addContent( screenTransformEl );
+
+		// Coloring.
+		final Element coloringEl = new Element( COLORING_TAG );
+		final boolean noColoring = coloringModel.noColoring();
+		coloringEl.addContent( XmlHelpers.booleanElement( NO_COLORING_TAG, noColoring ) );
+		if ( !noColoring )
+			if ( coloringModel.getTagSet() != null )
+				coloringEl.addContent( XmlHelpers.textElement( TAG_SET_TAG, coloringModel.getTagSet().getName() ) );
+		element.addContent( coloringEl );
+
 		return element;
 	}
 
+	@Override
+	public void restoreFromXml( final Element element )
+	{
+		super.restoreFromXml( element );
+
+		// Screen transform.
+		final Element screenTransformEl = element.getChild( VIEWER_TRANSFORM_TAG );
+		if ( null != screenTransformEl )
+		{
+			try
+			{
+				final double minX = XmlHelpers.getDouble( screenTransformEl, MIN_X_TAG, Double.NaN );
+				final double maxX = XmlHelpers.getDouble( screenTransformEl, MAX_X_TAG, Double.NaN );
+				final double minY = XmlHelpers.getDouble( screenTransformEl, MIN_Y_TAG, Double.NaN );
+				final double maxY = XmlHelpers.getDouble( screenTransformEl, MAX_Y_TAG, Double.NaN );
+				final int screenWidth = XmlHelpers.getInt( screenTransformEl, SCREEN_WIDTH_TAG, -1 );
+				final int screenHeight = XmlHelpers.getInt( screenTransformEl, SCREEN_HEIGHT_TAG, -1 );
+				final boolean invalid =
+						Double.isNaN( minX ) || Double.isNaN( maxX )
+								|| Double.isNaN( minY ) || Double.isNaN( maxY )
+								|| screenWidth < 0 || screenHeight < 0
+								|| maxX < minX || maxY < minY;
+				if ( !invalid )
+				{
+					final ScreenTransform t = new ScreenTransform( minX, maxX, minY, maxY, screenWidth, screenHeight );
+					trackschemePanel.getTransformEventHandler().setTransform( t );
+				}
+			}
+			catch ( final NumberFormatException nfe )
+			{}
+		}
+
+		// Coloring.
+		final Element coloringEl = element.getChild( COLORING_TAG );
+		if ( null != coloringEl )
+		{
+			final boolean noColoring = XmlHelpers.getBoolean( coloringEl, NO_COLORING_TAG );
+			if ( noColoring )
+				coloringModel.colorByNone();
+			else
+			{
+				final String tagSetName = XmlHelpers.getText( coloringEl, TAG_SET_TAG );
+				if ( null != tagSetName )
+				{
+					for ( final TagSet tagSet : coloringModel.getTagSetStructure().getTagSets() )
+					{
+						if ( tagSet.getName().equals( tagSetName ) )
+						{
+							coloringModel.colorByTagSet( tagSet );
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
 }
