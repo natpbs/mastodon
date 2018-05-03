@@ -256,9 +256,21 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		{
 			final AffineTransform3D t = XmlHelpers.getAffineTransform3D( element, VIEWER_TRANSFORM_TAG );
 			if ( null != t )
-				viewer.setCurrentViewerTransform( t );
+			{
+				new Thread( () -> {
+					try
+					{
+						Thread.sleep( 100 );
+						viewer.setCurrentViewerTransform( t );
+					}
+					catch ( final InterruptedException e )
+					{
+						e.printStackTrace();
+					}
+				} ).start();
+			}
 		}
-		catch(final NumberFormatException nfe)
+		catch ( final NumberFormatException nfe )
 		{}
 	}
 }
