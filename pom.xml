@@ -61,6 +61,10 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-ui-swing</artifactId>
+		</dependency>
 	</dependencies>
 
 	<mailingLists>
