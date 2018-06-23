@@ -50,15 +50,12 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 	private static final String UNFOCUSED_TEXT = "Search...";
 
 	private static final ImageIcon FOCUSED_ICON = new ImageIcon( SearchVertexLabel.class.getResource( "find-24x24-orange.png" ) );
-
 	private static final ImageIcon UNFOCUSED_ICON = new ImageIcon( SearchVertexLabel.class.getResource( "find-24x24.png" ) );
-
 	private static final ImageIcon FOUND_ICON = new ImageIcon( SearchVertexLabel.class.getResource( "find-24x24-green.png" ) );
-
 	private static final ImageIcon NOT_FOUND_ICON = new ImageIcon( SearchVertexLabel.class.getResource( "find-24x24-red.png" ) );
+	private static final ImageIcon LOOP_ICON = new ImageIcon( SearchVertexLabel.class.getResource( "find-24x24-loop.png" ) );
 
 	public static final String SEARCH = "search label";
-
 	public static final String[] SEARCH_KEYS = new String[] { "ctrl F", "meta F", "SLASH" };
 
 	private final static String CANCEL_ACTION = "cancel-entry";
@@ -167,9 +164,9 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 					{
 						try
 						{
-							final boolean found = sa.search( searchField.getText(), chckbxstartswith.isSelected() );
+							final SearchResult found = sa.search( searchField.getText(), chckbxstartswith.isSelected() );
 							searchField.requestFocusInWindow();
-							setIcon( found ? FOUND_ICON : NOT_FOUND_ICON );
+							setIcon( found.getIcon() );
 						}
 						finally
 						{
@@ -195,6 +192,23 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 		labelIcon.setPressedIcon( icon == UNFOCUSED_ICON ? FOCUSED_ICON : icon );
 	}
 
+	private static enum SearchResult
+	{
+		FOUND( FOUND_ICON ), LOOPED( LOOP_ICON ), NOT_FOUND( NOT_FOUND_ICON );
+
+		private final ImageIcon icon;
+
+		private SearchResult( final ImageIcon icon )
+		{
+			this.icon = icon;
+		}
+
+		public Icon getIcon()
+		{
+			return icon;
+		}
+	}
+
 	private static class SearchAction< V extends Vertex< E > & HasLabel, E extends Edge< V > >
 			extends AbstractGraphAlgorithm< V, E >
 			implements FocusListener
@@ -209,7 +223,11 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 
 		private V start;
 
+		private V firstFound;
+
 		private String previousSearchString = "";
+
+		private boolean gotOne;
 
 		public SearchAction(
 				final ReadOnlyGraph< V, E > graph,
@@ -222,16 +240,18 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 			this.selection = selection;
 			this.focus = focus;
 			this.start = graph.vertexRef();
+			this.firstFound = graph.vertexRef();
 			getStartFromUI();
-			reinit();
+			reinit( start );
 		}
 
-		private synchronized boolean search( final String text, final boolean startsWith )
+		private synchronized SearchResult search( final String text, final boolean startsWith )
 		{
 			if ( !previousSearchString.equals( text ) )
 			{
-				reinit();
+				reinit( start );
 				previousSearchString = text;
+				gotOne = false;
 			}
 
 			while ( iterator.hasNext() )
@@ -240,17 +260,32 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 				final String label = v.getLabel();
 				if ( startsWith ? label.startsWith( text ) : label.contains( text ) )
 				{
+					if ( !gotOne )
+					{
+						gotOne = true;
+						firstFound = assign( v, firstFound );
+
+					}
 					navigation.notifyNavigateToVertex( v );
 					focus.focusVertex( v );
 					if ( iterator.hasNext() )
 						start = assign( v, start );
-					return true;
+					return SearchResult.FOUND;
 				}
 			}
-			return false;
+			// We have exhausted the search.
+			if ( gotOne )
+			{
+				// Loop back to the last valid.
+				navigation.notifyNavigateToVertex( firstFound );
+				focus.focusVertex( firstFound );
+				reinit( firstFound );
+				return SearchResult.LOOPED;
+			}
+			return SearchResult.NOT_FOUND;
 		}
 
-		private void getStartFromUI()
+		private V getStartFromUI()
 		{
 			// If selection == 1 vertex, then start from this one.
 			final int nSelected = selection.getSelectedVertices().size();
@@ -258,7 +293,7 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 			{
 				final V selectedVertex = selection.getSelectedVertices().iterator().next();
 				start = assign( selectedVertex, start );
-				return;
+				return start;
 			}
 
 			// If not look for the focused vertex.
@@ -267,15 +302,21 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 			if ( null != focusedVertex )
 			{
 				start = assign( focusedVertex, start );
-				return;
+				return start;
 			}
 
 			// If not take the first one.
 			if ( !graph.vertices().isEmpty() )
+			{
 				start = assign( graph.vertices().iterator().next(), start );
+				return start;
+			}
+
+			// Null for empty graph.
+			return null;
 		}
 
-		private synchronized void reinit()
+		private synchronized void reinit( final V from )
 		{
 			if ( graph.vertices().isEmpty() )
 			{
@@ -285,7 +326,7 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 
 			// First, look for the root of the start vertex.
 			final InverseDepthFirstIterator< V, E > rootFinder =
-					new InverseDepthFirstIterator<>( start, graph );
+					new InverseDepthFirstIterator<>( from, graph );
 
 			V root = graph.vertexRef();
 			boolean rootFound = false;
@@ -308,8 +349,8 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 				 * probably related to changing roots while looking for the
 				 * right root.
 				 */
-				System.err.println( "[SearchVertex] Could not find the root for vertex " + start );
-				iterator = new BreadthFirstCrossComponentIterator<>( start, graph, roots );
+				System.err.println( "[SearchVertex] Could not find the root for vertex " + from );
+				iterator = new BreadthFirstCrossComponentIterator<>( from, graph, roots );
 				graph.releaseRef( root );
 				return;
 			}
@@ -331,7 +372,7 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 
 			iterator = new BreadthFirstCrossComponentIterator<>( root, graph, iteratedRoots );
 			// Rewind to the starting point.
-			while ( !iterator.next().equals( start ) );
+			while ( !iterator.next().equals( from ) );
 
 			graph.releaseRef( root );
 		}
@@ -340,7 +381,7 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 		public void focusGained( final FocusEvent e )
 		{
 			getStartFromUI();
-			reinit();
+			reinit( start );
 		}
 
 		@Override
