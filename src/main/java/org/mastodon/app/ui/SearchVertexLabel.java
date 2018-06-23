@@ -12,12 +12,16 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.ActionMap;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
@@ -38,6 +42,7 @@ import org.mastodon.revised.model.HasLabel;
 import org.mastodon.revised.trackscheme.util.AlphanumCompare;
 import org.mastodon.revised.ui.util.KeyConfigUtils;
 import org.scijava.ui.behaviour.util.Actions;
+import org.scijava.ui.behaviour.util.RunnableAction;
 
 public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge< V > >
 {
@@ -56,6 +61,8 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 
 	public static final String[] SEARCH_KEYS = new String[] { "ctrl F", "meta F", "SLASH" };
 
+	private final static String CANCEL_ACTION = "cancel-entry";
+
 	private final JTextField searchField;
 
 	private final JButton labelIcon;
@@ -64,14 +71,33 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 
 	private final JPanel searchPanel;
 
+	/**
+	 * Installs the search vertex label action.
+	 * 
+	 * @param actions
+	 *            the {@link Actions} to add the search vertex action to.
+	 * @param graph
+	 *            the graph to operate the search on.
+	 * @param navigation
+	 *            the navigation model to navigate to search results.
+	 * @param selection
+	 *            the selection model used to take a starting point from.
+	 * @param focus
+	 *            the focus model used to take a starting point from.
+	 * @param cancelEntryFocusTarget
+	 *            the component to focus back to, when the use presses ESCAPE in the
+	 *            search text field.
+	 * @return a new panel containing the search field.
+	 */
 	public static < V extends Vertex< E > & HasLabel, E extends Edge< V > > JPanel install(
 			final Actions actions,
 			final ReadOnlyGraph< V, E > graph,
 			final NavigationHandler< V, E > navigation,
 			final SelectionModel< V, E > selection,
-			final FocusModel< V, E > focus )
+			final FocusModel< V, E > focus,
+			final JComponent cancelEntryFocusTarget )
 	{
-		final SearchVertexLabel< V, E > search = new SearchVertexLabel<>( graph, navigation, selection, focus );
+		final SearchVertexLabel< V, E > search = new SearchVertexLabel<>( graph, navigation, selection, focus, cancelEntryFocusTarget );
 		actions.runnableAction( () -> search.searchField.requestFocusInWindow(), SEARCH, SEARCH_KEYS );
 		return search.searchPanel;
 	}
@@ -80,7 +106,8 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 			final ReadOnlyGraph< V, E > graph,
 			final NavigationHandler< V, E > navigation,
 			final SelectionModel< V, E > selection,
-			final FocusModel< V, E > focus )
+			final FocusModel< V, E > focus,
+			final JComponent cancelFocusTarget )
 	{
 		searchPanel = new JPanel();
 		searchPanel.setMinimumSize( new Dimension( 26, 25 ) );
@@ -152,6 +179,14 @@ public class SearchVertexLabel< V extends Vertex< E > & HasLabel, E extends Edge
 				}.start();
 			}
 		} );
+		// Cancel entry
+		if ( null != cancelFocusTarget )
+		{
+			final InputMap im = searchField.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW );
+			final ActionMap am = searchField.getActionMap();
+			im.put( KeyStroke.getKeyStroke( "ESCAPE" ), CANCEL_ACTION );
+			am.put( CANCEL_ACTION, new RunnableAction( CANCEL_ACTION, () -> cancelFocusTarget.requestFocusInWindow() ) );
+		}
 	}
 
 	private void setIcon( final Icon icon )

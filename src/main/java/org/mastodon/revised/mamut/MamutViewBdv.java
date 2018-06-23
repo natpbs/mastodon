@@ -147,7 +147,7 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		HighlightBehaviours.install( viewBehaviours, viewGraph, viewGraph.getLock(), viewGraph, highlightModel, model );
 		FocusActions.install( viewActions, viewGraph, viewGraph.getLock(), navigateFocusModel, selectionModel );
 
-		final JPanel searchField = SearchVertexLabel.install( viewActions, viewGraph, navigationHandler, selectionModel, focusModel );
+		final JPanel searchField = SearchVertexLabel.install( viewActions, viewGraph, navigationHandler, selectionModel, focusModel, viewer );
 		frame.getSettingsPanel().add( searchField );
 
 		NavigationActionsMamut.install( viewActions, viewer );
