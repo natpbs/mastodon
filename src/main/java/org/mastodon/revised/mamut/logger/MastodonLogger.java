@@ -1,4 +1,4 @@
-package org.mastodon.revised.mamut;
+package org.mastodon.revised.mamut.logger;
 
 import org.scijava.log.LogSource;
 import org.scijava.service.SciJavaService;

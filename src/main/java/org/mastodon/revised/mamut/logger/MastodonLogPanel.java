@@ -1,4 +1,4 @@
-package org.mastodon.revised.mamut;
+package org.mastodon.revised.mamut.logger;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
