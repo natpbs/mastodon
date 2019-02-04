@@ -146,7 +146,7 @@ public class MainWindow extends JFrame
 
 		++gridy;
 
-		final JButton saveProjectButton = new JButton( actionMap.get( ProjectManager.SAVE_PROJECT ) );
+		final JButton saveProjectButton = new JButton( actionMap.get( ProjectManager.SAVE_PROJECT_AS ) );
 		saveProjectButton.setText( "save project" );
 		button_gbc_left.gridy = gridy;
 		buttonsPanel.add( saveProjectButton, button_gbc_left );
@@ -188,7 +188,7 @@ public class MainWindow extends JFrame
 				fileMenu(
 						item( ProjectManager.CREATE_PROJECT ),
 						item( ProjectManager.LOAD_PROJECT ),
-						item( ProjectManager.SAVE_PROJECT ),
+						item( ProjectManager.SAVE_PROJECT_AS ),
 						separator(),
 						item( ProjectManager.IMPORT_TGMM ),
 						item( ProjectManager.IMPORT_SIMI ),
