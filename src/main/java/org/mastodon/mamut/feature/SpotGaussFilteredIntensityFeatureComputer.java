@@ -10,18 +10,19 @@ import java.util.function.IntFunction;
 
 import org.mastodon.RefPool;
 import org.mastodon.collection.ref.RefArrayList;
-import org.mastodon.feature.DefaultFeatureComputerService.FeatureComputationStatus;
 import org.mastodon.feature.update.GraphUpdate;
 import org.mastodon.feature.update.GraphUpdate.UpdateLocality;
 import org.mastodon.feature.update.GraphUpdateStack;
 import org.mastodon.properties.DoublePropertyMap;
 import org.mastodon.revised.bdv.SharedBigDataViewerData;
 import org.mastodon.revised.bdv.overlay.util.JamaEigenvalueDecomposition;
+import org.mastodon.revised.mamut.logger.MastodonLogger;
 import org.mastodon.revised.model.mamut.Link;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.Spot;
 import org.scijava.Cancelable;
 import org.scijava.ItemIO;
+import org.scijava.log.LogSource;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
@@ -51,7 +52,7 @@ public class SpotGaussFilteredIntensityFeatureComputer implements MamutFeatureCo
 	private GraphUpdateStack< Spot, Link > update;
 
 	@Parameter
-	private FeatureComputationStatus status;
+	private MastodonLogger logger;
 
 	@Parameter( type = ItemIO.OUTPUT )
 	private SpotGaussFilteredIntensityFeature output;
@@ -73,6 +74,7 @@ public class SpotGaussFilteredIntensityFeatureComputer implements MamutFeatureCo
 	public void run()
 	{
 		cancelReason = null;
+		final LogSource loggerSource = logger.getLogSourceRoot().subSource( SpotGaussFilteredIntensityFeature.KEY );
 
 		// TODO Take into account that some sources might not be computed.
 		this.processSource = new boolean[ bdvData.getSources().size() ];
@@ -127,6 +129,7 @@ public class SpotGaussFilteredIntensityFeatureComputer implements MamutFeatureCo
 		final ArrayList< SourceAndConverter< ? > > sources = bdvData.getSources();
 		final int nSources = sources.size();
 		int done = 0;
+		logger.setStatus( SpotGaussFilteredIntensityFeature.KEY, loggerSource );
 		MAIN_LOOP: for ( int iSource = 0; iSource < nSources; iSource++ )
 		{
 			if ( !processSource[ iSource ] )
@@ -136,7 +139,7 @@ public class SpotGaussFilteredIntensityFeatureComputer implements MamutFeatureCo
 			for ( int timepoint = 0; timepoint < numTimepoints; timepoint++ )
 			{
 
-				status.notifyProgress( ( double ) done++ / todo );
+				logger.setProgress( ( double ) done++ / todo, loggerSource );
 
 				source.getSourceTransform( timepoint, level, transform );
 				for ( int d = 0; d < calibration.length; d++ )
@@ -216,6 +219,7 @@ public class SpotGaussFilteredIntensityFeatureComputer implements MamutFeatureCo
 				}
 			}
 		}
+		logger.clearStatus( loggerSource );
 	}
 
 	public static final long nSpots( final IntFunction< Iterable< Spot > > index, final int numTimepoints )

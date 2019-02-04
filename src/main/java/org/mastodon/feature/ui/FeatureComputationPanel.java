@@ -21,7 +21,6 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.ScrollPaneConstants;
@@ -40,8 +39,6 @@ public class FeatureComputationPanel extends JPanel
 	final JButton btnCompute;
 
 	final JButton btnCancel;
-
-	final JProgressBar progressBar;
 
 	final JPanel panelConfig;
 
@@ -81,13 +78,6 @@ public class FeatureComputationPanel extends JPanel
 
 		final Component horizontalStrut_1 = Box.createHorizontalStrut( 20 );
 		panelButton.add( horizontalStrut_1 );
-
-		progressBar = new JProgressBar();
-		progressBar.setStringPainted( true );
-		panelButton.add( progressBar );
-
-		final Component horizontalStrut_2 = Box.createHorizontalStrut( 5 );
-		panelButton.add( horizontalStrut_2 );
 
 		final JPanel panelTitle = new JPanel( new FlowLayout( FlowLayout.LEADING ) );
 		add( panelTitle, BorderLayout.NORTH );

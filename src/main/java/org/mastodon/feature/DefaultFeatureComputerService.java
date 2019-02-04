@@ -12,12 +12,14 @@ import org.mastodon.collection.RefList;
 import org.mastodon.feature.FeatureDependencyGraph.Edge;
 import org.mastodon.feature.FeatureDependencyGraph.Vertex;
 import org.mastodon.graph.algorithm.TopologicalSort;
-import org.mastodon.util.Listeners;
+import org.mastodon.revised.mamut.logger.MastodonLogger;
+import org.mastodon.revised.util.AppUtil;
 import org.scijava.Cancelable;
 import org.scijava.InstantiableException;
 import org.scijava.command.CommandInfo;
 import org.scijava.command.CommandModule;
 import org.scijava.command.CommandService;
+import org.scijava.log.LogSource;
 import org.scijava.module.ModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -36,16 +38,19 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 	@Parameter
 	private FeatureSpecsService featureSpecs;
 
+	@Parameter
+	private MastodonLogger log;
+
 	// FeatureComputer type discovered and managed by this service
 	private final Class< ? extends FeatureComputer > klass;
 
 	private final FeatureDependencyGraph dependencies = new FeatureDependencyGraph();
 
-	private final FeatureComputationStatus status = new FeatureComputationStatus();
-
 	private String cancelReason;
 
 	private FeatureComputer currentFeatureComputer;
+
+	private LogSource logSource;
 
 	public DefaultFeatureComputerService()
 	{
@@ -78,6 +83,8 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 		dependencies.removeCycles();
 		// 2.) recursively remove vertices with missing inputs or featurecomputers
 		dependencies.removeIncomputable();
+
+		this.logSource = log.getLogSourceRoot().subSource( "Feature computation" );
 	}
 
 	/**
@@ -189,6 +196,10 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 	@Override
 	public Map< FeatureSpec< ?, ? >, Feature< ? > > compute( final Collection< FeatureSpec< ?, ? > > featureKeys )
 	{
+		log.info( "________________________", logSource );
+		log.info( AppUtil.now(), logSource );
+		log.info( "Starting feature computation.", logSource );
+
 		cancelReason = null;
 		final List< FeatureSpec< ?, ? > > specs = new ArrayList<>();
 		for ( final FeatureSpec< ?, ? > spec : featureKeys )
@@ -196,7 +207,7 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 			// Did we discover a feature computer for this feature spec?
 			if ( !dependencies.contains( spec ) )
 			{
-				System.err.println( "No feature computer for feature: " + spec + ". Skipping." );
+				log.error( "No feature computer for feature: " + spec + ". Skipping.", logSource );
 				continue;
 			}
 
@@ -205,7 +216,10 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 		final FeatureDependencyGraph dependencyGraph = dependencies.subGraphFor( specs );
 		final RefList< FeatureDependencyGraph.Vertex > sequence = new TopologicalSort<>( dependencyGraph ).get();
 
+
 		final Map< FeatureSpec< ?, ? >, Feature< ? > > featureModel = new HashMap<>();
+		int progress = 0;
+		final double todo = sequence.size();
 		for ( final FeatureDependencyGraph.Vertex vertex : sequence )
 		{
 			if ( isCanceled() )
@@ -220,7 +234,8 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 				provideParameters( item, module, klass, featureModel );
 			}
 
-			status.notifyStatus( vertex.getFeatureSpec().getKey() );
+			log.setStatus( vertex.getFeatureSpec().getKey(), logSource );
+			log.setProgress( progress++ / todo, logSource );
 			currentFeatureComputer.createOutput();
 			currentFeatureComputer.run();
 
@@ -229,7 +244,14 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 		}
 
 		currentFeatureComputer = null;
-		status.notifyClear();
+		if ( isCanceled() )
+			log.info( "Feature computation canceled: " + getCancelReason(), logSource );
+		else
+			log.info( "Feature computation done.", logSource );
+		log.info( AppUtil.now(), logSource );
+		log.info( "________________________", logSource );
+		log.clearStatus( logSource );
+
 		return ( featureModel );
 	}
 
@@ -267,11 +289,11 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 		}
 
 		// FeatureComputationStatus.
-		if (FeatureComputationStatus.class.isAssignableFrom( parameterClass ))
+		if ( MastodonLogger.class.isAssignableFrom( parameterClass ) )
 		{
 			@SuppressWarnings( "unchecked" )
-			final ModuleItem< FeatureComputationStatus > statusModule = ( ModuleItem< FeatureComputationStatus > ) item;
-			statusModule.setValue( module, status );
+			final ModuleItem< MastodonLogger > statusModule = ( ModuleItem< MastodonLogger > ) item;
+			statusModule.setValue( module, log );
 			return;
 		}
 
@@ -296,59 +318,5 @@ public class DefaultFeatureComputerService extends AbstractService implements Fe
 	public String getCancelReason()
 	{
 		return cancelReason;
-	}
-
-	/**
-	 * {@code FeatureComputationStatusListener}s added here will be notified
-	 * about progress of computation.
-	 * 
-	 * @return the listeners.
-	 */
-	public Listeners< FeatureComputationStatusListener > computationStatusListeners()
-	{
-		return status.listeners;
-	}
-
-	/*
-	 *
-	 * Reporting computation status
-	 *
-	 */
-
-	public interface FeatureComputationStatusListener
-	{
-		void status( final String status );
-
-		void progress( final double progress );
-
-		void clear();
-	}
-
-	public static class FeatureComputationStatus
-	{
-		private final Listeners.List< FeatureComputationStatusListener > listeners;
-
-		FeatureComputationStatus()
-		{
-			listeners = new Listeners.SynchronizedList<>();
-		}
-
-		public void notifyStatus( final String status )
-		{
-			listeners.list.forEach( l -> l.status( status ) );
-		}
-
-		/**
-		 * @param progress computation progress as a number between 0 and 1
-		 */
-		public void notifyProgress( final double progress )
-		{
-			listeners.list.forEach( l -> l.progress( progress ) );
-		}
-
-		public void notifyClear()
-		{
-			listeners.list.forEach( l -> l.clear() );
-		}
 	}
 }
