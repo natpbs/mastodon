@@ -41,6 +41,7 @@ public class ProjectManager
 	public static final String CREATE_PROJECT = "create new project";
 	public static final String LOAD_PROJECT = "load project";
 	public static final String SAVE_PROJECT_AS = "save project as";
+	public static final String SAVE_PROJECT = "save project";
 	public static final String IMPORT_TGMM = "import tgmm";
 	public static final String IMPORT_SIMI = "import simi";
 	public static final String IMPORT_MAMUT = "import mamut";
@@ -49,6 +50,7 @@ public class ProjectManager
 	static final String[] CREATE_PROJECT_KEYS = new String[] { "not mapped" };
 	static final String[] LOAD_PROJECT_KEYS = new String[] { "not mapped" };
 	static final String[] SAVE_PROJECT_AS_KEYS = new String[] { "not mapped" };
+	static final String[] SAVE_PROJECT_KEYS = new String[] { "not mapped" };
 	static final String[] IMPORT_TGMM_KEYS = new String[] { "not mapped" };
 	static final String[] IMPORT_SIMI_KEYS = new String[] { "not mapped" };
 	static final String[] IMPORT_MAMUT_KEYS = new String[] { "not mapped" };
@@ -70,7 +72,8 @@ public class ProjectManager
 		{
 			descriptions.add( CREATE_PROJECT, CREATE_PROJECT_KEYS, "Create a new project." );
 			descriptions.add( LOAD_PROJECT, LOAD_PROJECT_KEYS, "Load a project." );
-			descriptions.add( SAVE_PROJECT_AS, SAVE_PROJECT_AS_KEYS, "Save the current project." );
+			descriptions.add( SAVE_PROJECT, SAVE_PROJECT_KEYS, "Save the current project." );
+			descriptions.add( SAVE_PROJECT_AS, SAVE_PROJECT_AS_KEYS, "Save the current project under a new file." );
 			descriptions.add( IMPORT_TGMM, IMPORT_TGMM_KEYS, "Import tracks from TGMM xml files into the current project." );
 			descriptions.add( IMPORT_SIMI, IMPORT_SIMI_KEYS, "Import tracks from a Simi Biocell .sbd into the current project." );
 			descriptions.add( IMPORT_MAMUT, IMPORT_MAMUT_KEYS, "Import a MaMuT project." );
@@ -94,6 +97,8 @@ public class ProjectManager
 
 	private final AbstractNamedAction saveProjectAsAction;
 
+	private final AbstractNamedAction saveProjectAction;
+
 	private final AbstractNamedAction importTgmmAction;
 
 	private final AbstractNamedAction importSimiAction;
@@ -112,6 +117,7 @@ public class ProjectManager
 		createProjectAction = new RunnableAction( CREATE_PROJECT, this::createProject );
 		loadProjectAction = new RunnableAction( LOAD_PROJECT, this::loadProject );
 		saveProjectAsAction = new RunnableAction( SAVE_PROJECT_AS, this::saveProjectAsk );
+		saveProjectAction = new RunnableAction( SAVE_PROJECT, this::saveProject );
 		importTgmmAction = new RunnableAction( IMPORT_TGMM, this::importTgmm );
 		importSimiAction = new RunnableAction( IMPORT_SIMI, this::importSimi );
 		importMamutAction = new RunnableAction( IMPORT_MAMUT, this::importMamut );
@@ -124,6 +130,7 @@ public class ProjectManager
 	{
 		final boolean projectOpen = ( project != null );
 		saveProjectAsAction.setEnabled( projectOpen );
+		saveProjectAction.setEnabled( projectOpen && ( null != project.getProjectRoot() ) );
 		importTgmmAction.setEnabled( projectOpen );
 		importSimiAction.setEnabled( projectOpen );
 		exportMamutAction.setEnabled( projectOpen );
@@ -140,6 +147,7 @@ public class ProjectManager
 	{
 		actions.namedAction( createProjectAction, CREATE_PROJECT_KEYS );
 		actions.namedAction( loadProjectAction, LOAD_PROJECT_KEYS );
+		actions.namedAction( saveProjectAction, SAVE_PROJECT_KEYS );
 		actions.namedAction( saveProjectAsAction, SAVE_PROJECT_AS_KEYS );
 		actions.namedAction( importTgmmAction, IMPORT_TGMM_KEYS );
 		actions.namedAction( importSimiAction, IMPORT_SIMI_KEYS );
@@ -222,6 +230,24 @@ public class ProjectManager
 		{
 			proposedProjectRoot = file;
 			saveProject( proposedProjectRoot );
+		}
+		catch ( final IOException e )
+		{
+			e.printStackTrace();
+		}
+	}
+
+	public synchronized void saveProject()
+	{
+		if ( project == null )
+			return;
+
+		try
+		{
+			if ( null == project.getProjectRoot() )
+				saveProjectAsk();
+			else
+				saveProject( project.getProjectRoot() );
 		}
 		catch ( final IOException e )
 		{

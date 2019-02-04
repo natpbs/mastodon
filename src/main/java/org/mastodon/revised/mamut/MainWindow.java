@@ -188,6 +188,7 @@ public class MainWindow extends JFrame
 				fileMenu(
 						item( ProjectManager.CREATE_PROJECT ),
 						item( ProjectManager.LOAD_PROJECT ),
+						item( ProjectManager.SAVE_PROJECT ),
 						item( ProjectManager.SAVE_PROJECT_AS ),
 						separator(),
 						item( ProjectManager.IMPORT_TGMM ),
