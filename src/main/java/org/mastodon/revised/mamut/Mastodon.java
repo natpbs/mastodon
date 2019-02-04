@@ -21,14 +21,14 @@ public class Mastodon extends ContextCommand
 {
 	private WindowManager windowManager;
 
-	private MainWindow mainWindow;
+	private MastodonMainWindow mainWindow;
 
 	@Override
 	public void run()
 	{
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 		windowManager = new WindowManager( getContext() );
-		mainWindow = new MainWindow( windowManager );
+		mainWindow = new MastodonMainWindow( windowManager );
 		mainWindow.setVisible( true );
 	}
 

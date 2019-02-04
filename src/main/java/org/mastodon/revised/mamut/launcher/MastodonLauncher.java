@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
 import org.jdom2.JDOMException;
 import org.mastodon.project.MamutProject;
 import org.mastodon.project.MamutProjectIO;
-import org.mastodon.revised.mamut.MainWindow;
+import org.mastodon.revised.mamut.MastodonMainWindow;
 import org.mastodon.revised.mamut.WindowManager;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.simi.SimiImporter;
@@ -146,7 +146,7 @@ public class MastodonLauncher extends JFrame
 				final int radius = Integer.parseInt( gui.importSimiBioCellPanel.spotRadiusTextField.getText() );
 				final boolean interpolateMissingSpots = gui.importSimiBioCellPanel.interpolateCheckBox.isSelected();
 				SimiImporter.read( sbdFilename, frameToTimepointFunction, labelFunction, positionFunction, radius, interpolateMissingSpots, model );
-				new MainWindow( windowManager ).setVisible( true );
+				new MastodonMainWindow( windowManager ).setVisible( true );
 				dispose();
 			}
 			catch ( final IOException e )
@@ -216,7 +216,7 @@ public class MastodonLauncher extends JFrame
 					TgmmImporter.read( tgmmFiles, timepoints, TgmmImporter.getTimepointToIndex( spimData ), viewRegistrations, setupID, nSigmas, model );
 
 				// Success? We move on.
-				new MainWindow( windowManager ).setVisible( true );
+				new MastodonMainWindow( windowManager ).setVisible( true );
 				dispose();
 			}
 			catch ( final ParseException e )
@@ -283,7 +283,7 @@ public class MastodonLauncher extends JFrame
 			{
 				final WindowManager windowManager = createWindowManager();
 				windowManager.getProjectManager().open( new MamutProject( null, file ) );
-				new MainWindow( windowManager ).setVisible( true );
+				new MastodonMainWindow( windowManager ).setVisible( true );
 				dispose();
 			}
 			catch ( IOException | SpimDataException e )
@@ -342,7 +342,7 @@ public class MastodonLauncher extends JFrame
 				final WindowManager windowManager = createWindowManager();
 				windowManager.getProjectManager().open( importer.createProject() );
 				importer.readModel( windowManager.getAppModel().getModel(), windowManager.getFeatureSpecsService() );
-				new MainWindow( windowManager ).setVisible( true );
+				new MastodonMainWindow( windowManager ).setVisible( true );
 				dispose();
 			}
 			catch ( final IOException | SpimDataException e )
@@ -383,7 +383,7 @@ public class MastodonLauncher extends JFrame
 					{
 						final MamutProject project = new MamutProjectIO().load( file.getAbsolutePath() );
 						windowManager.getProjectManager().open( project );
-						new MainWindow( windowManager ).setVisible( true );
+						new MastodonMainWindow( windowManager ).setVisible( true );
 						dispose();
 					}
 					catch ( final IOException | SpimDataException e )
