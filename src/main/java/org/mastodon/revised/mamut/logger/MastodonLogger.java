@@ -104,4 +104,17 @@ public interface MastodonLogger extends SciJavaService
 	 *            process is considered finished.
 	 */
 	public void setProgress( double progress );
+
+	/**
+	 * Clears the status message for the process with the specified log source.
+	 * 
+	 * @param source
+	 *            the source of the process.
+	 */
+	public void clearStatus( LogSource source );
+
+	/**
+	 * Clears the status message for an unknown process.
+	 */
+	public void clearStatus();
 }

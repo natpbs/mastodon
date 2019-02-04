@@ -68,4 +68,12 @@ public class SysOutMastodonLogger extends AbstractService implements MastodonLog
 	@Override
 	public void setProgress( final double progress )
 	{}
+
+	@Override
+	public void clearStatus( final LogSource source )
+	{}
+
+	@Override
+	public void clearStatus()
+	{}
 }

@@ -84,4 +84,16 @@ public class DefaultMastodonLogger extends AbstractService implements MastodonLo
 	{
 		mastodonLogPanel.setProgress( progress );
 	}
+
+	@Override
+	public void clearStatus( final LogSource source )
+	{
+		mastodonLogPanel.setProgress( 1.1, source );
+	}
+
+	@Override
+	public void clearStatus()
+	{
+		mastodonLogPanel.setProgress( 1.1 );
+	}
 }
