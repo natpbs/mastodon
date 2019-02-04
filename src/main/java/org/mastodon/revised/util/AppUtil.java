@@ -2,12 +2,16 @@ package org.mastodon.revised.util;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 public class AppUtil
 {
 
 	private static final String PROPERTIES_FILE_PATH = "../../../../mastodon-app.properties";
+
+	private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern( "d-MMM-yyyy HH-mm-ss" );
 
 	/**
 	 * Returns the Mastodon-app artifact version, as stored in the Maven pom.xml
@@ -31,6 +35,13 @@ public class AppUtil
 			e.printStackTrace();
 			return "unknown";
 		}
+	}
+
+	public static String now()
+	{
+		final LocalDateTime now = LocalDateTime.now();
+		final String formatDateTime = now.format( DATE_FORMATTER );
+		return formatDateTime;
 	}
 
 	public static void main( final String[] args )
