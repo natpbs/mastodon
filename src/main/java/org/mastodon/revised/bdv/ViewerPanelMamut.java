@@ -16,16 +16,12 @@ public class ViewerPanelMamut extends ViewerPanel
 	public ViewerPanelMamut( final List< SourceAndConverter< ? > > sources, final int numTimepoints, final CacheControl cacheControl, final ViewerOptions optional )
 	{
 		super( sources, numTimepoints, cacheControl,
-				is2D( sources )
-						? optional.transformEventHandlerFactory( BehaviourTransformEventHandler3DMamut::new )
-						: optional.transformEventHandlerFactory( BehaviourTransformEventHandler2DMamut::new ) );
+				BehaviourTransformEventHandlerMamut.is2D( sources, numTimepoints )
+						? optional.transformEventHandlerFactory( BehaviourTransformEventHandler2DMamut::new )
+						: optional.transformEventHandlerFactory( BehaviourTransformEventHandler3DMamut::new ) );
 		transformEventHandler = ( BehaviourTransformEventHandlerMamut ) display.getTransformEventHandler();
 	}
 
-	private static boolean is2D( final List< SourceAndConverter< ? > > sources )
-	{
-		return true;
-	}
 
 	public BehaviourTransformEventHandlerMamut getTransformEventHandler()
 	{
