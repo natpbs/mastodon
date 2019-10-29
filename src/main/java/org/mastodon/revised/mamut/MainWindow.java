@@ -3,6 +3,7 @@ package org.mastodon.revised.mamut;
 import static org.mastodon.app.MastodonIcons.BDV_ICON_MEDIUM;
 import static org.mastodon.app.MastodonIcons.FEATURES_ICON_MEDIUM;
 import static org.mastodon.app.MastodonIcons.LOAD_ICON_MEDIUM;
+import static org.mastodon.app.MastodonIcons.MAINWINDOW_BG;
 import static org.mastodon.app.MastodonIcons.MAMUT_EXPORT_ICON_MEDIUM;
 import static org.mastodon.app.MastodonIcons.MAMUT_IMPORT_ICON_MEDIUM;
 import static org.mastodon.app.MastodonIcons.MASTODON_ICON_LARGE;
@@ -17,7 +18,8 @@ import static org.mastodon.revised.mamut.MamutMenuBuilder.fileMenu;
 import static org.mastodon.revised.mamut.MamutMenuBuilder.windowMenu;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -27,6 +29,7 @@ import java.awt.event.WindowEvent;
 import javax.swing.ActionMap;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -84,7 +87,9 @@ public class MainWindow extends JFrame
 		int gridy = 0;
 
 		label_gbc.gridy = gridy;
-		buttonsPanel.add( new JLabel( "Views:" ), label_gbc );
+		final JLabel viewsLabel = new JLabel( "Views:" );
+		viewsLabel.setFont( buttonsPanel.getFont().deriveFont( Font.BOLD ) );
+		buttonsPanel.add( viewsLabel, label_gbc );
 
 		++gridy;
 
@@ -108,7 +113,9 @@ public class MainWindow extends JFrame
 		++gridy;
 
 		label_gbc.gridy = gridy;
-		buttonsPanel.add( new JLabel( "Processing:" ), label_gbc );
+		final JLabel processingLabel = new JLabel( "Processing:" );
+		processingLabel.setFont( buttonsPanel.getFont().deriveFont( Font.BOLD ) );
+		buttonsPanel.add( processingLabel, label_gbc );
 
 		++gridy;
 
@@ -132,7 +139,9 @@ public class MainWindow extends JFrame
 		++gridy;
 
 		label_gbc.gridy = gridy;
-		buttonsPanel.add( new JLabel( "Input / Output:" ), label_gbc );
+		final JLabel ioLabel = new JLabel( "Input / Output:" );
+		ioLabel.setFont( buttonsPanel.getFont().deriveFont( Font.BOLD ) );
+		buttonsPanel.add( ioLabel, label_gbc );
 
 		++gridy;
 
@@ -170,7 +179,26 @@ public class MainWindow extends JFrame
 		button_gbc_right.gridy = gridy;
 		buttonsPanel.add( loadProjectButton, button_gbc_right );
 
-		final Container content = getContentPane();
+
+		/*
+		 * Background with an image.
+		 */
+
+		final JComponent content = new JPanel()
+		{
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void paintComponent( final Graphics g )
+			{
+				super.paintComponent( g );
+				g.drawImage( MAINWINDOW_BG, 0, 0, this );
+			}
+		};
+		setContentPane( content );
+
+		buttonsPanel.setOpaque( false );
 		content.add( buttonsPanel, BorderLayout.NORTH );
 
 		menubar = new JMenuBar();
