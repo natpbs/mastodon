@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
+
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -23,14 +24,17 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.WindowConstants;
-import mpicbg.spim.data.generic.AbstractSpimData;
-import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
-import mpicbg.spim.data.registration.ViewRegistrations;
-import mpicbg.spim.data.sequence.TimePoint;
+
+import org.mastodon.app.MastodonIcons;
 import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.simi.SimiImporter;
 import org.mastodon.revised.ui.util.ExtensionFileFilter;
 import org.mastodon.revised.ui.util.FileChooser;
+
+import mpicbg.spim.data.generic.AbstractSpimData;
+import mpicbg.spim.data.generic.sequence.AbstractSequenceDescription;
+import mpicbg.spim.data.registration.ViewRegistrations;
+import mpicbg.spim.data.sequence.TimePoint;
 
 public class SimiImportDialog
 {
@@ -74,6 +78,9 @@ public class SimiImportDialog
 		Dialog()
 		{
 			super( owner, true );
+			setIconImage( MastodonIcons.TGMM_IMPORT_ICON_MEDIUM.getImage() );
+			setLocationByPlatform( true );
+			setLocationRelativeTo( null );
 
 			final JPanel content = new JPanel();
 			getContentPane().add( content, BorderLayout.CENTER );

@@ -1,5 +1,11 @@
 package org.mastodon.revised.mamut;
 
+import static org.mastodon.app.MastodonIcons.LOAD_ICON_MEDIUM;
+import static org.mastodon.app.MastodonIcons.MAMUT_EXPORT_ICON_MEDIUM;
+import static org.mastodon.app.MastodonIcons.MAMUT_IMPORT_ICON_MEDIUM;
+import static org.mastodon.app.MastodonIcons.NEW_ICON_MEDIUM;
+import static org.mastodon.app.MastodonIcons.SAVE_ICON_MEDIUM;
+
 import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
@@ -158,7 +164,8 @@ public class ProjectManager
 				null,
 				new XmlFileFilter(),
 				"Open BigDataViewer File",
-				FileChooser.DialogType.LOAD );
+				FileChooser.DialogType.LOAD,
+				NEW_ICON_MEDIUM.getImage() );
 		if ( file == null )
 			return;
 
@@ -187,7 +194,8 @@ public class ProjectManager
 				new ExtensionFileFilter( "mastodon" ),
 				"Open Mastodon Project",
 				FileChooser.DialogType.LOAD,
-				SelectionMode.FILES_AND_DIRECTORIES );
+				SelectionMode.FILES_AND_DIRECTORIES,
+				LOAD_ICON_MEDIUM.getImage() );
 		if ( file == null )
 			return;
 
@@ -217,7 +225,8 @@ public class ProjectManager
 				new ExtensionFileFilter( "mastodon" ),
 				"Save Mastodon Project",
 				FileChooser.DialogType.SAVE,
-				SelectionMode.FILES_ONLY );
+				SelectionMode.FILES_ONLY,
+				SAVE_ICON_MEDIUM.getImage() );
 		if ( file == null )
 			return;
 
@@ -376,7 +385,8 @@ public class ProjectManager
 				null,
 				new XmlFileFilter(),
 				"Import MaMuT Project",
-				FileChooser.DialogType.LOAD );
+				FileChooser.DialogType.LOAD,
+				MAMUT_IMPORT_ICON_MEDIUM.getImage() );
 		if ( file == null )
 			return;
 
@@ -407,7 +417,8 @@ public class ProjectManager
 				filename,
 				new XmlFileFilter(),
 				"Export As MaMuT Project",
-				FileChooser.DialogType.SAVE );
+				FileChooser.DialogType.SAVE,
+				MAMUT_EXPORT_ICON_MEDIUM.getImage() );
 		if ( file == null )
 			return;
 
