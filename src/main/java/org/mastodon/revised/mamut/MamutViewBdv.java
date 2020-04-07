@@ -7,9 +7,23 @@ import static org.mastodon.revised.mamut.MamutMenuBuilder.editMenu;
 import static org.mastodon.revised.mamut.MamutMenuBuilder.fileMenu;
 import static org.mastodon.revised.mamut.MamutMenuBuilder.tagSetMenu;
 import static org.mastodon.revised.mamut.MamutMenuBuilder.viewMenu;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.BDV_STATE_KEY;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.BDV_TRANSFORM_KEY;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.FEATURE_COLOR_MODE_KEY;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.FRAME_POSITION_KEY;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.GROUP_HANDLE_ID_KEY;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.NO_COLORING_KEY;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.SETTINGS_PANEL_VISIBLE_KEY;
+import static org.mastodon.revised.mamut.MamutViewStateSerialization.TAG_SET_KEY;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.ActionMap;
 
+import org.jdom2.Element;
 import org.mastodon.app.ui.MastodonFrameViewActions;
 import org.mastodon.app.ui.ViewMenu;
 import org.mastodon.app.ui.ViewMenuBuilder;
@@ -38,13 +52,17 @@ import org.mastodon.revised.model.mamut.Model;
 import org.mastodon.revised.model.mamut.ModelGraph;
 import org.mastodon.revised.model.mamut.ModelOverlayProperties;
 import org.mastodon.revised.model.mamut.Spot;
+import org.mastodon.revised.model.tag.TagSetStructure.TagSet;
 import org.mastodon.revised.ui.FocusActions;
 import org.mastodon.revised.ui.HighlightBehaviours;
 import org.mastodon.revised.ui.SelectionActions;
+import org.mastodon.revised.ui.coloring.ColoringModel;
 import org.mastodon.revised.ui.coloring.GraphColorGeneratorAdapter;
+import org.mastodon.revised.ui.coloring.feature.FeatureColorMode;
 import org.mastodon.views.context.ContextProvider;
 
 import bdv.tools.InitializeViewerState;
+import net.imglib2.realtransform.AffineTransform3D;
 
 public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > >
 {
@@ -57,7 +75,18 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 
 	private final ViewerPanelMamut viewer;
 
+	/**
+	 * A reference on a supervising instance of the {@code ColoringModel} that
+	 * is bound to this instance/window.
+	 */
+	private final ColoringModel coloringModel;
+
 	public MamutViewBdv( final MamutAppModel appModel )
+	{
+		this( appModel, new HashMap<>() );
+	}
+
+	public MamutViewBdv( final MamutAppModel appModel, final Map< String, Object > guiState )
 	{
 		super( appModel,
 				new OverlayGraphWrapper<>(
@@ -74,6 +103,23 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		final BigDataViewerMamut bdv = new BigDataViewerMamut( sharedBdvData, windowTitle, groupHandle );
 		final ViewerFrameMamut frame = bdv.getViewerFrame();
 		setFrame( frame );
+
+		// Restore position.
+		final int[] pos = ( int[] ) guiState.get( FRAME_POSITION_KEY );
+		if ( null != pos )
+			frame.setBounds( pos[ 0 ], pos[ 1 ], pos[ 2 ], pos[ 3 ] );
+		else
+			frame.setLocationRelativeTo( null );
+
+		// Restore group handle.
+		final Integer groupID = ( Integer ) guiState.get( GROUP_HANDLE_ID_KEY );
+		if ( null != groupID )
+			groupHandle.setGroupId( groupID.intValue() );
+
+		// Restore settings panel visibility.
+		final Boolean settingsPanelVisible = ( Boolean ) guiState.get( SETTINGS_PANEL_VISIBLE_KEY );
+		if ( null != settingsPanelVisible )
+			frame.setSettingsPanelVisible( settingsPanelVisible.booleanValue() );
 
 		MastodonFrameViewActions.install( viewActions, this );
 		BigDataViewerActionsMamut.install( viewActions, bdv );
@@ -113,15 +159,23 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		);
 		appModel.getPlugins().addMenus( menu );
 
-		frame.setVisible( true );
-
 		viewer = bdv.getViewer();
-		InitializeViewerState.initTransform( viewer );
+
+		// Restore BDV state.
+		final Element stateEl = ( Element ) guiState.get( BDV_STATE_KEY );
+		if ( null != stateEl )
+			viewer.stateFromXml( stateEl );
+
+		// Restore transform.
+		final AffineTransform3D tLoaded = ( AffineTransform3D ) guiState.get( BDV_TRANSFORM_KEY );
+		if ( null == tLoaded )
+			InitializeViewerState.initTransform( viewer );
+		else
+			viewer.setCurrentViewerTransform( tLoaded );
 
 		final GraphColorGeneratorAdapter< Spot, Link, OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > coloring =
 				new GraphColorGeneratorAdapter<>( viewGraph.getVertexMap(), viewGraph.getEdgeMap() );
 
-		viewer.setTimepoint( timepointModel.getTimepoint() );
 		final OverlayGraphRenderer< OverlayVertexWrapper< Spot, Link >, OverlayEdgeWrapper< Spot, Link > > tracksOverlay = new OverlayGraphRenderer<>(
 				viewGraph,
 				highlightModel,
@@ -135,8 +189,48 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		final Model model = appModel.getModel();
 		final ModelGraph modelGraph = model.getGraph();
 
-		registerColoring( coloring, menuHandle, () -> viewer.getDisplay().repaint() );
-		registerTagSetMenu( tagSetMenuHandle, () -> viewer.getDisplay().repaint() );
+		coloringModel = registerColoring( coloring, menuHandle,
+				() -> viewer.getDisplay().repaint() );
+
+		registerTagSetMenu( tagSetMenuHandle,
+				() -> viewer.getDisplay().repaint() );
+
+		// Restore coloring.
+		final Boolean noColoring = ( Boolean ) guiState.get( NO_COLORING_KEY );
+		if ( null != noColoring && noColoring )
+		{
+			coloringModel.colorByNone();
+		}
+		else
+		{
+			final String tagSetName = ( String ) guiState.get( TAG_SET_KEY );
+			final String featureColorModeName = ( String ) guiState.get( FEATURE_COLOR_MODE_KEY );
+			if ( null != tagSetName )
+			{
+				for ( final TagSet tagSet : coloringModel.getTagSetStructure().getTagSets() )
+				{
+					if ( tagSet.getName().equals( tagSetName ) )
+					{
+						coloringModel.colorByTagSet( tagSet );
+						break;
+					}
+				}
+			}
+			else if ( null != featureColorModeName )
+			{
+				final List< FeatureColorMode > featureColorModes = new ArrayList<>();
+				featureColorModes.addAll( coloringModel.getFeatureColorModeManager().getBuiltinStyles() );
+				featureColorModes.addAll( coloringModel.getFeatureColorModeManager().getUserStyles() );
+				for ( final FeatureColorMode featureColorMode : featureColorModes )
+				{
+					if ( featureColorMode.getName().equals( featureColorModeName ) )
+					{
+						coloringModel.colorByFeature( featureColorMode );
+						break;
+					}
+				}
+			}
+		}
 
 		highlightModel.listeners().add( () -> viewer.getDisplay().repaint() );
 		focusModel.listeners().add( () -> viewer.getDisplay().repaint() );
@@ -178,6 +272,8 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 		renderSettings.updateListeners().add( updateListener );
 		onClose( () -> renderSettings.updateListeners().remove( updateListener ) );
 
+
+		frame.setVisible( true );
 //		if ( !bdv.tryLoadSettings( bdvFile ) ) // TODO
 //			InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewer(), bdv.getSetupAssignments() );
 	}
@@ -190,5 +286,15 @@ public class MamutViewBdv extends MamutView< OverlayGraphWrapper< Spot, Link >, 
 	public void requestRepaint()
 	{
 		viewer.requestRepaint();
+	}
+
+	ViewerPanelMamut getViewer()
+	{
+		return ( ( ViewerFrameMamut ) getFrame() ).getViewerPanel();
+	}
+
+	public ColoringModel getColoringModel()
+	{
+		return coloringModel;
 	}
 }
